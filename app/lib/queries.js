@@ -217,12 +217,11 @@ query PRODUCTS_SHOES_QUERY {
     description
     sku
     name
-<<<<<<< HEAD
-=======
+
           productBadges{
         label
       }
->>>>>>> 991dab5 (Initial commit with latest updates)
+
     are_shoes
     list_price_amount
     brand {
@@ -402,13 +401,11 @@ export const GET_PRODUCT_BY_SKU = gql`
         id
         name
       }
-<<<<<<< HEAD
 
-=======
 productBadges{
 label
 }
->>>>>>> 991dab5 (Initial commit with latest updates)
+
 
       list_price_amount
       list_price_currency
