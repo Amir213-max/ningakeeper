@@ -1,52 +1,13 @@
 'use client';
 import { useEffect, useState } from 'react';
-import {
-  FaFacebook,
-  FaInstagram,
-  FaYoutube,
-  FaTiktok,
-} from 'react-icons/fa';
-import { graphqlClient } from '../lib/graphqlClient';
-import { gql } from 'graphql-request';
-import { usePathname } from 'next/navigation'; // ✅ عشان نعرف الصفحة الحالية
-
-const GET_PAGE_BY_ID = gql`
-  query getPageById($id: ID!) {
-    page(id: $id) {
-      id
-      slug
-    }
-  }
-`;
-
-function FooterPageLink({ pageId }) {
-  const [page, setPage] = useState(null);
-
-  useEffect(() => {
-    const fetchPage = async () => {
-      try {
-        const data = await graphqlClient.request(GET_PAGE_BY_ID, { id: pageId });
-        setPage(data.page);
-      } catch (err) {
-        console.error('Error fetching page:', err);
-      }
-    };
-    fetchPage();
-  }, [pageId]);
-
-  if (!page) return null;
-
-  return (
-    <li className="cursor-pointer hover:text-amber-400">
-      <a href={`/pages/${page.slug}`}>{page.title}</a>
-    </li>
-  );
-}
+import { FaFacebook, FaInstagram, FaYoutube, FaTiktok } from 'react-icons/fa';
+import { usePathname } from 'next/navigation';
+import Link from 'next/link';
 
 export default function Footer() {
   const [settings, setSettings] = useState([]);
   const [footerTexts, setFooterTexts] = useState([]);
-  const pathname = usePathname(); // ✅ لتحديد الصفحة الحالية
+  const pathname = usePathname();
 
   useEffect(() => {
     async function fetchSettings() {
@@ -61,6 +22,7 @@ export default function Footer() {
                   key
                   value
                   group
+                  url
                 }
               }
             `
@@ -68,7 +30,7 @@ export default function Footer() {
         });
 
         const data = await res.json();
-        const allSettings = data.data.publicSettings || [];
+        const allSettings = data?.data?.publicSettings || [];
 
         const textSettings = allSettings.filter(
           (s) => s.group && s.group.toLowerCase() === "footer_text"
@@ -87,6 +49,7 @@ export default function Footer() {
     fetchSettings();
   }, []);
 
+  // Group settings by group name
   const groupedSettings = settings.reduce((acc, setting) => {
     if (!acc[setting.group]) acc[setting.group] = [];
     acc[setting.group].push(setting);
@@ -96,7 +59,7 @@ export default function Footer() {
   return (
     <footer className="bg-neutral-900 text-white text-sm">
 
-      {/* ✅ النصوص من Footer text — تظهر فقط في الـ Homepage */}
+      {/* Footer text (only on homepage) */}
       {pathname === '/' && footerTexts.length > 0 && (
         <div className="bg-black text-white flex justify-center py-4 sm:py-6 px-4">
           <div className="text-center text-sm sm:text-base md:text-lg font-semibold max-w-4xl leading-relaxed space-y-3">
@@ -107,7 +70,7 @@ export default function Footer() {
         </div>
       )}
 
-      {/* ✅ الاشتراك في النشرة البريدية */}
+      {/* Newsletter signup */}
       <div className="bg-yellow-400 text-black px-4 py-6 flex flex-col sm:flex-row items-center justify-center gap-4">
         <input
           type="email"
@@ -119,7 +82,7 @@ export default function Footer() {
         </button>
       </div>
 
-      {/* ✅ روابط الفوتر */}
+      {/* Footer links */}
       <div className="grid grid-cols-1 space-x-2 md:grid-cols-3 lg:grid-cols-5 gap-8 px-6 py-10 max-w-7xl mx-auto">
         {Object.entries(groupedSettings).map(([group, values]) => (
           <div key={group}>
@@ -127,7 +90,11 @@ export default function Footer() {
             <ul className="space-y-4 space-x-2">
               {values.map((setting, i) => (
                 <li key={i} className="cursor-pointer hover:text-amber-400">
-                  {setting.value}
+                  {setting.url ? (
+                    <Link href={setting.url}>{setting.value}</Link>
+                  ) : (
+                    <span>{setting.value}</span>
+                  )}
                 </li>
               ))}
             </ul>
@@ -137,7 +104,7 @@ export default function Footer() {
 
       <hr className="border-gray-700" />
 
-      {/* ✅ السوشيال ميديا */}
+      {/* Social media */}
       <div className="flex justify-center gap-4 py-6 text-xl">
         <a href="https://www.facebook.com/keepersport" target="_blank" rel="noopener noreferrer" className="hover:text-amber-400">
           <FaFacebook />

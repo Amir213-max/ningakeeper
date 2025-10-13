@@ -12,14 +12,12 @@ import CartSidebar from "./CartSidebar";
 import Image from "next/image";
 import { useChat } from "../contexts/ChatContext";
 
-
-export default function Sidebar({ isOpen, setIsOpen, onSelectCategory }) {
+export default function Sidebar({ isOpen, setIsOpen, onSelectCategory, isRTL = false }) {
   const [categories, setCategories] = useState([]);
   const [cartOpen, setCartOpen] = useState(false);
   const [openParentId, setOpenParentId] = useState(null);
   const router = useRouter();
-
-  const { openChat } = useChat(); // استدعاء chat context
+  const { openChat } = useChat();
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -53,7 +51,7 @@ export default function Sidebar({ isOpen, setIsOpen, onSelectCategory }) {
   return (
     <>
       {/* Sidebar للشاشات الكبيرة */}
-      <aside className="hidden lg:block bg-black text-white w-100 min-h-screen py-4 px-3 font-sans">
+      <aside className={`hidden lg:block bg-black absolut text-white w-64 min-h-screen py-4 px-3 font-sans ${isRTL ? "rtl" : "ltr"}`}>
         <SidebarContent
           parentCategories={parentCategories}
           categories={categories}
@@ -61,6 +59,7 @@ export default function Sidebar({ isOpen, setIsOpen, onSelectCategory }) {
           handleParentClick={handleParentClick}
           onSelectCategory={onSelectCategory}
           setIsOpen={setIsOpen}
+          isRTL={isRTL}
         />
       </aside>
 
@@ -80,11 +79,12 @@ export default function Sidebar({ isOpen, setIsOpen, onSelectCategory }) {
 
             {/* Drawer */}
             <motion.div
-              className="fixed top-0 left-0 h-full w-64 bg-black text-white z-50 shadow-xl py-4 px-3 font-sans overflow-y-auto lg:hidden flex flex-col"
-              initial={{ x: '-100%' }}
+              className="fixed top-0 h-full w-64 bg-black text-white z-50 shadow-xl py-4 px-3 font-sans overflow-y-auto lg:hidden flex flex-col"
+              initial={{ x: isRTL ? '100%' : '-100%' }}
               animate={{ x: 0 }}
-              exit={{ x: '-100%' }}
+              exit={{ x: isRTL ? '100%' : '-100%' }}
               transition={{ type: 'tween', duration: 0.4 }}
+              style={{ right: isRTL ? 0 : 'auto', left: isRTL ? 'auto' : 0 }}
             >
               {/* زر الإغلاق */}
               <div className="flex justify-between items-center mb-4">
@@ -108,11 +108,11 @@ export default function Sidebar({ isOpen, setIsOpen, onSelectCategory }) {
                   setIsOpen(false);
                 }}
                 setIsOpen={setIsOpen}
+                isRTL={isRTL}
               />
 
               {/* أيقونات أسفل الستارة */}
-              <div className="mt-auto pt-4 border-t border-neutral-700 flex justify-between items-center w-full px-3">
-
+              <div className={`mt-auto pt-4 border-t border-neutral-700 flex ${isRTL ? "flex-row-reverse items-center w-full justify-center gap-6" : "justify-between gap-4"} items-center w-full px-3`}>
                 {/* Logo */}
                 <Link href="/">
                   <Image
@@ -125,9 +125,6 @@ export default function Sidebar({ isOpen, setIsOpen, onSelectCategory }) {
                   />
                 </Link>
 
-                {/* Cart */}
-               
-
                 {/* Chat */}
                 <button
                   onClick={openChat}
@@ -136,7 +133,7 @@ export default function Sidebar({ isOpen, setIsOpen, onSelectCategory }) {
                   <FaComments size={20} />
                 </button>
 
-
+                {/* Cart */}
                 <button
                   onClick={() => setCartOpen(true)}
                   className="text-white hover:text-amber-400 transition-colors duration-200"
@@ -170,6 +167,7 @@ function SidebarContent({
   handleParentClick,
   onSelectCategory,
   setIsOpen,
+  isRTL,
 }) {
   return (
     <ul className="space-y-1">
@@ -185,16 +183,25 @@ function SidebarContent({
             <div
               className="flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-neutral-700 transition-all"
               onClick={() => handleParentClick(parent.id, parent.name)}
+              dir={isRTL ? "rtl" : "ltr"}
             >
               <span className="text-sm font-medium hover:text-amber-400">
                 {parent.name}
               </span>
               {subCategories.length > 0 &&
-                (isOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />)}
+                (isOpen
+                  ? <ChevronDown size={16} />
+                  : <ChevronRight size={16} className={isRTL ? "rotate-180" : ""} />)}
             </div>
 
             {isOpen && subCategories.length > 0 && (
-              <ul className="ml-4 mt-1 border-l border-neutral-700 space-y-1">
+              <ul
+                className={`mt-1 space-y-1 border-l border-neutral-700 ${
+                  isRTL
+                    ? "ml-0 mr-4 border-l-0 border-r"
+                    : "ml-4 mr-0"
+                }`}
+              >
                 {subCategories.map((sub) => (
                   <li
                     key={sub.id}

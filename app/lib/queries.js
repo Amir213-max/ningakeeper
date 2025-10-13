@@ -247,7 +247,15 @@ query PRODUCTS_SHOES_QUERY {
 `;
 
 
-
+export const GET_PAGE_BY_SLUG = gql`
+  query getPageBySlug($slug: String!) {
+    pageBySlug(slug: $slug) {
+      id
+      name
+      slug
+    }
+  }
+`;
 
 export const PRODUCTS_SALES_QUERY = gql` 
 

@@ -13,6 +13,7 @@ import RegisterSWClient from "./Componants/RegisterSWClient";
 import { Providers } from "./provider";
 import { AuthProvider } from "./contexts/AuthContext";
 import Sidebar from "./Componants/sidebar";
+import HomePageBlocks from "./Componants/HomePageBlocks";
 
 
 const geistSans = Geist({
@@ -47,7 +48,7 @@ export default function RootLayout({ children  }) {
      
 
 <ChatProvider>
-  
+
      <NavbarWithLinks />
 
 

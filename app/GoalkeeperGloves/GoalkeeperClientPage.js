@@ -17,10 +17,11 @@ export default function GoalKeeperClientPage({ products, brands, attributeValues
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
   const [selectedCategoryName, setSelectedCategoryName] = useState(null);
   const [filteredProducts, setFilteredProducts] = useState(products);
-
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 20;
-  const { t } = useTranslation();
+
+  const { t, language } = useTranslation();
+  const isRTL = language === "ar"; // ✅ اتجاه الموقع
 
   // Fetch categories
   useEffect(() => {
@@ -35,7 +36,7 @@ export default function GoalKeeperClientPage({ products, brands, attributeValues
     fetchCategories();
   }, []);
 
-  // Filter products based on category, brand, and attributes
+  // Filter products
   useEffect(() => {
     const result = products.filter((product) => {
       const brandMatch = !selectedBrand || product.brand?.name === selectedBrand;
@@ -67,7 +68,6 @@ export default function GoalKeeperClientPage({ products, brands, attributeValues
     setCurrentPage(1);
   }, [products, selectedBrand, selectedAttributes, selectedCategoryId]);
 
-  // Filter categories that have products
   const categoriesWithProducts = useMemo(() => {
     return categories.filter((cat) =>
       products.some((product) =>
@@ -76,22 +76,27 @@ export default function GoalKeeperClientPage({ products, brands, attributeValues
     );
   }, [categories, products]);
 
-  // Update selected category name when ID changes
   useEffect(() => {
     const cat = categoriesWithProducts.find((c) => c.id === selectedCategoryId);
     setSelectedCategoryName(cat?.name || null);
   }, [selectedCategoryId, categoriesWithProducts]);
 
-  // Pagination
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
   const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
   const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
 
+  const getBadgeColor = (label) => {
+    if (!label) return "bg-gray-400";
+    if (label.toLowerCase().includes("new")) return "bg-green-500";
+    if (label.includes("%") || label.toLowerCase().includes("off")) return "bg-gray-500";
+    return "bg-yellow-500";
+  };
+
   return (
-    <div className="bg-[#373e3e]">
+    <div className={`bg-[#373e3e] ${isRTL ? "rtl" : "ltr"}`}>
       <div className="grid pt-1 grid-cols-1 lg:grid-cols-5">
-        {/* ✅ Sidebar في الجنب للشاشات الكبيرة */}
+        {/* Sidebar */}
         <div className="hidden lg:block lg:col-span-1 bg-black h-auto">
           <Sidebar
             categories={categoriesWithProducts}
@@ -103,29 +108,25 @@ export default function GoalKeeperClientPage({ products, brands, attributeValues
                 setSelectedCategoryId(catId);
               }
             }}
+            isRTL={isRTL} // ✅ تمرير اتجاه اللغة
           />
         </div>
 
-        {/* Products Area */}
+        {/* Products Section */}
         <div className="md:col-span-4 p-4 bg-white">
-          {/* Title */}
           <h1 className="text-4xl text-[#1f2323] p-2">
             {selectedCategoryName || t("Goalkeeper Gloves")}
           </h1>
 
-          
-         
-
-          {/* Brands Slider */}
           <BrandsSlider
             brands={brands}
             selectedBrand={selectedBrand}
+            direction={isRTL ? "rtl" : "ltr"}
             onBrandClick={(brand) =>
               setSelectedBrand(brand === selectedBrand ? null : brand)
             }
           />
 
-          {/* Filters */}
           <div className="flex mb-4 gap-3 flex-wrap">
             <FilterDropdown
               attributeValues={attributeValues}
@@ -133,14 +134,26 @@ export default function GoalKeeperClientPage({ products, brands, attributeValues
             />
           </div>
 
-          {/* Products Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 p-2 sm:p-4">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-3 p-2 sm:p-4">
             {currentProducts.map((product) => (
               <div
                 key={product.sku}
-                className="bg-gradient-to-br from-white to-neutral-200 rounded-xl shadow-md overflow-hidden flex flex-col transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
+                className="relative bg-gradient-to-br from-white to-neutral-300 shadow-lg overflow-hidden flex flex-col transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
               >
-                <ProductSlider images={product.images} productName={product.name} />
+                {product.productBadges?.length > 0 &&
+                  product.productBadges[0]?.label && (
+                    <div
+                      className={`absolute top-3 left-[-20px] w-[90px] text-center text-white text-xs font-bold py-1 rotate-[-45deg] shadow-md z-10 ${getBadgeColor(
+                        product.productBadges[0].label
+                      )}`}
+                    >
+                      {product.productBadges[0].label}
+                    </div>
+                  )}
+
+                <div className="flex justify-center items-center h-[220px]">
+                  <ProductSlider images={product.images} productName={product.name} />
+                </div>
 
                 <Link
                   href={`/product/${encodeURIComponent(product.sku)}`}
@@ -171,40 +184,62 @@ export default function GoalKeeperClientPage({ products, brands, attributeValues
             ))}
           </div>
 
-          {/* Pagination Controls */}
           {totalPages > 1 && (
-            <div className="flex flex-wrap justify-center items-center gap-2 mt-6">
-              <button
-                onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-                disabled={currentPage === 1}
-                className="px-3 sm:px-4 py-2 cursor-pointer rounded-lg bg-gray-200 text-gray-700 disabled:opacity-50 text-sm sm:text-base"
-              >
-                Prev
-              </button>
+  <div className="flex justify-center items-center gap-4 mt-6 select-none">
+    {/* Previous Button */}
+    <button
+      onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+      disabled={currentPage === 1}
+      className="px-3 py-2 rounded-full bg-gray-200 text-gray-700 disabled:opacity-50 hover:bg-gray-300 transition"
+    >
+      &#10094;
+    </button>
 
-              {[...Array(totalPages)].map((_, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setCurrentPage(idx + 1)}
-                  className={`px-3 sm:px-4 py-2 cursor-pointer rounded-lg text-sm sm:text-base ${
-                    currentPage === idx + 1
-                      ? "bg-[#1f2323] text-white"
-                      : "bg-gray-100 text-gray-700"
-                  }`}
-                >
-                  {idx + 1}
-                </button>
-              ))}
+    {/* Page numbers slider */}
+    <div className="flex gap-2 overflow-x-auto scrollbar-none px-2">
+      {[...Array(totalPages)].map((_, idx) => {
+        const pageNumber = idx + 1;
+        // Show only few pages around current for slider effect
+        if (
+          pageNumber === 1 ||
+          pageNumber === totalPages ||
+          (pageNumber >= currentPage - 1 && pageNumber <= currentPage + 1)
+        ) {
+          return (
+            <button
+              key={idx}
+              onClick={() => setCurrentPage(pageNumber)}
+              className={`px-3 py-2 rounded-full text-sm sm:text-base transition ${
+                currentPage === pageNumber
+                  ? "bg-[#1f2323] text-white shadow-md"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              }`}
+            >
+              {pageNumber}
+            </button>
+          );
+        } else if (
+          pageNumber === currentPage - 2 ||
+          pageNumber === currentPage + 2
+        ) {
+          return <span key={idx} className="px-2 text-gray-500">...</span>;
+        } else {
+          return null;
+        }
+      })}
+    </div>
 
-              <button
-                onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-                disabled={currentPage === totalPages}
-                className="px-3 sm:px-4 py-2 cursor-pointer rounded-lg bg-gray-200 text-gray-700 disabled:opacity-50 text-sm sm:text-base"
-              >
-                Next
-              </button>
-            </div>
-          )}
+    {/* Next Button */}
+    <button
+      onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+      disabled={currentPage === totalPages}
+      className="px-3 py-2 rounded-full bg-gray-200 text-gray-700 disabled:opacity-50 hover:bg-gray-300 transition"
+    >
+      &#10095;
+    </button>
+  </div>
+)}
+
         </div>
       </div>
     </div>

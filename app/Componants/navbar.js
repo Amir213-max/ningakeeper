@@ -1,7 +1,7 @@
 'use client';
 import { useTranslation } from '../contexts/TranslationContext';
 import { FaSearch, FaShoppingCart, FaUser, FaBars } from 'react-icons/fa';
-import { useState } from 'react';
+import { useState , useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import CartSidebar from './CartSidebar';
@@ -9,13 +9,34 @@ import SearchComponent from './SearchComponant';
 import Sidebar from './sidebar';
 import NavbarNotifications from './NotificationsBell';
 import { useAuth } from '../contexts/AuthContext'; // ✅ استدعاء الـ AuthContext
+import { GET_ACTIVE_HOME_PAGE_BLOCKS } from '../lib/queries';
+import { graphqlClient } from '../lib/graphqlClient';
 
 export default function NavbarWithLinks({ onSelectCategory }) {
   const { t, lang, setLang } = useTranslation();
   const [cartOpen, setCartOpen] = useState(false);
+
+    const [blocks, setBlocks] = useState([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+useEffect(() => {
+    async function fetchBlocks() {
+      try {
+        const data = await graphqlClient.request(GET_ACTIVE_HOME_PAGE_BLOCKS);
+        const activeBlocks = data.activeHomepageBlocks || [];
+        setBlocks(activeBlocks);
 
+        // تحميل المنتجات الخاصة بالبلوكات من نوع products
+       
+      } catch (error) {
+        console.error("❌ Error fetching home page blocks:", error);
+      } 
+    }
+
+    fetchBlocks();
+  }, []);
+
+        
   // ✅ جلب بيانات المستخدم والتوكن من الـ AuthContext
   const { user, token } = useAuth();
 
@@ -25,9 +46,24 @@ export default function NavbarWithLinks({ onSelectCategory }) {
     }
     setSidebarOpen(false);
   };
-
+ const firstTextBlock = blocks.find((b) => b.type === "text");
+  
   return (
     <>
+      {/* 🟢 أول بلوك نصي يظهر فوق الـ Navbar */}
+  {firstTextBlock && (
+  <div
+    className="w-full top-0 left-0 z-[100] text-white text-center "
+    style={{ backgroundColor: firstTextBlock.background_color || "red" }}
+  >
+    <p className="text-sm sm:text-base md:text-lg font-bold whitespace-pre-line px-3">
+      {firstTextBlock.content?.content}
+    </p>
+  </div>
+)}
+
+
+      {/* ✅ Navbar */}
       <header className="w-full bg-black shadow py-4">
         <div className="navbar-container container mx-auto px-4 flex items-center justify-between">
           {/* ✅ Left side (Menu + Cart) */}
@@ -70,11 +106,9 @@ export default function NavbarWithLinks({ onSelectCategory }) {
             {user ? (
               <div className="text-white flex items-center gap-3">
                 <span className="text-sm hidden sm:inline">{user.name}</span>
-              
-  <button className="text-white hover:text-amber-600 cursor-pointer transition-colors duration-200">
-    <FaUser size={20} />
-  </button>
-
+                <button className="text-white hover:text-amber-600 cursor-pointer transition-colors duration-200">
+                  <FaUser size={20} />
+                </button>
               </div>
             ) : (
               <Link
@@ -93,7 +127,7 @@ export default function NavbarWithLinks({ onSelectCategory }) {
               <FaSearch size={20} />
             </button>
 
-            {/* 🔔 Notifications (باستخدام التوكن الحقيقي) */}
+            {/* 🔔 Notifications */}
             {token && <NavbarNotifications userToken={token} />}
 
             {/* ✅ Search Modal */}
@@ -117,54 +151,36 @@ export default function NavbarWithLinks({ onSelectCategory }) {
       {/* ✅ Navigation Links */}
       <nav
         id="main-links"
-        className="flex justify-around bg-black shadow py-3 text-sm sm:text-[14px] lg:text-lg"
+        className="hidden lg:flex justify-around bg-black shadow py-3 text-sm sm:text-[14px] lg:text-lg"
       >
         <ul className="flex gap-6 md:gap-12 text-white font-bold">
           <li>
-            <Link
-              href="/GoalkeeperGloves"
-              className="hover:border-b-2 pb-1 border-white"
-            >
+            <Link href="/GoalkeeperGloves" className="hover:border-b-2 pb-1 border-white">
               {t('Goalkeeper Gloves')}
             </Link>
           </li>
           <li>
-            <Link
-              href="/FootballBoots"
-              className="hover:border-b-2 pb-1 border-white"
-            >
+            <Link href="/FootballBoots" className="hover:border-b-2 pb-1 border-white">
               {t('Football Boots')}
             </Link>
           </li>
           <li>
-            <Link
-              href="/Goalkeeperapparel"
-              className="hover:border-b-2 pb-1 border-white"
-            >
+            <Link href="/Goalkeeperapparel" className="hover:border-b-2 pb-1 border-white">
               {t('Goalkeeper Apparel')}
             </Link>
           </li>
           <li>
-            <Link
-              href="/Goalkeeperequipment"
-              className="hover:border-b-2 pb-1 border-white"
-            >
+            <Link href="/Goalkeeperequipment" className="hover:border-b-2 pb-1 border-white">
               {t('Goalkeeper Equipment')}
             </Link>
           </li>
           <li>
-            <Link
-              href="/Teamsport"
-              className="hover:border-b-2 pb-1 border-white"
-            >
+            <Link href="/Teamsport" className="hover:border-b-2 pb-1 border-white">
               {t('Teamsport')}
             </Link>
           </li>
           <li>
-            <Link
-              href="/Sale"
-              className="hover:border-b-2 pb-1 border-white"
-            >
+            <Link href="/Sale" className="hover:border-b-2 pb-1 border-white">
               {t('Sale')}
             </Link>
           </li>
@@ -177,6 +193,7 @@ export default function NavbarWithLinks({ onSelectCategory }) {
           isOpen={sidebarOpen}
           setIsOpen={setSidebarOpen}
           onSelectCategory={handleCategorySelect}
+          isRTL={lang === 'ar'}
         />
       </div>
 

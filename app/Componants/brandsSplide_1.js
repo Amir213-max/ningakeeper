@@ -7,7 +7,6 @@ import { useTranslation } from '../contexts/TranslationContext';
 export default function BrandsSlider({ brands, onBrandClick, selectedBrand }) {
   const { lang } = useTranslation();
 
-
   // 🔹 فلترة القيم الفارغة
   const validBrands = brands.filter(
     (brand) => brand && brand.trim() !== ''
@@ -37,10 +36,7 @@ export default function BrandsSlider({ brands, onBrandClick, selectedBrand }) {
         aria-label="Brand names"
         className="w-full"
       >
-
-
         {validBrands.map((brand, index) => (
-
           <SplideSlide
             key={index}
             className="p-0 m-0 flex justify-center items-center"

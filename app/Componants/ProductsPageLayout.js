@@ -1,58 +1,59 @@
 "use client";
 
-import { Heart } from "lucide-react";
-import Link from "next/link";
 import { useState, useEffect, useMemo } from "react";
+import Link from "next/link";
+import { Heart } from "lucide-react";
+import Sidebar from "../Componants/sidebar";
 import BrandsSlider from "../Componants/brandsSplide_1";
 import FilterDropdown from "../Componants/CheckboxDropdown ";
 import ProductSlider from "../Componants/ProductSlider";
-import Sidebar from "../Componants/sidebar";
 import { useTranslation } from "../contexts/TranslationContext";
 import { graphqlClient } from "../lib/graphqlClient";
-import { GET_CATEGORIES_QUERY, GET_WISHLIST_ITEMS } from "../lib/queries";
-import { ADD_TO_WISHLIST } from "../lib/mutations";
-import { useAuth } from "../contexts/AuthContext";
 import toast from "react-hot-toast";
+import { useAuth } from "../contexts/AuthContext";
+import { ADD_TO_WISHLIST } from "../lib/mutations";
 
-export default function GoalkeeperClientPage({ products, brands, attributeValues }) {
-  const { user } = useAuth();
+export default function ProductsPageLayout({
+  products,
+  brands,
+  attributeValues,
+  pageTitle,
+}) {
   const { t, language } = useTranslation();
+  const { user } = useAuth();
   const isRTL = language === "ar";
 
   const [categories, setCategories] = useState([]);
-  const [selectedBrand, setSelectedBrand] = useState(null);
-  const [selectedAttributes, setSelectedAttributes] = useState({});
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
   const [selectedCategoryName, setSelectedCategoryName] = useState(null);
+  const [selectedBrand, setSelectedBrand] = useState(null);
+  const [selectedAttributes, setSelectedAttributes] = useState({});
   const [filteredProducts, setFilteredProducts] = useState(products);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [wishlistIds, setWishlistIds] = useState([]);
-  const wishlistId = user?.defaultWishlist?.id || user?.wishlists?.[0]?.id;
 
-  const [currentPage, setCurrentPage] = useState(1);
+  const wishlistId = user?.defaultWishlist?.id || user?.wishlists?.[0]?.id;
   const productsPerPage = 20;
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Fetch wishlist items
   useEffect(() => {
-    if (wishlistId) {
-      const fetchWishlist = async () => {
-        try {
-          const res = await graphqlClient.request(GET_WISHLIST_ITEMS, { wishlistId });
-          const ids = res?.wishlist?.items?.map((item) => String(item.product.id)) || [];
-          setWishlistIds(ids);
-        } catch (err) {
-          console.error("Error fetching wishlist items:", err);
-        }
-      };
-      fetchWishlist();
-    }
+    if (!wishlistId) return;
+    const fetchWishlist = async () => {
+      try {
+        const res = await graphqlClient.request(ADD_TO_WISHLIST, { wishlistId });
+        const ids = res?.wishlist?.items?.map((item) => String(item.product.id)) || [];
+        setWishlistIds(ids);
+      } catch (error) {
+        console.error("Wishlist error:", error);
+      }
+    };
+    fetchWishlist();
   }, [wishlistId]);
 
-  // Add to wishlist
   const handleAddToWishlist = async (productId) => {
     if (!user) return toast.error("You must be logged in");
     if (wishlistIds.includes(String(productId))) return toast("Already added ❤️");
-
     try {
       const res = await graphqlClient.request(ADD_TO_WISHLIST, {
         input: { wishlist_id: wishlistId, product_id: productId },
@@ -61,19 +62,19 @@ export default function GoalkeeperClientPage({ products, brands, attributeValues
         toast.success("Added to wishlist");
         setWishlistIds((prev) => [...prev, String(productId)]);
       }
-    } catch (err) {
+    } catch (error) {
       toast.error("Something went wrong");
     }
   };
 
-  // Fetch categories
+  // Fetch categories (replace GET_CATEGORIES_QUERY if needed)
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const data = await graphqlClient.request(GET_CATEGORIES_QUERY);
+        const data = await graphqlClient.request(/* GET_CATEGORIES_QUERY */);
         setCategories(data.rootCategories || []);
-      } catch (err) {
-        console.error("Error fetching categories:", err);
+      } catch (error) {
+        console.error("Categories fetch error:", error);
       }
     };
     fetchCategories();
@@ -91,7 +92,8 @@ export default function GoalkeeperClientPage({ products, brands, attributeValues
           const selectedLower = selectedVals.map((v) => String(v).toLowerCase());
           return attrs.some(
             (pav) =>
-              String(pav.attribute?.label || "").toLowerCase() === attrLabel.toLowerCase() &&
+              String(pav.attribute?.label || pav.attribute?.key || "")
+                .toLowerCase() === String(attrLabel).toLowerCase() &&
               selectedLower.includes(String(pav.key ?? "").toLowerCase())
           );
         }
@@ -99,7 +101,9 @@ export default function GoalkeeperClientPage({ products, brands, attributeValues
 
       const categoryMatch =
         !selectedCategoryId ||
-        (product.rootCategories || []).some((cat) => String(cat.id) === String(selectedCategoryId));
+        (product.rootCategories || []).some(
+          (cat) => String(cat.id) === String(selectedCategoryId)
+        );
 
       return brandMatch && attributesMatch && categoryMatch;
     });
@@ -108,11 +112,10 @@ export default function GoalkeeperClientPage({ products, brands, attributeValues
     setCurrentPage(1);
   }, [products, selectedBrand, selectedAttributes, selectedCategoryId]);
 
-  // Categories with products
   const categoriesWithProducts = useMemo(() => {
     return categories.filter((cat) =>
-      products.some((p) =>
-        (p.rootCategories || []).some((c) => c.id === cat.id)
+      products.some((product) =>
+        (product.rootCategories || []).some((pCat) => pCat.id === cat.id)
       )
     );
   }, [categories, products]);
@@ -127,26 +130,28 @@ export default function GoalkeeperClientPage({ products, brands, attributeValues
   const currentProducts = filteredProducts.slice(indexOfFirst, indexOfLast);
   const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
 
+  const getBadgeColor = (label) => {
+    if (!label) return "bg-gray-400";
+    if (label.toLowerCase().includes("new")) return "bg-green-500";
+    if (label.includes("%") || label.toLowerCase().includes("off")) return "bg-red-500";
+    return "bg-yellow-500";
+  };
+
   const handleCategorySelect = (catId) => {
     if (catId === selectedCategoryId) {
       setSelectedCategoryId(null);
       setSelectedCategoryName(null);
     } else {
       setSelectedCategoryId(catId);
+      const cat = categories.find((c) => c.id === catId);
+      setSelectedCategoryName(cat?.name || null);
     }
-  };
-
-  const getBadgeColor = (label) => {
-    if (!label) return "bg-gray-400";
-    if (label.toLowerCase().includes("new")) return "bg-green-500";
-    if (label.includes("%") || label.toLowerCase().includes("off")) return "bg-gray-500";
-    return "bg-yellow-500";
   };
 
   return (
     <div className={`bg-[#373e3e] min-h-screen ${isRTL ? "rtl" : "ltr"}`}>
-      {/* Top bar mobile */}
-      <div className="block lg:hidden bg-gray-300 px-4 py-3 sticky top-0 z-30 flex justify-between items-center">
+      {/* Mobile Top bar */}
+      <div className="block lg:hidden bg-[#1f2323] px-4 py-3 sticky top-0 z-30 flex justify-between items-center">
         <button
           onClick={() => setSidebarOpen(true)}
           className="text-white bg-yellow-500 px-3 py-1 rounded-lg font-semibold"
@@ -154,13 +159,13 @@ export default function GoalkeeperClientPage({ products, brands, attributeValues
           ☰ {t("Filters")}
         </button>
         <h2 className="text-white font-bold text-lg">
-          {selectedCategoryName || t("Football Shose")}
+          {selectedCategoryName || pageTitle}
         </h2>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-0">
         {/* Sidebar desktop */}
-        <div className="hidden lg:block lg:col-span-1 bg-[black ]h-auto p-2">
+        <div className="hidden lg:block lg:col-span-1 bg-[#1f2323] h-auto p-2">
           <Sidebar
             categories={categoriesWithProducts}
             onSelectCategory={handleCategorySelect}
@@ -170,7 +175,7 @@ export default function GoalkeeperClientPage({ products, brands, attributeValues
         {/* Main content */}
         <div className="lg:col-span-4 bg-white p-4 sm:p-6 rounded-t-2xl lg:rounded-none">
           <h1 className="text-3xl sm:text-4xl font-bold text-[#1f2323] mb-4">
-            {selectedCategoryName || t("Football Shose")}
+            {selectedCategoryName || pageTitle}
           </h1>
 
           {brands.length > 1 && (
@@ -190,37 +195,23 @@ export default function GoalkeeperClientPage({ products, brands, attributeValues
             />
           </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-3 p-2 sm:p-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
             {currentProducts.map((product) => (
               <div
                 key={product.sku}
                 className="bg-gradient-to-br from-white to-neutral-200 rounded-xl shadow-md overflow-hidden flex flex-col relative transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
               >
-                {product.productBadges?.length > 0 && product.productBadges[0]?.label && (
-                  <div
-                    className={`absolute top-3 left-[-20px] w-[90px] text-center text-white text-xs font-bold py-1 rotate-[-45deg] shadow-md z-10 ${getBadgeColor(
-                      product.productBadges[0].label
-                    )}`}
-                  >
-                    {product.productBadges[0].label}
-                  </div>
-                )}
-
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleAddToWishlist(product.id);
-                  }}
-                  className="absolute top-2 right-2 z-10 p-1 rounded-full transition-all duration-300 hover:bg-white/20"
-                >
-                  <Heart
-                    className={`w-6 h-6 transition-colors duration-300 ${
-                      wishlistIds.includes(String(product.id))
-                        ? "stroke-red-500 fill-red-500"
-                        : "stroke-gray-400 fill-transparent hover:stroke-red-500 hover:fill-red-500"
-                    }`}
-                  />
-                </button>
+                {/* Product Badge */}
+                {product.productBadges?.length > 0 &&
+                  product.productBadges[0]?.label && (
+                    <div
+                      className={`absolute top-3 left-[-20px] w-[90px] text-center text-white text-xs font-bold py-1 rotate-[-45deg] shadow-md z-10 ${getBadgeColor(
+                        product.productBadges[0].label
+                      )}`}
+                    >
+                      {product.productBadges[0].label}
+                    </div>
+                  )}
 
                 <ProductSlider images={product.images} productName={product.name} />
 
@@ -254,66 +245,43 @@ export default function GoalkeeperClientPage({ products, brands, attributeValues
           </div>
 
           {/* Pagination */}
-     {totalPages > 1 && (
-  <div className="flex justify-center items-center gap-4 mt-6 select-none">
-    {/* Previous Button */}
-    <button
-      onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-      disabled={currentPage === 1}
-      className="px-3 py-2 rounded-full bg-gray-200 text-gray-700 disabled:opacity-50 hover:bg-gray-300 transition"
-    >
-      &#10094;
-    </button>
+          {totalPages > 1 && (
+            <div className="flex flex-wrap justify-center items-center gap-2 mt-6">
+              <button
+                onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                disabled={currentPage === 1}
+                className="px-3 sm:px-4 py-2 cursor-pointer rounded-lg bg-gray-200 text-gray-700 disabled:opacity-50 text-sm sm:text-base"
+              >
+                Prev
+              </button>
 
-    {/* Page numbers slider */}
-    <div className="flex gap-2 overflow-x-auto scrollbar-none px-2">
-      {[...Array(totalPages)].map((_, idx) => {
-        const pageNumber = idx + 1;
-        // Show only few pages around current for slider effect
-        if (
-          pageNumber === 1 ||
-          pageNumber === totalPages ||
-          (pageNumber >= currentPage - 1 && pageNumber <= currentPage + 1)
-        ) {
-          return (
-            <button
-              key={idx}
-              onClick={() => setCurrentPage(pageNumber)}
-              className={`px-3 py-2 rounded-full text-sm sm:text-base transition ${
-                currentPage === pageNumber
-                  ? "bg-[#1f2323] text-white shadow-md"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              }`}
-            >
-              {pageNumber}
-            </button>
-          );
-        } else if (
-          pageNumber === currentPage - 2 ||
-          pageNumber === currentPage + 2
-        ) {
-          return <span key={idx} className="px-2 text-gray-500">...</span>;
-        } else {
-          return null;
-        }
-      })}
-    </div>
+              {[...Array(totalPages)].map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setCurrentPage(idx + 1)}
+                  className={`px-3 sm:px-4 py-2 cursor-pointer rounded-lg text-sm sm:text-base ${
+                    currentPage === idx + 1
+                      ? "bg-[#1f2323] text-white"
+                      : "bg-gray-100 text-gray-700"
+                  }`}
+                >
+                  {idx + 1}
+                </button>
+              ))}
 
-    {/* Next Button */}
-    <button
-      onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-      disabled={currentPage === totalPages}
-      className="px-3 py-2 rounded-full bg-gray-200 text-gray-700 disabled:opacity-50 hover:bg-gray-300 transition"
-    >
-      &#10095;
-    </button>
-  </div>
-)}
-
+              <button
+                onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                disabled={currentPage === totalPages}
+                className="px-3 sm:px-4 py-2 cursor-pointer rounded-lg bg-gray-200 text-gray-700 disabled:opacity-50 text-sm sm:text-base"
+              >
+                Next
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Sidebar mobile drawer */}
+      {/* Sidebar drawer for mobile */}
       {sidebarOpen && (
         <div className="fixed inset-0 z-40 bg-black/60 flex">
           <div className="bg-[#1f2323] w-3/4 sm:w-2/4 p-4 overflow-y-auto">
