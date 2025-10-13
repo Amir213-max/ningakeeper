@@ -10,7 +10,7 @@ import { useTranslation } from "../contexts/TranslationContext";
 import { graphqlClient } from "../lib/graphqlClient";
 import { GET_CATEGORIES_QUERY } from "../lib/queries";
 
-export default function GoalKeeperClientPage({ products, brands, attributeValues }) {
+export default function FootballClientPage({ products, brands, attributeValues }) {
   const [categories, setCategories] = useState([]);
   const [selectedBrand, setSelectedBrand] = useState(null);
   const [selectedAttributes, setSelectedAttributes] = useState({});
@@ -115,7 +115,7 @@ export default function GoalKeeperClientPage({ products, brands, attributeValues
         {/* Products Section */}
         <div className="md:col-span-4 p-4 bg-white">
           <h1 className="text-4xl text-[#1f2323] p-2">
-            {selectedCategoryName || t("Goalkeeper Gloves")}
+            {selectedCategoryName || t("Football Boots")}
           </h1>
 
           <BrandsSlider
