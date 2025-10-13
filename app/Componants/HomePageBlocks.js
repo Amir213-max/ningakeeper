@@ -70,7 +70,7 @@ export default function HomePageBlocks() {
   
 
       {/* باقي البلوكات بعد الـ Navbar */}
-      <div className="pt-12 space-y-12">
+      <div className="pt-3 space-y-3">
         {otherBlocks.map((block, index) => (
           <motion.div
             key={block.id}
@@ -205,7 +205,7 @@ export default function HomePageBlocks() {
                           src={getImageUrl(banner.image)}
                           alt={banner.title || ""}
                           fill
-                          className="object-cover object-center"
+                          className="object-fit-fill object-center"
                           unoptimized
                           priority={isFirstBanner}
                         />
