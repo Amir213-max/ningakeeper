@@ -1,9 +1,6 @@
 import { graphqlClient } from "../lib/graphqlClient";
 import { PRODUCTS_BY_CATEGORY_QUERY } from "../lib/queries";
-
-
 import TeamsportClientPage from "./TeamsportClientPage";
-
 
 const FOOTBALL_BOOTS_CATEGORY_ID = "21"; 
 // تقدر تعدل الـ ID أو تخليها Array وتعرض أكتر من SubCategory لو حابب
@@ -12,7 +9,7 @@ const fetchProductsByCategory = async () => {
   const variables = { categoryId: FOOTBALL_BOOTS_CATEGORY_ID };
   const data = await graphqlClient.request(PRODUCTS_BY_CATEGORY_QUERY, variables);
 
-  // هنجيب المنتجات الخاصة بالكاتيجوري + المنتجات الخاصة بالسب كاتيجوريز
+  // 🟢 جمع المنتجات الخاصة بالكاتيجوري + المنتجات الخاصة بالسب كاتيجوريز
   let products = data.rootCategory?.products || [];
 
   if (data.rootCategory?.subCategories) {
@@ -22,6 +19,15 @@ const fetchProductsByCategory = async () => {
       }
     });
   }
+
+  // ✅ ترتيب المنتجات من الأحدث للأقدم
+  // لو عندك created_at في البيانات
+  products = products.sort(
+    (a, b) => new Date(b.created_at) - new Date(a.created_at)
+  );
+
+  // لو مفيش created_at في الداتا، استخدم السطر ده بدل اللي فوق:
+  // products = products.reverse();
 
   return products;
 };

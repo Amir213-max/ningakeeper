@@ -1,9 +1,6 @@
-
-
 import { graphqlClient } from "../lib/graphqlClient";
 import { PRODUCTS_SALES_QUERY } from "../lib/queries";
 import SalesClientPage from "./SalesClientPage";
-
 
 const fetchProductsByBadges = async () => {
   const data = await graphqlClient.request(PRODUCTS_SALES_QUERY);
@@ -14,6 +11,9 @@ const fetchProductsByBadges = async () => {
   products = products.filter(
     (product) => product.productBadges && product.productBadges.length > 0
   );
+
+  // 🟢 ترتيب المنتجات من الأحدث للأقدم حسب created_at
+  products.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
   return products;
 };

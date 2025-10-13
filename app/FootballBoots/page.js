@@ -5,7 +5,13 @@ import FootballClientPage from "./FootballBootsClientpage";
 export default async function Page() {
   const data = await graphqlClient.request(PRODUCTS_SHOES_QUERY);
 
-  const products = (data.products || []).filter((p) => p.are_shoes === true);
+  let products = (data.products || []).filter((p) => p.are_shoes === true);
+
+  // ✅ ترتيب المنتجات من الأحدث للأقدم بناءً على created_at
+  products = products.sort(
+    (a, b) => new Date(b.created_at) - new Date(a.created_at)
+  );
+
   const brands = [...new Set(products.map((p) => p.brand?.name).filter(Boolean))];
 
   const attributeValues = [];
@@ -26,5 +32,11 @@ export default async function Page() {
     });
   });
 
-  return <FootballClientPage products={products} brands={brands} attributeValues={attributeValues} />;
+  return (
+    <FootballClientPage
+      products={products}
+      brands={brands}
+      attributeValues={attributeValues}
+    />
+  );
 }

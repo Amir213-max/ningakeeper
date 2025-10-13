@@ -96,6 +96,8 @@ query ProductsByCategory($categoryId: ID!) {
    
     slug
     products {
+    created_at
+      updated_at
       productBadges{
         label
       }
@@ -166,6 +168,8 @@ query GetCategories {
     name
   }
   products {
+  created_at
+      updated_at
     list_price_amount
     list_price_currency
     relative_list_price_difference
@@ -204,6 +208,8 @@ export const PRODUCTS_SHOES_QUERY = gql`
 
 query PRODUCTS_SHOES_QUERY {
   products {
+  created_at
+      updated_at
     list_price_amount
     list_price_currency
     relative_list_price_difference
@@ -265,6 +271,8 @@ query PRODUCTS_SALES_QUERY {
     productBadges{
       label
     }
+      created_at
+      updated_at
     list_price_amount
     list_price_currency
     relative_list_price_difference
@@ -464,6 +472,7 @@ query GetOrders {
     reference_id
     payment_status
     tags
+    
     tracking_urls
     published
     created_at

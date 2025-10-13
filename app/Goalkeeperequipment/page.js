@@ -2,9 +2,6 @@ import { graphqlClient } from "../lib/graphqlClient";
 import { PRODUCTS_BY_CATEGORY_QUERY } from "../lib/queries";
 import EquipmentClientPage from "./EquipmenClientpage";
 
-
-
-
 const FOOTBALL_BOOTS_CATEGORY_ID = "52"; 
 // تقدر تعدل الـ ID أو تخليها Array وتعرض أكتر من SubCategory لو حابب
 
@@ -22,6 +19,9 @@ const fetchProductsByCategory = async () => {
       }
     });
   }
+
+  // 🟢 عرض المنتجات من الأحدث إلى الأقدم
+  products = products.reverse();
 
   return products;
 };

@@ -156,7 +156,12 @@ export default function BrandPage() {
   const indexOfFirst = indexOfLast - productsPerPage;
   const currentProducts = filteredProducts.slice(indexOfFirst, indexOfLast);
   const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
-
+  const getBadgeColor = (label) => {
+    if (!label) return "bg-gray-400";
+    if (label.toLowerCase().includes("new")) return "bg-green-500";
+    if (label.includes("%") || label.toLowerCase().includes("off")) return "bg-gray-500";
+    return "bg-yellow-500";
+  };
   return (
     <div className="bg-[#373e3e] min-h-screen">
       <div className="grid pt-1 grid-cols-1 lg:grid-cols-5">
@@ -183,35 +188,24 @@ export default function BrandPage() {
           </div>
 
           {/* 🔹 Products Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 p-2 sm:p-4">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-3 p-2 sm:p-4">
             {currentProducts.map((product) => (
               <div
                 key={product.sku}
                 className="relative bg-gradient-to-br from-white to-neutral-200 rounded-xl shadow-md overflow-hidden flex flex-col transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
               >
-                {/* 🔺 Badge (Diagonal top-left corner) */}
-                {product.productBadges?.length > 0 && (
-                  <div className="absolute top-0 left-0 transform -rotate-45 origin-top-left bg-red-500 text-white text-xs font-bold px-8 py-1 shadow-md">
-                    {product.productBadges[0].label}
-                  </div>
-                )}
+                {product.productBadges?.length > 0 &&
+                  product.productBadges[0]?.label && (
+                    <div
+                      className={`absolute top-3 left-[-20px] w-[90px] text-center text-white text-xs font-bold py-1 rotate-[-45deg] shadow-md z-10 ${getBadgeColor(
+                        product.productBadges[0].label
+                      )}`}
+                    >
+                      {product.productBadges[0].label}
+                    </div>
+                  )}
 
-                {/* ❤️ Wishlist */}
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleAddToWishlist(product.id);
-                  }}
-                  className="absolute top-2 right-2 z-10 p-1 rounded-full hover:bg-white/20"
-                >
-                  <Heart
-                    className={`w-6 h-6 ${
-                      wishlistIds.includes(String(product.id))
-                        ? "stroke-red-500 fill-red-500"
-                        : "stroke-gray-400 hover:stroke-red-500 hover:fill-red-500"
-                    }`}
-                  />
-                </button>
+               
 
                 {/* 🖼 Product Image */}
                 <ProductSlider images={product.images} productName={product.name} />

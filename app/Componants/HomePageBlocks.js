@@ -14,7 +14,7 @@ import MultiSlider_6 from "./Slider_6";
 export default function HomePageBlocks() {
   const { lang } = useTranslation();
   const BASE_URL = "https://keeper.in-brackets.online/storage/";
-  const firstBannerRenderedRef = useRef(false);
+  
 
   const [blocks, setBlocks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -183,37 +183,54 @@ export default function HomePageBlocks() {
                 </Splide>
               )}
 
-              {/* 🔹 Banners */}
-              {block.type === "banners" && block.content?.banners?.length > 0 && (
-                <div className="flex justify-center flex-col sm:flex-row gap-4 flex-wrap px-1 md:px-2 lg:px-1">
-                  {block.content.banners.map((banner, idx) => {
-                    const isFirstBanner = idx === 0;
-                    const bannerCount = block.content.banners.length;
+           {/* 🔹 Banners */}
+{block.type === "banners" && block.content?.banners?.length > 0 && (
+  <div
+    className={`
+      grid gap-4 px-1 md:px-2 lg:px-1
+      ${
+        block.content.banners.length === 1
+          ? "grid-cols-1"
+          : block.content.banners.length === 2
+          ? "grid-cols-1 sm:grid-cols-2"
+          : block.content.banners.length === 3
+          ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+          : "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+      }
+    `}
+  >
+   {block.content.banners.map((banner, idx) => {
+  const isFirstBanner = idx === 0;
+  const isMultiple = block.content.banners.length > 1; // 👈 نحدد لو فيه أكتر من بانر
 
-                    return (
-                      <motion.div
-                        key={banner.id || idx}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: idx * 0.1 }}
-                        className={`relative overflow-hidden
-                          ${bannerCount === 2 ? "w-full sm:w-[49%]" : "w-full"}
-                          h-[40vh] sm:h-[40vh] md:h-[40vh] lg:h-[60vh]
-                        `}
-                      >
-                        <Image
-                          src={getImageUrl(banner.image)}
-                          alt={banner.title || ""}
-                          fill
-                          className="object-fit-fill object-center"
-                          unoptimized
-                          priority={isFirstBanner}
-                        />
-                      </motion.div>
-                    );
-                  })}
-                </div>
-              )}
+  return (
+    <motion.a
+      key={banner.id || idx}
+      href={banner.link || "#"}
+      target="_blank"
+      rel="noopener noreferrer"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, delay: idx * 0.1 }}
+      className="relative  w-full h-[40vh] sm:h-[35vh] md:h-[40vh] lg:h-[55vh] overflow-hidden rounded-xl shadow-md group"
+    >
+      <Image
+        src={getImageUrl(banner.image)}
+        alt={banner.title || ""}
+        fill
+        className={`transition-transform duration-500 group-hover:scale-105 ${
+          isMultiple ? "object-contain object-center" : "object-fill object-center"
+        }`}
+        unoptimized
+        priority={isFirstBanner}
+      />
+    </motion.a>
+  );
+})}
+
+  </div>
+)}
+
 
               {/* 🔹 Products */}
               {block.type === "products" && productsMap[block.id]?.length > 0 && (
