@@ -53,7 +53,7 @@ useEffect(() => {
       {/* 🟢 أول بلوك نصي يظهر فوق الـ Navbar */}
   {firstTextBlock && (
   <div
-    className="w-full top-0 left-0 z-[100] text-white text-center "
+    className="w-full top-0 left-0 z-[100] text-black text-center "
     style={{ backgroundColor: firstTextBlock.background_color || "red" }}
   >
     <p className="text-sm sm:text-base md:text-lg font-bold whitespace-pre-line px-3">

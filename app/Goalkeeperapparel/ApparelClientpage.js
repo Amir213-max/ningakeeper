@@ -160,7 +160,8 @@ export default function ApparelClientPage({ products, brands, attributeValues })
                   className="p-4 flex flex-col flex-grow justify-between"
                 >
                   <div className="bg-neutral-400 text-amber-100 text-xs font-semibold w-fit px-3 py-1 rounded-full mb-3">
-                    {(product.rootCategories || []).map((cat) => cat.name).join(", ")}
+                    {(product.rootCategories || []).slice(0, 2).map((cat) => cat.name).join(", ")}
+
                   </div>
 
                   <h3 className="text-base text-gray-700 text-center font-bold mb-1">
