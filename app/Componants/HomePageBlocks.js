@@ -262,10 +262,11 @@ export default function HomePageBlocks() {
                           transition={{ duration: 0.5, delay: idx * 0.1 }}
                           className="h-full overflow-hidden"
                         >
-                          <Link
-                            href={`/product/${product.sku}`}
-                            className="block bg-[#111] hover:bg-[#2b2a2a] rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 h-full"
-                          >
+                         <Link
+  href={`/product/${encodeURIComponent(product.sku)}`}
+  className="block bg-[#111] hover:bg-[#2b2a2a] rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 h-full"
+>
+
                             <div className="relative flex items-center justify-center overflow-hidden aspect-[1.3/1.5]">
                               {product.images?.[0] ? (
                                 <Image

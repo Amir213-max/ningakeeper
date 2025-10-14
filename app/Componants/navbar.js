@@ -11,8 +11,9 @@ import NavbarNotifications from './NotificationsBell';
 import { useAuth } from '../contexts/AuthContext'; // ✅ استدعاء الـ AuthContext
 import { GET_ACTIVE_HOME_PAGE_BLOCKS } from '../lib/queries';
 import { graphqlClient } from '../lib/graphqlClient';
+import { useCategory } from '../contexts/CategoryContext';
 
-export default function NavbarWithLinks({ onSelectCategory }) {
+export default function NavbarWithLinks() {
   const { t, lang, setLang } = useTranslation();
   const [cartOpen, setCartOpen] = useState(false);
 
@@ -40,12 +41,13 @@ useEffect(() => {
   // ✅ جلب بيانات المستخدم والتوكن من الـ AuthContext
   const { user, token } = useAuth();
 
+    const { setSelectedCategoryId } = useCategory();
   const handleCategorySelect = (catId) => {
-    if (onSelectCategory) {
-      onSelectCategory(catId);
-    }
+    setSelectedCategoryId(catId);
     setSidebarOpen(false);
   };
+  
+
  const firstTextBlock = blocks.find((b) => b.type === "text");
   
   return (

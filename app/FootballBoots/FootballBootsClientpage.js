@@ -10,11 +10,13 @@ import { useTranslation } from "../contexts/TranslationContext";
 import { graphqlClient } from "../lib/graphqlClient";
 import { GET_CATEGORIES_QUERY } from "../lib/queries";
 
+import { useCategory } from "../contexts/CategoryContext";
+
 export default function FootballClientPage({ products, brands, attributeValues }) {
   const [categories, setCategories] = useState([]);
   const [selectedBrand, setSelectedBrand] = useState(null);
   const [selectedAttributes, setSelectedAttributes] = useState({});
-  const [selectedCategoryId, setSelectedCategoryId] = useState(null);
+  const { selectedCategoryId, setSelectedCategoryId } = useCategory();
   const [selectedCategoryName, setSelectedCategoryName] = useState(null);
   const [filteredProducts, setFilteredProducts] = useState(products);
   const [currentPage, setCurrentPage] = useState(1);
@@ -94,6 +96,8 @@ export default function FootballClientPage({ products, brands, attributeValues }
   };
 
   return (
+    <>
+
     <div className={`bg-[#373e3e] ${isRTL ? "rtl" : "ltr"}`}>
       <div className="grid pt-1 grid-cols-1 lg:grid-cols-5">
         {/* Sidebar */}
@@ -243,5 +247,6 @@ export default function FootballClientPage({ products, brands, attributeValues }
         </div>
       </div>
     </div>
+    </>
   );
 }

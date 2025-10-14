@@ -9,12 +9,13 @@ import Sidebar from "../Componants/sidebar";
 import { useTranslation } from "../contexts/TranslationContext";
 import { graphqlClient } from "../lib/graphqlClient";
 import { GET_CATEGORIES_QUERY } from "../lib/queries";
+import { useCategory } from "../contexts/CategoryContext";
 
 export default function SalesClientPage({ products, brands, attributeValues }) {
   const [categories, setCategories] = useState([]);
   const [selectedBrand, setSelectedBrand] = useState(null);
   const [selectedAttributes, setSelectedAttributes] = useState({});
-  const [selectedCategoryId, setSelectedCategoryId] = useState(null);
+  const { selectedCategoryId, setSelectedCategoryId } = useCategory();
   const [selectedCategoryName, setSelectedCategoryName] = useState(null);
   const [filteredProducts, setFilteredProducts] = useState(products);
   const [currentPage, setCurrentPage] = useState(1);

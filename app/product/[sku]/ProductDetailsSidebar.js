@@ -57,11 +57,10 @@ export default function ProductDetailsSidebar({ product }) {
   const listPrice = (product.list_price_amount * 4.6).toFixed(2);
   const finalPrice = (product.price_range_exact_amount * 4.6).toFixed(2);
   const listCurrency = "SAR";
-  const discountPercent =
-    product.productBadges?.[0]?.label || null;
+  const discountPercent = product.productBadges?.[0]?.label || null;
   const hasDiscount = listPrice && finalPrice && finalPrice < listPrice;
 
-  // 🎨 دالة عرض الخيارات
+  // 🎨 دالة عرض خيار dropdown
   const renderDropdownOption = (val, label) => {
     const isSelected = selectedAttributes[label] === val;
     const isColor = label.toLowerCase().includes("color");
@@ -111,6 +110,13 @@ export default function ProductDetailsSidebar({ product }) {
         </h2>
         <p className="text-xs sm:text-sm text-gray-500">{product.sku}</p>
 
+        {/* 🏢 Brand */}
+        {product.brand?.name && (
+          <p className="text-sm text-gray-700 font-medium">
+            Brand: <span className="text-amber-600">{product.brand.name}</span>
+          </p>
+        )}
+
         {/* 💵 السعر */}
         <div className="mt-2 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 justify-center sm:justify-start">
           <div>
@@ -133,51 +139,86 @@ export default function ProductDetailsSidebar({ product }) {
 
       {/* 🧩 الخصائص */}
       {Object.keys(attributesMap).length > 0 && (
-        <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3">
-          {Object.entries(attributesMap).map(([label, values]) =>
-            values.length > 1 ? (
-              <div key={label} className="relative w-full sm:w-auto">
-                <button
-                  onClick={() =>
-                    setOpenDropdown(openDropdown === label ? null : label)
-                  }
-                  className="w-full sm:min-w-[110px] flex justify-between items-center bg-white rounded-md px-3 py-2 shadow-sm hover:shadow-md transition text-sm font-medium"
-                >
-                  <span
-                    className={`truncate ${
-                      selectedAttributes[label]
-                        ? "text-amber-600"
-                        : "text-gray-400"
-                    }`}
-                  >
-                    {label}:{" "}
-                    {selectedAttributes[label] || (
-                      <span className="text-gray-400">Select</span>
-                    )}
-                  </span>
-                  <ChevronDown
-                    className={`w-4 h-4 transition-transform ${
-                      openDropdown === label ? "rotate-180" : ""
-                    }`}
-                  />
-                </button>
+        <div className="flex flex-wrap gap-4 mt-4">
+          {Object.entries(attributesMap).map(([label, values]) => {
+            const isSize = label.toLowerCase().includes("size");
 
-                <AnimatePresence>
-                  {openDropdown === label && (
-                    <motion.ul
-                      initial={{ opacity: 0, y: -8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -8 }}
-                      transition={{ duration: 0.2 }}
-                      className="absolute z-20 w-full sm:w-40 mt-1 bg-white rounded-lg shadow-lg overflow-hidden text-sm"
+            return (
+              <div key={label} className="flex flex-col gap-2 min-w-[120px]">
+                <span className="font-semibold text-gray-800 text-sm">
+                  {label}
+                </span>
+
+                {isSize ? (
+                  // ✅ لو Size نعرضه كمربعات
+                  <div className="flex flex-wrap gap-2">
+                    {values.map((val) => {
+                      const selected = selectedAttributes[label] === val;
+                      return (
+                        <button
+                          key={val}
+                          onClick={() =>
+                            setSelectedAttributes((prev) => ({
+                              ...prev,
+                              [label]: val,
+                            }))
+                          }
+                          className={`px-3 py-1 text-sm border rounded-md transition ${
+                            selected
+                              ? "bg-amber-600 text-white border-amber-600"
+                              : "bg-white text-gray-700 hover:border-amber-500"
+                          }`}
+                        >
+                          {val}
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  // ✅ باقي الـ attributes في dropdown شيك وصغير
+                  <div className="relative inline-block">
+                    <button
+                      onClick={() =>
+                        setOpenDropdown(openDropdown === label ? null : label)
+                      }
+                      className="min-w-[100px] flex justify-between items-center bg-white rounded-md px-3 py-2 shadow-sm hover:shadow-md transition text-sm font-medium"
                     >
-                      {values.map((val) => renderDropdownOption(val, label))}
-                    </motion.ul>
-                  )}
-                </AnimatePresence>
+                      <span
+                        className={`truncate ${
+                          selectedAttributes[label]
+                            ? "text-amber-600"
+                            : "text-gray-400"
+                        }`}
+                      >
+                        {selectedAttributes[label] || "Select"}
+                      </span>
+                      <ChevronDown
+                        className={`w-4 h-4 transition-transform ${
+                          openDropdown === label ? "rotate-180" : ""
+                        }`}
+                      />
+                    </button>
+
+                    <AnimatePresence>
+                      {openDropdown === label && (
+                        <motion.ul
+                          initial={{ opacity: 0, y: -8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -8 }}
+                          transition={{ duration: 0.2 }}
+                          className="absolute z-20 mt-1 bg-white rounded-lg shadow-lg overflow-hidden text-sm min-w-[120px]"
+                        >
+                          {values.map((val) =>
+                            renderDropdownOption(val, label)
+                          )}
+                        </motion.ul>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                )}
               </div>
-            ) : null
-          )}
+            );
+          })}
         </div>
       )}
 

@@ -14,6 +14,7 @@ import { Providers } from "./provider";
 import { AuthProvider } from "./contexts/AuthContext";
 import Sidebar from "./Componants/sidebar";
 import HomePageBlocks from "./Componants/HomePageBlocks";
+import { CategoryProvider } from "./contexts/CategoryContext";
 
 
 const geistSans = Geist({
@@ -43,7 +44,7 @@ export default function RootLayout({ children  }) {
    <TranslationProvider>
 <AuthProvider>
    <Toaster position="top-center" />
-   
+     <CategoryProvider>
      <CartProvider>
      
 
@@ -53,6 +54,7 @@ export default function RootLayout({ children  }) {
 
 
   <CartProvider>
+
 {children}
        
         <RegisterSWClient />
@@ -60,9 +62,9 @@ export default function RootLayout({ children  }) {
   </CartProvider>
 <ChatSidebar />
 </ChatProvider>
-
         <Footer />
      </CartProvider>
+</CategoryProvider>
        
 </AuthProvider>
     </TranslationProvider>
