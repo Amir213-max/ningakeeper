@@ -167,7 +167,7 @@ export default function HomePageBlocks() {
                           alt={img.title || ""}
                           width={400}
                           height={200}
-                          className="w-full h-full object-contain"
+                          className="w-full h-full object-fill-fit" 
                           unoptimized
                         />
                         {img.title && (
@@ -183,53 +183,87 @@ export default function HomePageBlocks() {
                 </Splide>
               )}
 
-           {/* 🔹 Banners */}
+
+
 {block.type === "banners" && block.content?.banners?.length > 0 && (
-  <div
-    className={`
-      grid gap-4 px-1 md:px-2 lg:px-1
-      ${
-        block.content.banners.length === 1
-          ? "grid-cols-1"
-          : block.content.banners.length === 2
-          ? "grid-cols-1 sm:grid-cols-2"
-          : block.content.banners.length === 3
-          ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
-          : "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
-      }
-    `}
-  >
-   {block.content.banners.map((banner, idx) => {
-  const isFirstBanner = idx === 0;
-  const isMultiple = block.content.banners.length > 1; // 👈 نحدد لو فيه أكتر من بانر
-
-  return (
-    <motion.a
-      key={banner.id || idx}
-      href={banner.link || "#"}
-      target="_blank"
-      rel="noopener noreferrer"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, delay: idx * 0.1 }}
-      className="relative  w-full h-[40vh] sm:h-[35vh] md:h-[40vh] lg:h-[55vh] overflow-hidden rounded-xl shadow-md group"
-    >
-      <Image
-        src={getImageUrl(banner.image)}
-        alt={banner.title || ""}
-        fill
-        className={`transition-transform duration-500 group-hover:scale-105 ${
-          isMultiple ? "object-contain object-center" : "object-fill object-center"
-        }`}
-        unoptimized
-        priority={isFirstBanner}
-      />
-    </motion.a>
-  );
-})}
-
-  </div>
+  <>
+    {/* ✅ لو بانر واحد أو اتنين - شبكة عادية */}
+    {block.content.banners.length <= 2 ? (
+      <div className="w-full px-2 md:px-4">
+        <div
+          className={`grid gap-3 ${
+            block.content.banners.length === 1
+              ? "grid-cols-1"
+              : "grid-cols-2"
+          }`}
+        >
+          {block.content.banners.map((banner, idx) => {
+            const isFirstBanner = idx === 0;
+            const bannersCount = block.content.banners.length;
+            return (
+              <motion.a
+                key={banner.id || idx}
+                href={banner.link || "#"}
+                target="_blank"
+                rel="noopener noreferrer"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: idx * 0.1 }}
+                className={`relative overflow-hidden rounded-xl shadow-md group w-full ${
+                  bannersCount === 1
+                    ? "h-[45vh] sm:h-[55vh] md:h-[60vh]"
+                    : "h-[35vh] sm:h-[40vh] md:h-[45vh]"
+                }`}
+              >
+                <Image
+                  src={getImageUrl(banner.image)}
+                  alt={banner.title || ""}
+                  fill
+                  className=" transition-transform duration-500 group-hover:scale-105"
+                  unoptimized
+                  priority={isFirstBanner}
+                />
+              </motion.a>
+            );
+          })}
+        </div>
+      </div>
+    ) : (
+      /* ✅ لو أكتر من صورتين - صف أفقي قابل للتمرير */
+      <div className="w-full overflow-x-auto no-scrollbar px-2 md:px-4">
+        <div className="flex gap-3 min-w-max">
+          {block.content.banners.map((banner, idx) => {
+            const isFirstBanner = idx === 0;
+            return (
+              <motion.a
+                key={banner.id || idx}
+                href={banner.link || "#"}
+                target="_blank"
+                rel="noopener noreferrer"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: idx * 0.1 }}
+                className="relative flex-shrink-0 w-[80vw] sm:w-[45vw] md:w-[30vw] lg:w-[25vw] h-[40vh] overflow-hidden rounded-xl shadow-md group"
+              >
+                <Image
+                  src={getImageUrl(banner.image)}
+                  alt={banner.title || ""}
+                  fill
+                  className="object-fill-fit transition-transform duration-500 group-hover:scale-105"
+                  unoptimized
+                  priority={isFirstBanner}
+                />
+              </motion.a>
+            );
+          })}
+        </div>
+      </div>
+    )}
+  </>
 )}
+
+
+
 
 
               {/* 🔹 Products */}

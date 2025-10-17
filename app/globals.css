@@ -77,6 +77,15 @@ body {
   font-family: 'cairo', sans-serif;
 }
 
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+
 @media (max-width: 730px) {
   nav#main-links {
     display: none !important;

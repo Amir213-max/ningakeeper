@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import ChatSidebar from "./Componants/ChatSidebar";
 import Footer from "./Componants/Footer";
 import NavbarWithLinks from "./Componants/navbar";
+import WhatsAppButton from "./Componants/WhatsAppButton";
 import { CartProvider } from "./contexts/CartContext";
 import { ChatProvider } from "./contexts/ChatContext";
 import { TranslationProvider } from "./contexts/TranslationContext";
@@ -61,6 +62,7 @@ export default function RootLayout({ children  }) {
         <Toaster position="top-right"    toastOptions={{ duration: 3000 }}  />
   </CartProvider>
 <ChatSidebar />
+<WhatsAppButton phoneNumber="201234567890" />
 </ChatProvider>
         <Footer />
      </CartProvider>
