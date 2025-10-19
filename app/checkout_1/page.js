@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { gql } from "graphql-request";
 import { graphqlClient } from "../lib/graphqlClient";
 import { fetchUserCart } from "../lib/mutations";
+import PriceDisplay from "../components/PriceDisplay";
 
 const GET_COUNTRIES = gql`
   query {
@@ -60,7 +61,21 @@ export default function CheckoutPage() {
       )
     : 0;
 
+  // المجموع بعد الخصم
   const totalAfterDiscount = cartSubtotal - discountAmount;
+
+  // تحديد الدولة المختارة
+  const selectedCountryData = countries.find((c) => c.id === selectedCountry);
+
+  // حساب الضريبة لو الدولة هي السعودية
+  const isSaudi =
+    selectedCountryData &&
+    (selectedCountryData.name.toLowerCase().includes("saudi") ||
+      selectedCountryData.code === "SA");
+
+  const taxRate = isSaudi ? 0.15 : 0;
+  const taxAmount = totalAfterDiscount * taxRate;
+  const totalWithTax = totalAfterDiscount + taxAmount;
 
   const handleContinue = () => {
     if (!selectedCountry) {
@@ -75,102 +90,182 @@ export default function CheckoutPage() {
     router.push(`/checkout_1/customer?${params.toString()}`);
   };
 
-  if (!cart) return <p className="text-white text-center mt-10">Loading...</p>;
+  if (!cart) return (
+    <div className="min-h-screen bg-white md:bg-gray-50 flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FFD300] mx-auto mb-4"></div>
+        <p className="text-[#111] text-lg">Loading your cart...</p>
+      </div>
+    </div>
+  );
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-white py-10 px-6">
-      <h1 className="text-3xl font-extrabold text-center mb-10 text-yellow-400">
-        Checkout
-      </h1>
+    <div className="min-h-screen bg-white md:bg-gray-50 text-[#111]">
+      {/* Header */}
+      <div className="bg-white md:bg-gray-50 border-b border-gray-200 md:border-none">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <h1 className="text-3xl md:text-4xl font-bold text-[#111] text-center">
+            Checkout
+          </h1>
+          <div className="w-24 h-1 bg-[#FFD300] mx-auto mt-4 rounded-full"></div>
+        </div>
+      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
-        {/* Cart Summary */}
-        <div className="bg-neutral-900 p-6 rounded-2xl shadow-lg lg:col-span-2 border border-neutral-800">
-          <h2 className="text-xl font-bold mb-6 text-yellow-400">Your Cart</h2>
-          {cart.lineItems.map((item) => (
-            <div
-              key={item.id}
-              className="flex items-center justify-between bg-neutral-800 text-white p-4 rounded-xl mb-4 border border-neutral-700"
-            >
-              <div className="flex items-center gap-4">
-                <img
-                  src={item.product.images?.[0] || "/no-image.png"}
-                  alt={item.product.name}
-                  className="w-20 h-20 rounded-lg object-cover border border-neutral-600"
-                />
-                <div>
-                  <p className="font-bold">{item.product.name}</p>
-                  <p className="text-sm text-gray-400">Qty: {item.quantity}</p>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Left Column - Cart Summary */}
+          <div className="space-y-6">
+            {/* Cart Items */}
+            <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8 border border-gray-100 hover:shadow-xl transition-all duration-300">
+              <div className="flex items-center mb-6">
+                <div className="w-8 h-8 bg-[#FFD300] rounded-full flex items-center justify-center mr-3">
+                  <span className="text-[#111] font-bold text-sm">1</span>
+                </div>
+                <h2 className="text-2xl font-bold text-[#111]">Your Cart</h2>
+              </div>
+              
+              <div className="space-y-4">
+                {cart.lineItems.map((item) => (
+                  <div
+                    key={item.id}
+                    className="flex items-center p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors duration-200"
+                  >
+                    <div className="flex-shrink-0 w-16 h-16 md:w-20 md:h-20 bg-gray-200 rounded-lg overflow-hidden">
+                      {item.product.images?.[0] ? (
+                        <img
+                          src={item.product.images[0]}
+                          alt={item.product.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-500 font-bold text-xs">
+                          No Image
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="ml-4 flex-1">
+                      <h3 className="font-semibold text-[#111] text-sm md:text-base line-clamp-2">
+                        {item.product.name}
+                      </h3>
+                      <p className="text-[#555] text-sm">Quantity: {item.quantity}</p>
+                    </div>
+                    
+                    <div className="text-right">
+                      <PriceDisplay 
+                        price={item.product.price_range_exact_amount * item.quantity}
+                        size="base"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Coupon Section */}
+              <div className="mt-6 pt-6 border-t border-gray-200">
+                <h3 className="text-lg font-semibold text-[#111] mb-4">Discount Code</h3>
+                <div className="flex gap-3">
+                  <input
+                    type="text"
+                    placeholder="Enter discount code"
+                    value={couponCode}
+                    onChange={(e) => setCouponCode(e.target.value)}
+                    className="flex-1 px-4 py-3 rounded-xl border border-gray-300 focus:border-[#FFD300] focus:ring-2 focus:ring-[#FFD300] focus:ring-opacity-20 outline-none transition-all duration-200 text-[#111] placeholder-[#555]"
+                  />
+                  <button
+                    onClick={applyCoupon}
+                    className="bg-[#FFD300] text-[#111] px-6 py-3 rounded-xl font-semibold hover:bg-[#E6BE00] transition-colors duration-200 whitespace-nowrap"
+                  >
+                    Apply
+                  </button>
                 </div>
               </div>
-              <p className="font-bold text-yellow-400">
-              {(item.product.price_range_exact_amount * item.quantity).toFixed(2)} SAR
-              </p>
             </div>
-          ))}
+          </div>
 
-          {/* Coupon */}
-          <div className="mt-6 flex gap-3">
-            <input
-              type="text"
-              placeholder="ادخل كود الخصم"
-              value={couponCode}
-              onChange={(e) => setCouponCode(e.target.value)}
-              className="flex-1 p-3 rounded-lg bg-neutral-800 text-white border border-neutral-600 focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400 outline-none"
-            />
+          {/* Right Column - Country Selection & Continue */}
+          <div className="space-y-6">
+            {/* Country Selection */}
+            <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8 border border-gray-100 hover:shadow-xl transition-all duration-300">
+              <div className="flex items-center mb-6">
+                <div className="w-8 h-8 bg-[#FFD300] rounded-full flex items-center justify-center mr-3">
+                  <span className="text-[#111] font-bold text-sm">2</span>
+                </div>
+                <h2 className="text-2xl font-bold text-[#111]">Shipping Destination</h2>
+              </div>
+              
+              <div className="space-y-4">
+                <label className="block">
+                  <span className="text-[#111] font-medium mb-2 block">Select Country</span>
+                  <select
+                    value={selectedCountry}
+                    onChange={(e) => setSelectedCountry(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-[#FFD300] focus:ring-2 focus:ring-[#FFD300] focus:ring-opacity-20 outline-none transition-all duration-200 text-[#111] bg-white"
+                  >
+                    <option value="">-- Select Country --</option>
+                    {countries.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name} ({c.code})
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+            </div>
+
+            {/* Order Summary */}
+            <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8 border border-gray-100">
+              <h3 className="text-xl font-bold text-[#111] mb-6">Order Summary</h3>
+              
+              <div className="space-y-3">
+                <div className="flex justify-between text-[#555]">
+                  <span>Subtotal:</span>
+                  <PriceDisplay price={cartSubtotal} showCurrency={true} />
+                </div>
+                
+                {discountAmount > 0 && (
+                  <div className="flex justify-between text-green-600">
+                    <span>Discount:</span>
+                    <span>- <PriceDisplay price={discountAmount} showCurrency={true} /></span>
+                  </div>
+                )}
+
+                {isSaudi && (
+                  <>
+                    <div className="flex justify-between text-[#555]">
+                      <span>Subtotal (excl. tax):</span>
+                      <PriceDisplay price={totalAfterDiscount} showCurrency={true} />
+                    </div>
+                    <div className="flex justify-between text-orange-600">
+                      <span>VAT (15%):</span>
+                      <span>+ <PriceDisplay price={taxAmount} showCurrency={true} /></span>
+                    </div>
+                  </>
+                )}
+                
+                <div className="border-t border-gray-200 pt-3">
+                  <div className="flex justify-between text-lg font-bold text-[#111]">
+                    <span>Total:</span>
+                    <span className="text-[#FFD300]">
+                      <PriceDisplay 
+                        price={isSaudi ? totalWithTax : totalAfterDiscount} 
+                        showCurrency={true} 
+                        size="lg"
+                      />
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Continue Button */}
             <button
-              onClick={applyCoupon}
-              className="bg-yellow-400 text-black px-5 py-2 rounded-lg font-bold hover:bg-yellow-300 transition"
+              onClick={handleContinue}
+              className="w-full bg-[#FFD300] text-[#111] py-4 px-6 rounded-xl font-bold text-lg hover:bg-[#E6BE00] transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl"
             >
-              تطبيق
+              Continue to Shipping
             </button>
           </div>
-
-          {/* Totals */}
-          <div className="mt-6 space-y-2 text-lg">
-            <div className="flex justify-between">
-              <span>المجموع:</span>
-              <span>{cartSubtotal.toFixed(2)}  SAR</span>
-            </div>
-            {discountAmount > 0 && (
-              <div className="flex justify-between text-green-400">
-                <span>الخصم:</span>
-                <span>- {discountAmount.toFixed(2)} SAR</span>
-              </div>
-            )}
-            <div className="flex justify-between font-bold border-t border-neutral-700 pt-2 text-yellow-400">
-              <span>الإجمالي:</span>
-              <span>{totalAfterDiscount.toFixed(2)} SAR</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Country Selection */}
-        <div className="space-y-6">
-          <div className="bg-neutral-900 p-6 rounded-2xl shadow-lg border border-neutral-800">
-            <h2 className="text-lg font-semibold mb-3 text-yellow-400">
-              Choose Country
-            </h2>
-            <select
-              value={selectedCountry}
-              onChange={(e) => setSelectedCountry(e.target.value)}
-              className="w-full p-3 rounded-lg bg-neutral-800 text-white border border-neutral-600 focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400 outline-none"
-            >
-              <option value="">-- اختر الدولة --</option>
-              {countries.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name} ({c.code})
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <button
-            onClick={handleContinue}
-            className="w-full bg-yellow-400 text-black py-3 font-bold rounded-xl hover:bg-yellow-300 transition"
-          >
-            Continue
-          </button>
         </div>
       </div>
     </div>

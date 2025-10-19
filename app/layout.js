@@ -7,6 +7,7 @@ import WhatsAppButton from "./Componants/WhatsAppButton";
 import { CartProvider } from "./contexts/CartContext";
 import { ChatProvider } from "./contexts/ChatContext";
 import { TranslationProvider } from "./contexts/TranslationContext";
+import { CurrencyProvider } from "./contexts/CurrencyContext";
 import { Toaster } from 'react-hot-toast';
 import "./globals.css";
 
@@ -44,6 +45,7 @@ export default function RootLayout({ children  }) {
 
    <TranslationProvider>
 <AuthProvider>
+<CurrencyProvider>
    <Toaster position="top-center" />
      <CategoryProvider>
      <CartProvider>
@@ -67,7 +69,7 @@ export default function RootLayout({ children  }) {
         <Footer />
      </CartProvider>
 </CategoryProvider>
-       
+</CurrencyProvider>
 </AuthProvider>
     </TranslationProvider>
       </body>

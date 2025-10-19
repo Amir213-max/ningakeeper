@@ -16,6 +16,20 @@ import { useEffect, useState } from 'react';
 export default function RecommendedSlider({ productId }) {
   const { t, lang } = useTranslation();
   const [products, setProducts] = useState([]);
+const [currencyRate, setCurrencyRate] = useState(null);
+
+useEffect(() => {
+  const fetchRate = async () => {
+    try {
+      const { getCurrencyRate } = await import("../../lib/getCurrencyRate");
+      const rate = await getCurrencyRate();
+      setCurrencyRate(rate);
+    } catch (err) {
+      console.error("Error loading currency rate:", err);
+    }
+  };
+  fetchRate();
+}, []);
 
   useEffect(() => {
     const fetchRecommended = async () => {
@@ -39,7 +53,7 @@ export default function RecommendedSlider({ productId }) {
     type: 'loop',
     perPage: 5,
     gap: '1rem',
-    autoplay: true,
+    autoplay: false,
     interval: 3000,
     pauseOnHover: true,
     arrows: true,
@@ -55,7 +69,7 @@ export default function RecommendedSlider({ productId }) {
 
   return (
     <div className="w-full max-w-9xl mx-auto px-4 space-y-5 py-10">
-      <h2 className="text-white font-bold text-3xl text-center">
+      <h2 className="text-neutral-900 font-bold text-3xl text-center">
         {t('Recommended for you')}
       </h2>
 
@@ -63,7 +77,7 @@ export default function RecommendedSlider({ productId }) {
         {products.map((item) => (
           <SplideSlide key={item.id}>
             <Link href={`/product/${item.sku}`} className="block">
-              <div className="bg-neutral-900 hover:bg-neutral-800 rounded-lg shadow-md overflow-hidden flex flex-col h-96">
+              <div className="bg-gray-100 hover:bg-gray-200 transition duration-2000 text-neutral-700 rounded-lg shadow-md overflow-hidden flex flex-col h-96">
                 <div className="relative w-full h-48 flex items-center justify-center">
                   {item.images?.[0] ? (
                     <Image
@@ -86,7 +100,7 @@ export default function RecommendedSlider({ productId }) {
                     {item.name}
                   </h3>
                   <h2 className="font-bold text-2xl mt-8 flex justify-center line-clamp-1">
-                  {`SAR ${(item.price_range_from ? item.price_range_from * 4.6 : 0).toFixed(2)}`}
+                  {`SAR ${(item.price_range_from ? item.price_range_from * currencyRate : 0).toFixed(2)}`}
 
                   </h2>
                 </div>

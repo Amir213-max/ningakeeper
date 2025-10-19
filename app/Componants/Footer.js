@@ -1,20 +1,21 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { FaFacebook, FaInstagram, FaYoutube, FaTiktok } from 'react-icons/fa';
+import { FaFacebook, FaInstagram, FaYoutube, FaTiktok, FaWhatsapp } from 'react-icons/fa';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 
 export default function Footer() {
   const [settings, setSettings] = useState([]);
   const [footerTexts, setFooterTexts] = useState([]);
+  const [socialLinks, setSocialLinks] = useState([]);
   const pathname = usePathname();
 
   useEffect(() => {
     async function fetchSettings() {
       try {
-        const res = await fetch("https://keeper.in-brackets.online/graphql", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+        const res = await fetch('https://keeper.in-brackets.online/graphql', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             query: `
               query {
@@ -32,17 +33,25 @@ export default function Footer() {
         const data = await res.json();
         const allSettings = data?.data?.publicSettings || [];
 
+        // نصوص الفوتر
         const textSettings = allSettings.filter(
-          (s) => s.group && s.group.toLowerCase() === "footer_text"
+          (s) => s.group && s.group.toLowerCase() === 'footer_text'
         );
         setFooterTexts(textSettings);
 
+        // باقي الإعدادات (لروابط الفوتر)
         const otherSettings = allSettings.filter(
-          (s) => !s.group || s.group.toLowerCase() !== "footer_text"
+          (s) => s.group && !['footer_text', 'social'].includes(s.group.toLowerCase())
         );
         setSettings(otherSettings);
+
+        // روابط السوشيال
+        const socials = allSettings.filter(
+          (s) => s.group && s.group.toLowerCase() === 'social'
+        );
+        setSocialLinks(socials);
       } catch (err) {
-        console.error("Error fetching footer settings:", err);
+        console.error('Error fetching footer settings:', err);
       }
     }
 
@@ -55,6 +64,17 @@ export default function Footer() {
     acc[setting.group].push(setting);
     return acc;
   }, {});
+
+  // Map icons dynamically
+  const getSocialIcon = (key) => {
+    const lower = key.toLowerCase();
+    if (lower.includes('facebook')) return <FaFacebook />;
+    if (lower.includes('instagram')) return <FaInstagram />;
+    if (lower.includes('youtube')) return <FaYoutube />;
+    if (lower.includes('tiktok')) return <FaTiktok />;
+    if (lower.includes('whatsapp')) return <FaWhatsapp />;
+    return null;
+  };
 
   return (
     <footer className="bg-neutral-900 text-white text-sm">
@@ -84,40 +104,47 @@ export default function Footer() {
 
       {/* Footer links */}
       <div className="grid grid-cols-1 space-x-2 md:grid-cols-3 lg:grid-cols-5 gap-8 px-6 py-10 max-w-7xl mx-auto">
-        {Object.entries(groupedSettings).map(([group, values]) => (
-          <div key={group}>
-            <h3 className="font-bold text-lg mb-4">{group}</h3>
-            <ul className="space-y-4 space-x-2">
-              {values.map((setting, i) => (
-                <li key={i} className="cursor-pointer hover:text-amber-400">
-                  {setting.url ? (
-                    <Link href={setting.url}>{setting.value}</Link>
-                  ) : (
-                    <span>{setting.value}</span>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </div>
+   {Object.entries(groupedSettings)
+  .filter(([group]) => group.toLowerCase() !== 'general') // 👈 استبعاد الجروب general
+  .map(([group, values]) => (
+    <div key={group}>
+      <h3 className="font-bold text-lg mb-4">{group}</h3>
+      <ul className="space-y-4 space-x-2">
+        {values.map((setting, i) => (
+          <li key={i} className="cursor-pointer hover:text-amber-400 transition">
+            {setting.url ? (
+              <Link href={setting.url}>{setting.value}</Link>
+            ) : (
+              <span>{setting.value}</span>
+            )}
+          </li>
         ))}
+      </ul>
+    </div>
+  ))}
+
       </div>
 
       <hr className="border-gray-700" />
 
-      {/* Social media */}
-      <div className="flex justify-center gap-4 py-6 text-xl">
-        <a href="https://www.facebook.com/keepersport" target="_blank" rel="noopener noreferrer" className="hover:text-amber-400">
-          <FaFacebook />
-        </a>
-        <a href="https://www.instagram.com/keepersport" target="_blank" rel="noopener noreferrer" className="hover:text-amber-400">
-          <FaInstagram />
-        </a>
-        <a href="https://www.youtube.com/keepersport" target="_blank" rel="noopener noreferrer" className="hover:text-amber-400">
-          <FaYoutube />
-        </a>
-        <a href="https://www.tiktok.com/@keepersport" target="_blank" rel="noopener noreferrer" className="hover:text-amber-400">
-          <FaTiktok />
-        </a>
+      {/* Social media (dynamically from API) */}
+      <div className="flex justify-center gap-6 py-8 text-2xl">
+        {socialLinks.map((item, i) => (
+          <a
+            key={i}
+            href={item.value}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-amber-400 transition-transform transform hover:scale-125"
+          >
+            {getSocialIcon(item.key)}
+          </a>
+        ))}
+      </div>
+
+      {/* Copyright */}
+      <div className="bg-black py-4 text-center text-xs text-gray-400 border-t border-gray-800">
+        © {new Date().getFullYear()} KeeperSport | All Rights Reserved
       </div>
     </footer>
   );

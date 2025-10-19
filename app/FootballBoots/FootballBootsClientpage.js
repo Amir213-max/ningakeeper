@@ -24,6 +24,20 @@ export default function FootballClientPage({ products, brands, attributeValues }
 
   const { t, language } = useTranslation();
   const isRTL = language === "ar";
+const [currencyRate, setCurrencyRate] = useState(null);
+
+useEffect(() => {
+  const fetchRate = async () => {
+    try {
+      const { getCurrencyRate } = await import("../lib/getCurrencyRate");
+      const rate = await getCurrencyRate();
+      setCurrencyRate(rate);
+    } catch (err) {
+      console.error("Error loading currency rate:", err);
+    }
+  };
+  fetchRate();
+}, []);
 
   // Fetch categories
   useEffect(() => {
@@ -114,6 +128,7 @@ export default function FootballClientPage({ products, brands, attributeValues }
             }}
             isRTL={isRTL}
           />
+         
         </div>
 
         {/* Products Section */}
@@ -144,16 +159,18 @@ export default function FootballClientPage({ products, brands, attributeValues }
                 key={product.sku}
                 className="relative bg-gradient-to-br from-white to-neutral-200 rounded-xl shadow-md overflow-hidden flex flex-col transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
               >
-                {product.productBadges?.length > 0 &&
-                  product.productBadges[0]?.label && (
-                    <div
-                      className={`absolute top-3 left-[-20px] w-[90px] text-center text-white text-xs font-bold py-1 rotate-[-45deg] shadow-md z-10 ${getBadgeColor(
-                        product.productBadges[0].label
-                      )}`}
-                    >
-                      {product.productBadges[0].label}
-                    </div>
-                  )}
+              {product.productBadges?.length > 0 &&
+  product.productBadges[0]?.label && (
+    <div
+      className="absolute top-3 left-[-20px] w-[90px] text-center text-white text-xs font-bold py-1 rotate-[-45deg] shadow-md z-10"
+      style={{
+        backgroundColor: product.productBadges[0]?.color || "#888", // fallback gray if no color
+      }}
+    >
+      {product.productBadges[0].label}
+    </div>
+  )}
+
 
                 <div className="flex justify-center items-center h-[220px]">
                   <ProductSlider images={product.images} productName={product.name} />
@@ -163,10 +180,7 @@ export default function FootballClientPage({ products, brands, attributeValues }
                   href={`/product/${encodeURIComponent(product.sku)}`}
                   className="p-4 flex flex-col flex-grow justify-between"
                 >
-                  <div className="bg-neutral-400 text-amber-100 text-xs font-semibold w-fit px-3 py-1 rounded-full mb-3">
-                    {(product.rootCategories || []).slice(0, 2).map((cat) => cat.name).join(", ")}
-
-                  </div>
+                 
 
                   <h3 className="text-base text-gray-700 text-center font-bold mb-1">
                     {product.brand?.name}
@@ -177,12 +191,22 @@ export default function FootballClientPage({ products, brands, attributeValues }
                   </p>
 
                   <div className="text-center">
-                    <div className="line-through text-gray-500 text-sm">
-                      SAR {(product.list_price_amount * 4.6).toFixed(2)}
-                    </div>
+                  
+                    {currencyRate && (
+                      <>
+                       {product.list_price_amount !== product.price_range_exact_amount && (
+                      <div className="line-through text-gray-500 text-sm">
+                        SAR {(product.list_price_amount * currencyRate).toFixed(2)}
+                      </div>
+                    )}
                     <span className="text-lg font-bold text-neutral-900">
-                      SAR {(product.price_range_exact_amount * 4.6).toFixed(2)}
+                      SAR {(product.price_range_exact_amount * currencyRate).toFixed(2)}
                     </span>
+                      </>
+                   
+                    )}
+                 
+
                   </div>
                 </Link>
               </div>

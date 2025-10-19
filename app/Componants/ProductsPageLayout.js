@@ -12,6 +12,7 @@ import { graphqlClient } from "../lib/graphqlClient";
 import toast from "react-hot-toast";
 import { useAuth } from "../contexts/AuthContext";
 import { ADD_TO_WISHLIST } from "../lib/mutations";
+import PriceDisplay from "../components/PriceDisplay";
 
 export default function ProductsPageLayout({
   products,
@@ -35,6 +36,7 @@ export default function ProductsPageLayout({
   const wishlistId = user?.defaultWishlist?.id || user?.wishlists?.[0]?.id;
   const productsPerPage = 20;
   const [currentPage, setCurrentPage] = useState(1);
+// Currency handling is now managed by CurrencyContext
 
   // Fetch wishlist items
   useEffect(() => {
@@ -202,16 +204,18 @@ export default function ProductsPageLayout({
                 className="bg-gradient-to-br from-white to-neutral-200 rounded-xl shadow-md overflow-hidden flex flex-col relative transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
               >
                 {/* Product Badge */}
-                {product.productBadges?.length > 0 &&
-                  product.productBadges[0]?.label && (
-                    <div
-                      className={`absolute top-3 left-[-20px] w-[90px] text-center text-white text-xs font-bold py-1 rotate-[-45deg] shadow-md z-10 ${getBadgeColor(
-                        product.productBadges[0].label
-                      )}`}
-                    >
-                      {product.productBadges[0].label}
-                    </div>
-                  )}
+              {product.productBadges?.length > 0 &&
+  product.productBadges[0]?.label && (
+    <div
+      className="absolute top-3 left-[-20px] w-[90px] text-center text-white text-xs font-bold py-1 rotate-[-45deg] shadow-md z-10"
+      style={{
+        backgroundColor: product.productBadges[0]?.color || "#888", // fallback gray if no color
+      }}
+    >
+      {product.productBadges[0].label}
+    </div>
+  )}
+
 
                 <ProductSlider images={product.images} productName={product.name} />
 
@@ -232,12 +236,11 @@ export default function ProductsPageLayout({
                   </p>
 
                   <div className="text-center">
-                    <div className="line-through text-gray-500 text-sm">
-                      SAR {(product.list_price_amount * 4.6).toFixed(2)}
-                    </div>
-                    <span className="text-lg font-bold text-neutral-900">
-                      SAR {(product.price_range_exact_amount * 4.6).toFixed(2)}
-                    </span>
+                    <PriceDisplay 
+                      price={product.price_range_exact_amount}
+                      originalPrice={product.list_price_amount !== product.price_range_exact_amount ? product.list_price_amount : null}
+                      size="lg"
+                    />
                   </div>
                 </Link>
               </div>

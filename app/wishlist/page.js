@@ -30,6 +30,20 @@ const GET_WISHLIST = gql`
 export default function WishlistPage() {
   const [wishlist, setWishlist] = useState(null);
   const [loading, setLoading] = useState(true);
+const [currencyRate, setCurrencyRate] = useState(null);
+
+useEffect(() => {
+  const fetchRate = async () => {
+    try {
+      const { getCurrencyRate } = await import("../lib/getCurrencyRate");
+      const rate = await getCurrencyRate();
+      setCurrencyRate(rate);
+    } catch (err) {
+      console.error("Error loading currency rate:", err);
+    }
+  };
+  fetchRate();
+}, []);
 
   // ⚠️ هنا لازم تستخدم الـ wishlist id اللي بيرجع من الـ API
   const wishlistId = "1"; 
@@ -83,13 +97,22 @@ export default function WishlistPage() {
                 <p className="text-sm text-gray-500 mb-2">{product.name}</p>
 
                 <div className="text-center">
-                  <div className="line-through text-gray-400 text-sm">
-                     SAR {(product.list_price_amount * 4.6).toFixed(2)}
-                  </div>
-                  <span className="text-lg font-bold text-gray-900">
-                    SAR {(product.list_price_amount * 4.6).toFixed(2)}
+                
+                    {currencyRate && (
+                      <>
+                       {product.list_price_amount !== product.price_range_exact_amount && (
+                      <div className="line-through text-gray-500 text-sm">
+                        SAR {(product.list_price_amount * currencyRate).toFixed(2)}
+                      </div>
+                    )}
+                    <span className="text-lg font-bold text-neutral-900">
+                      SAR {(product.price_range_exact_amount * currencyRate).toFixed(2)}
+                    </span>
+                      </>
+                   
+                    )}
+                 
 
-                  </span>
                 </div>
 
                 <Link

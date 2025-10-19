@@ -192,14 +192,21 @@ export default function HomePageBlocks() {
       <div className="w-full px-2 md:px-4">
         <div
           className={`grid gap-3 ${
-            block.content.banners.length === 1
-              ? "grid-cols-1"
-              : "grid-cols-2"
+            block.content.banners.length === 1 ? "grid-cols-1" : "grid-cols-2"
           }`}
         >
           {block.content.banners.map((banner, idx) => {
             const isFirstBanner = idx === 0;
             const bannersCount = block.content.banners.length;
+
+            // 🔹 تحديد الصورة حسب الجهاز
+            const imageSrc =
+              typeof window !== "undefined" &&
+              window.innerWidth < 768 &&
+              banner.mobile_image
+                ? getImageUrl(banner.mobile_image)
+                : getImageUrl(banner.image);
+
             return (
               <motion.a
                 key={banner.id || idx}
@@ -216,10 +223,10 @@ export default function HomePageBlocks() {
                 }`}
               >
                 <Image
-                  src={getImageUrl(banner.image)}
+                  src={imageSrc}
                   alt={banner.title || ""}
                   fill
-                  className=" transition-transform duration-500 group-hover:scale-105"
+                  className="object-fill-fit transition-transform duration-500 group-hover:scale-105"
                   unoptimized
                   priority={isFirstBanner}
                 />
@@ -234,6 +241,15 @@ export default function HomePageBlocks() {
         <div className="flex gap-3 min-w-max">
           {block.content.banners.map((banner, idx) => {
             const isFirstBanner = idx === 0;
+
+            // 🔹 اختيار الصورة حسب حجم الشاشة
+            const imageSrc =
+              typeof window !== "undefined" &&
+              window.innerWidth < 768 &&
+              banner.mobile_image
+                ? getImageUrl(banner.mobile_image)
+                : getImageUrl(banner.image);
+
             return (
               <motion.a
                 key={banner.id || idx}
@@ -246,7 +262,7 @@ export default function HomePageBlocks() {
                 className="relative flex-shrink-0 w-[80vw] sm:w-[45vw] md:w-[30vw] lg:w-[25vw] h-[40vh] overflow-hidden rounded-xl shadow-md group"
               >
                 <Image
-                  src={getImageUrl(banner.image)}
+                  src={imageSrc}
                   alt={banner.title || ""}
                   fill
                   className="object-fill-fit transition-transform duration-500 group-hover:scale-105"

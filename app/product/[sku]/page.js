@@ -1,12 +1,11 @@
 // app/product/[sku]/page.js
 import { graphqlClient } from "@/app/lib/graphqlClient";
 import { GET_PRODUCT_BY_SKU } from "@/app/lib/queries";
-import ImageGallery from "./ImageGallery";
+import ProductPage from "./ProductPage";
 import ProductDescription from "./ProductDescription";
-import ProductDetailsSidebar from "./ProductDetailsSidebar";
 import RecommendedSlider from "./RecommendedProducts";
 
-export default async function ProductPage({ params }) {
+export default async function ProductPageSku({ params }) {
   const sku = decodeURIComponent(params.sku);
 
   let product = null;
@@ -27,35 +26,19 @@ export default async function ProductPage({ params }) {
   }
 
   return (
-    <div className="bg-[#373e3e] min-h-screen px-3 sm:px-6 py-6">
-      {/* 🧱 القسم الرئيسي */}
-      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-6 gap-2">
-        {/* 📸 الصور والوصف */}
-        <div className="lg:col-span-4 bg-white rounded-2xl p-4 sm:p-6 shadow-lg flex flex-col">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#1f2323] mb-4 text-center lg:text-left">
-            {product.name}
-          </h1>
-          <div className="flex-1">
-            <ImageGallery
-              images={product.images}
-              productName={product.name}
-            />
-          </div>
-        </div>
+    <div className="min-h-screen">
+      {/* Main Product Page */}
+      <ProductPage product={product} />
 
-        {/* 🎯 الشريط الجانبي */}
-        <div className="lg:col-span-2 bg-[#1f2323] rounded-2xl shadow-lg p-4 sm:p-5">
-          <ProductDetailsSidebar product={product} />
+      {/* Product Description */}
+      <div className=" mx-auto bg-white px-2 sm:px-2 lg:px-3 py-3">
+        <div className="">
+          <ProductDescription product={product} />
         </div>
       </div>
 
-      {/* 📄 وصف المنتج */}
-      <div className="max-w-7xl mx-auto mt-8 bg-white rounded-2xl shadow-xl p-4 sm:p-6">
-        <ProductDescription product={product} />
-      </div>
-
-      {/* 🛍 منتجات مقترحة */}
-      <div className="max-w-7xl mx-auto mt-10">
+      {/* Recommended Products */}
+      <div className=" mx-auto bg-white px-2 sm:px-3 lg:px-3 pb-4">
         <RecommendedSlider productId={product.id} />
       </div>
     </div>

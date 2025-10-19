@@ -12,6 +12,7 @@ import { useAuth } from '../contexts/AuthContext'; // ✅ استدعاء الـ 
 import { GET_ACTIVE_HOME_PAGE_BLOCKS } from '../lib/queries';
 import { graphqlClient } from '../lib/graphqlClient';
 import { useCategory } from '../contexts/CategoryContext';
+import CurrencySwitcher from '../components/CurrencySwitcher';
 
 export default function NavbarWithLinks() {
   const { t, lang, setLang } = useTranslation();
@@ -136,6 +137,9 @@ useEffect(() => {
             {searchOpen && (
               <SearchComponent onClose={() => setSearchOpen(false)} />
             )}
+
+            {/* 💰 Currency Switcher */}
+            {/* <CurrencySwitcher /> */}
 
             {/* 🌐 Language Selector */}
             <select

@@ -1,17 +1,34 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { addToCartTempUser } from "@/app/lib/mutations";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, ShoppingCart } from "lucide-react";
+import Link from "next/link";
+import { useTranslation } from "@/app/contexts/TranslationContext";
 
 export default function ProductDetailsSidebar({ product }) {
   const [quantity, setQuantity] = useState(1);
   const [adding, setAdding] = useState(false);
   const [selectedAttributes, setSelectedAttributes] = useState({});
   const [openDropdown, setOpenDropdown] = useState(null);
+  const [currencyRate, setCurrencyRate] = useState(null);
   const router = useRouter();
+  const { t } = useTranslation();
+
+  useEffect(() => {
+    const fetchRate = async () => {
+      try {
+        const { getCurrencyRate } = await import("../../lib/getCurrencyRate");
+        const rate = await getCurrencyRate();
+        setCurrencyRate(rate);
+      } catch (err) {
+        console.error("Error loading currency rate:", err);
+      }
+    };
+    fetchRate();
+  }, []);
 
   // 🧩 تجهيز الخصائص
   const attributesMap = {};
@@ -54,235 +71,255 @@ export default function ProductDetailsSidebar({ product }) {
   };
 
   // 💰 الأسعار
-  const listPrice = (product.list_price_amount * 4.6).toFixed(2);
-  const finalPrice = (product.price_range_exact_amount * 4.6).toFixed(2);
+  const listPrice = currencyRate
+    ? (product.list_price_amount * currencyRate).toFixed(2)
+    : "...";
+  const finalPrice = currencyRate
+    ? (product.price_range_exact_amount * currencyRate).toFixed(2)
+    : "...";
   const listCurrency = "SAR";
   const discountPercent = product.productBadges?.[0]?.label || null;
   const hasDiscount = listPrice && finalPrice && finalPrice < listPrice;
 
-  // 🎨 دالة عرض خيار dropdown
-  const renderDropdownOption = (val, label) => {
-    const isSelected = selectedAttributes[label] === val;
-    const isColor = label.toLowerCase().includes("color");
-
-    return (
-      <li
-        key={val}
-        onClick={() => {
-          setSelectedAttributes((prev) => ({
-            ...prev,
-            [label]: val,
-          }));
-          setOpenDropdown(null);
-        }}
-        className={`flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-gray-100 ${
-          isSelected ? "font-semibold text-amber-600" : "text-gray-700"
-        }`}
-      >
-        {isColor && (
-          <span
-            className="w-5 h-5 rounded-full border border-gray-300"
-            style={{ backgroundColor: val.toLowerCase() }}
-          />
-        )}
-        <span>{val}</span>
-      </li>
-    );
-  };
-
   return (
-    <div className="flex flex-col gap-5 bg-gray-50 p-4 sm:p-6 rounded-2xl shadow-lg w-full max-w-md mx-auto transition-all">
-      {/* 🖼 صورة المنتج */}
-      {product.images && product.images.length > 0 && (
-        <div className="w-full h-56 sm:h-64 md:h-72 overflow-hidden rounded-xl">
-          <img
-            src={product.images[0]}
-            alt={product.name}
-            className="object-contain w-full h-full"
-          />
+    <div className="flex flex-col gap-6 w-full">
+      {/* Brand */}
+      {product.brand?.name && (
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 bg-gray-400 rotate-45" />
+          <span className="text-sm font-medium text-gray-600 uppercase">
+            {product.brand.name}
+          </span>
         </div>
       )}
 
-      {/* 🏷 بيانات المنتج */}
-      <div className="flex flex-col gap-1 text-neutral-800 text-center sm:text-left">
-        <h2 className="text-lg sm:text-xl md:text-2xl font-bold">
-          {product.name}
-        </h2>
-        <p className="text-xs sm:text-sm text-gray-500">{product.sku}</p>
+      {/* SKU */}
+      <div className="text-xs text-gray-400 font-mono">SKU {product.sku}</div>
 
-        {/* 🏢 Brand */}
-        {product.brand?.name && (
-          <p className="text-sm text-gray-700 font-medium">
-            Brand: <span className="text-amber-600">{product.brand.name}</span>
-          </p>
+      {/* Title */}
+      <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 leading-tight">
+        {product.name}
+      </h1>
+
+      {/* Price */}
+      <div className="flex items-center gap-3">
+        {hasDiscount && (
+          <span className="text-sm text-gray-400 line-through">
+            {listCurrency} {listPrice}
+          </span>
         )}
-
-        {/* 💵 السعر */}
-        <div className="mt-2 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 justify-center sm:justify-start">
-          <div>
-            {hasDiscount && (
-              <div className="line-through text-gray-400 text-sm">
-                {listCurrency} {listPrice}
-              </div>
-            )}
-            <span className="text-xl sm:text-2xl font-bold text-amber-600">
-              {listCurrency} {finalPrice}
-            </span>
-          </div>
-          {discountPercent && (
-            <span className="bg-red-100 text-red-600 text-xs font-semibold px-2 py-0.5 rounded">
-              {discountPercent}
-            </span>
-          )}
-        </div>
+        <span className="text-3xl font-bold text-gray-900">
+          {listCurrency} {finalPrice}
+        </span>
+        {discountPercent && (
+          <span className="bg-yellow-400 text-gray-900 text-sm font-bold px-2 py-1 rounded">
+            {discountPercent}
+          </span>
+        )}
       </div>
 
-      {/* 🧩 الخصائص */}
-      {Object.keys(attributesMap).length > 0 && (
-        <div className="flex flex-wrap gap-4 mt-4">
-          {Object.entries(attributesMap).map(([label, values]) => {
-            const isSize = label.toLowerCase().includes("size");
-
-            return (
-              <div key={label} className="flex flex-col gap-2 min-w-[120px]">
-                <span className="font-semibold text-gray-800 text-sm">
-                  {label}
-                </span>
-
-                {isSize ? (
-                  // ✅ لو Size نعرضه كمربعات
-                  <div className="flex flex-wrap gap-2">
-                    {values.map((val) => {
-                      const selected = selectedAttributes[label] === val;
-                      return (
-                        <button
-                          key={val}
-                          onClick={() =>
-                            setSelectedAttributes((prev) => ({
-                              ...prev,
-                              [label]: val,
-                            }))
-                          }
-                          className={`px-3 py-1 text-sm border rounded-md transition ${
-                            selected
-                              ? "bg-amber-600 text-white border-amber-600"
-                              : "bg-white text-gray-700 hover:border-amber-500"
-                          }`}
-                        >
-                          {val}
-                        </button>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  // ✅ باقي الـ attributes في dropdown شيك وصغير
-                  <div className="relative inline-block">
-                    <button
-                      onClick={() =>
-                        setOpenDropdown(openDropdown === label ? null : label)
-                      }
-                      className="min-w-[100px] flex justify-between items-center bg-white rounded-md px-3 py-2 shadow-sm hover:shadow-md transition text-sm font-medium"
-                    >
-                      <span
-                        className={`truncate ${
-                          selectedAttributes[label]
-                            ? "text-amber-600"
-                            : "text-gray-400"
-                        }`}
-                      >
-                        {selectedAttributes[label] || "Select"}
-                      </span>
-                      <ChevronDown
-                        className={`w-4 h-4 transition-transform ${
-                          openDropdown === label ? "rotate-180" : ""
-                        }`}
-                      />
-                    </button>
-
-                    <AnimatePresence>
-                      {openDropdown === label && (
-                        <motion.ul
-                          initial={{ opacity: 0, y: -8 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -8 }}
-                          transition={{ duration: 0.2 }}
-                          className="absolute z-20 mt-1 bg-white rounded-lg shadow-lg overflow-hidden text-sm min-w-[120px]"
-                        >
-                          {values.map((val) =>
-                            renderDropdownOption(val, label)
-                          )}
-                        </motion.ul>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      {/* 🔢 الكمية */}
-      <div className="relative w-full sm:w-auto">
-        <button
-          onClick={() => setOpenDropdown(openDropdown === "Qty" ? null : "Qty")}
-          className="w-full sm:min-w-[100px] flex justify-between items-center bg-white rounded-md px-3 py-2 shadow-sm hover:shadow-md transition text-sm font-medium"
-        >
-          <span className="text-amber-600">Qty: {quantity}</span>
-          <ChevronDown
-            className={`w-4 h-4 transition-transform ${
-              openDropdown === "Qty" ? "rotate-180" : ""
-            }`}
-          />
-        </button>
-
-        <AnimatePresence>
-          {openDropdown === "Qty" && (
-            <motion.ul
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.2 }}
-              className="absolute z-20 w-full sm:w-32 mt-1 bg-white rounded-lg shadow-lg overflow-hidden text-sm"
+    {Object.keys(attributesMap).length > 0 && (
+  <div className="space-y-6">
+    {/* 🟨 مجموعة المقاسات والألوان تفضل كما هي */}
+    {Object.entries(attributesMap)
+      .filter(([label]) => 
+        label.toLowerCase().includes("size") ||
+        label.toLowerCase().includes("color")
+      )
+      .sort(([a], [b]) => (a.toLowerCase().includes("size") ? -1 : 1))
+      .map(([label, values]) => {
+        const isColor = label.toLowerCase().includes("color");
+        return (
+          <div key={label} className="space-y-3">
+            <h3 className="text-sm font-medium text-gray-900 uppercase tracking-wide">
+              {label}
+            </h3>
+            <div
+              className={`flex flex-wrap gap-2 ${isColor ? "items-center" : ""}`}
             >
-              {[...Array(10)].map((_, i) => (
-                <li
-                  key={i + 1}
-                  onClick={() => {
-                    setQuantity(i + 1);
-                    setOpenDropdown(null);
-                  }}
-                  className={`px-4 py-2 cursor-pointer hover:bg-gray-100 ${
-                    quantity === i + 1
-                      ? "bg-gray-200 font-semibold text-amber-600"
-                      : "text-gray-700"
-                  }`}
+              {values.map((val) => {
+                const selected = selectedAttributes[label] === val;
+                return (
+                  <button
+                    key={val}
+                    onClick={() =>
+                      setSelectedAttributes((prev) => ({
+                        ...prev,
+                        [label]: val,
+                      }))
+                    }
+                    className={`${
+                      isColor
+                        ? "w-10 h-10 rounded-full border-2"
+                        : "px-4 py-2 rounded-lg border-2 text-sm font-medium"
+                    } transition-all duration-200 ${
+                      selected
+                        ? "border-gray-900 bg-gray-900 text-white"
+                        : "border-gray-200 text-gray-600 hover:border-gray-400 hover:bg-gray-50"
+                    }`}
+                    style={
+                      isColor
+                        ? { backgroundColor: val.toLowerCase() }
+                        : undefined
+                    }
+                  >
+                    {!isColor && val}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
+
+    {/* 🟦 باقي الخصائص تكون Dropdowns جنب بعض */}
+    <div className="flex flex-wrap gap-4">
+      {Object.entries(attributesMap)
+        .filter(
+          ([label]) =>
+            !label.toLowerCase().includes("size") &&
+            !label.toLowerCase().includes("color")
+        )
+        .map(([label, values]) => (
+          <div key={label} className="relative min-w-[160px]">
+            <h3 className="text-sm font-medium text-gray-900 uppercase tracking-wide mb-2">
+              {label}
+            </h3>
+            <button
+              onClick={() =>
+                setOpenDropdown(openDropdown === label ? null : label)
+              }
+              className="w-full flex justify-between items-center bg-white border border-gray-200 rounded-lg px-3 py-2 hover:border-gray-400 transition-colors"
+            >
+              <span className="text-gray-900 font-medium">
+                {selectedAttributes[label] || `Select ${label}`}
+              </span>
+              <ChevronDown
+                className={`w-4 h-4 text-gray-400 transition-transform ${
+                  openDropdown === label ? "rotate-180" : ""
+                }`}
+              />
+            </button>
+
+            <AnimatePresence>
+              {openDropdown === label && (
+                <motion.ul
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.2 }}
+                  className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden"
                 >
-                  {i + 1}
-                </li>
-              ))}
-            </motion.ul>
-          )}
-        </AnimatePresence>
+                  {values.map((val) => (
+                    <li
+                      key={val}
+                      onClick={() => {
+                        setSelectedAttributes((prev) => ({
+                          ...prev,
+                          [label]: val,
+                        }));
+                        setOpenDropdown(null);
+                      }}
+                      className={`px-3 py-2 cursor-pointer hover:bg-gray-50 text-sm ${
+                        selectedAttributes[label] === val
+                          ? "bg-gray-100 font-semibold text-gray-900"
+                          : "text-gray-700"
+                      }`}
+                    >
+                      {val}
+                    </li>
+                  ))}
+                </motion.ul>
+              )}
+            </AnimatePresence>
+          </div>
+        ))}
+    </div>
+  </div>
+)}
+
+
+      {/* Quantity Selector */}
+      <div className="space-y-3">
+        <h3 className="text-sm font-medium text-gray-900 uppercase tracking-wide">
+          Quantity
+        </h3>
+        <div className="relative w-32">
+          <button
+            onClick={() => setOpenDropdown(openDropdown === "Qty" ? null : "Qty")}
+            className="w-full flex justify-between items-center bg-white border border-gray-200 rounded-lg px-3 py-2 hover:border-gray-400 transition-colors"
+          >
+            <span className="text-gray-900 font-medium">{quantity}</span>
+            <ChevronDown
+              className={`w-4 h-4 text-gray-400 transition-transform ${
+                openDropdown === "Qty" ? "rotate-180" : ""
+              }`}
+            />
+          </button>
+
+          <AnimatePresence>
+            {openDropdown === "Qty" && (
+              <motion.ul
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.2 }}
+                className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden"
+              >
+                {[...Array(10)].map((_, i) => (
+                  <li
+                    key={i + 1}
+                    onClick={() => {
+                      setQuantity(i + 1);
+                      setOpenDropdown(null);
+                    }}
+                    className={`px-3 py-2 cursor-pointer hover:bg-gray-50 text-sm ${
+                      quantity === i + 1
+                        ? "bg-gray-100 font-semibold text-gray-900"
+                        : "text-gray-700"
+                    }`}
+                  >
+                    {i + 1}
+                  </li>
+                ))}
+              </motion.ul>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
 
-      {/* 🛍 الأزرار */}
-      <div className="flex flex-col sm:flex-row gap-3 mt-4">
+         <div className="sticky bottom-0  bg-white pt-4 lg:relative lg:sticky lg:top-6 flex flex-col gap-3">
+        {/* زر إضافة للسلة */}
         <button
           onClick={addToCart}
           disabled={adding}
-          className="flex-1 bg-black hover:bg-gray-800 text-white font-semibold py-2 sm:py-3 px-4 rounded-lg text-sm transition"
+          className="w-full cursor-pointer bg-yellow-400 hover:bg-yellow-500 disabled:bg-yellow-300 text-gray-900 font-bold py-4 px-6 rounded-lg text-lg transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
         >
-          {adding ? "Adding..." : "Add to Cart"}
+          {adding ? (
+            <div className="w-5 h-5 border-2 border-gray-900 border-t-transparent rounded-full z-50 animate-spin" />
+          ) : (
+            <>
+              <ShoppingCart className="w-5 h-5" />
+              ADD TO BASKET
+            </>
+          )}
         </button>
 
-        <button
-          onClick={() => router.push("/checkout_1")}
-          className="flex-1 bg-amber-500 hover:bg-amber-600 text-white font-semibold py-2 sm:py-3 px-4 rounded-lg text-sm transition"
+        {/* زر Checkout */}
+        <Link
+          href="/checkout_1"
+          className="w-full cursor-pointer text-black bg-yellow-400 hover:bg-yellow-600 z-50 font-bold py-4 px-6 rounded-lg text-lg transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
         >
+       
           Checkout
-        </button>
+          
+        </Link>
       </div>
+
+
+
+     
+
     </div>
   );
 }

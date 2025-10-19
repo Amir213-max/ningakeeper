@@ -58,6 +58,20 @@ export default function BrandPage() {
   const wishlistId = user?.defaultWishlist?.id || user?.wishlists?.[0]?.id;
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 20;
+const [currencyRate, setCurrencyRate] = useState(null);
+
+useEffect(() => {
+  const fetchRate = async () => {
+    try {
+      const { getCurrencyRate } = await import("../../lib/getCurrencyRate");
+      const rate = await getCurrencyRate();
+      setCurrencyRate(rate);
+    } catch (err) {
+      console.error("Error loading currency rate:", err);
+    }
+  };
+  fetchRate();
+}, []);
 
   // 🧩 Fetch Products by Brand
   useEffect(() => {
@@ -194,16 +208,18 @@ export default function BrandPage() {
                 key={product.sku}
                 className="relative bg-gradient-to-br from-white to-neutral-200 rounded-xl shadow-md overflow-hidden flex flex-col transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
               >
-                {product.productBadges?.length > 0 &&
-                  product.productBadges[0]?.label && (
-                    <div
-                      className={`absolute top-3 left-[-20px] w-[90px] text-center text-white text-xs font-bold py-1 rotate-[-45deg] shadow-md z-10 ${getBadgeColor(
-                        product.productBadges[0].label
-                      )}`}
-                    >
-                      {product.productBadges[0].label}
-                    </div>
-                  )}
+              {product.productBadges?.length > 0 &&
+  product.productBadges[0]?.label && (
+    <div
+      className="absolute top-3 left-[-20px] w-[90px] text-center text-white text-xs font-bold py-1 rotate-[-45deg] shadow-md z-10"
+      style={{
+        backgroundColor: product.productBadges[0]?.color || "#888", // fallback gray if no color
+      }}
+    >
+      {product.productBadges[0].label}
+    </div>
+  )}
+
 
                
 
@@ -228,38 +244,59 @@ export default function BrandPage() {
                   </p>
 
                   <div className="text-center">
-                    {product.list_price_amount !== product.price_range_exact_amount && (
+                    {currencyRate && (
+                      <>
+                       {product.list_price_amount !== product.price_range_exact_amount && (
                       <div className="line-through text-gray-500 text-sm">
-                        SAR {(product.list_price_amount * 4.6).toFixed(2)}
+                        SAR {(product.list_price_amount * currencyRate).toFixed(2)}
                       </div>
                     )}
                     <span className="text-lg font-bold text-neutral-900">
-                      SAR {(product.price_range_exact_amount * 4.6).toFixed(2)}
+                      SAR {(product.price_range_exact_amount * currencyRate).toFixed(2)}
                     </span>
+                      </>
+                   
+                    )}
                   </div>
                 </Link>
               </div>
             ))}
           </div>
 
-          {/* 🔹 Pagination */}
-          {totalPages > 1 && (
-            <div className="flex justify-center items-center gap-2 mt-6 flex-wrap">
-              {[...Array(totalPages)].map((_, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setCurrentPage(idx + 1)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium ${
-                    currentPage === idx + 1
-                      ? "bg-[#1f2323] text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
-                >
-                  {idx + 1}
-                </button>
-              ))}
-            </div>
-          )}
+      {totalPages > 1 && (
+  <div className="flex justify-center items-center gap-4 mt-8">
+    {/* ◀️ Previous Button */}
+    <button
+      onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+      disabled={currentPage === 1}
+      className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
+        currentPage === 1
+          ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+          : "bg-[#1f2323] text-white hover:bg-[#333]"
+      }`}
+    >
+      <span>←</span> Previous
+    </button>
+
+    <span className="text-gray-700 font-medium">
+      Page {currentPage} of {totalPages}
+    </span>
+
+    {/* ▶️ Next Button */}
+    <button
+      onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+      disabled={currentPage === totalPages}
+      className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
+        currentPage === totalPages
+          ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+          : "bg-[#1f2323] text-white hover:bg-[#333]"
+      }`}
+    >
+      Next <span>→</span>
+    </button>
+  </div>
+)}
+
         </div>
       </div>
     </div>

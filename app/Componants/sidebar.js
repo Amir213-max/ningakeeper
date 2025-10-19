@@ -11,6 +11,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import CartSidebar from "./CartSidebar";
 import Image from "next/image";
 import { useChat } from "../contexts/ChatContext";
+import { useTranslation } from "../contexts/TranslationContext";
 
 export default function Sidebar({ isOpen, setIsOpen, onSelectCategory, isRTL = false }) {
   const [categories, setCategories] = useState([]);
@@ -18,7 +19,8 @@ export default function Sidebar({ isOpen, setIsOpen, onSelectCategory, isRTL = f
   const [openParentId, setOpenParentId] = useState(null);
   const router = useRouter();
   const { openChat } = useChat();
-
+ const { t } = useTranslation();
+ 
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -60,6 +62,7 @@ export default function Sidebar({ isOpen, setIsOpen, onSelectCategory, isRTL = f
           onSelectCategory={onSelectCategory}
           setIsOpen={setIsOpen}
           isRTL={isRTL}
+          t={t}
         />
       </aside>
 
@@ -88,7 +91,7 @@ export default function Sidebar({ isOpen, setIsOpen, onSelectCategory, isRTL = f
             >
               {/* زر الإغلاق */}
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-semibold">Menu</h2>
+                <h2 className="text-lg font-semibold">{t("Menu")}</h2>
                 <button
                   onClick={() => setIsOpen(false)}
                   className="text-white hover:text-amber-400"
@@ -109,6 +112,7 @@ export default function Sidebar({ isOpen, setIsOpen, onSelectCategory, isRTL = f
                 }}
                 setIsOpen={setIsOpen}
                 isRTL={isRTL}
+                t={t}
               />
 
               {/* أيقونات أسفل الستارة */}
@@ -168,6 +172,7 @@ function SidebarContent({
   onSelectCategory,
   setIsOpen,
   isRTL,
+  t,
 }) {
   return (
     <ul className="space-y-1">
@@ -186,7 +191,8 @@ function SidebarContent({
               dir={isRTL ? "rtl" : "ltr"}
             >
               <span className="text-sm font-medium hover:text-amber-400">
-                {parent.name}
+                {t(parent.name)}
+
               </span>
               {subCategories.length > 0 &&
                 (isOpen
@@ -213,7 +219,7 @@ function SidebarContent({
                       }, 50);
                     }}
                   >
-                    {sub.name}
+                    {t(sub.name)}
                   </li>
                 ))}
               </ul>

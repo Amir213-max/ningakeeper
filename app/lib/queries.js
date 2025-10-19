@@ -226,6 +226,7 @@ query PRODUCTS_SHOES_QUERY {
 
           productBadges{
         label
+        color
       }
 
     are_shoes
@@ -643,6 +644,7 @@ query {
       show_add_to_cart
       banners {
         image
+        mobile_image
         title
         link
         description
