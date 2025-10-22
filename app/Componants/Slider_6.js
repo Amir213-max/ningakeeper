@@ -67,7 +67,13 @@ export default function MultiSlider_6() {
       </div>
 
       {/* ✅ Dynamic Slider */}
-      <Splide key={lang} className="h-fit" options={sliderOptions} aria-label="Brand logos">
+     <Splide
+  key={`${lang}-${brands.length}`} // ✅ إعادة بناء السلايدر عند تغيير اللغة أو البيانات
+  className="h-fit"
+  options={sliderOptions}
+  aria-label="Brand logos"
+>
+
         {brands.length > 0 ? (
           brands.map((brand, index) => (
             <SplideSlide key={index}>

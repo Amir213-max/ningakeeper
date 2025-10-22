@@ -417,6 +417,7 @@ export const GET_PRODUCT_BY_SKU = gql`
       brand {
         id
         name
+        logo
       }
 
 productBadges{

@@ -43,12 +43,17 @@ export default function ProductDetailsSidebar({ product }) {
 
   // 🛒 إضافة المنتج للسلة
   const addToCart = async () => {
-    const requiredAttributes = Object.keys(attributesMap).filter(
-      (label) => attributesMap[label].length > 1
-    );
-    const missing = requiredAttributes.filter(
-      (attr) => !selectedAttributes[attr]
-    );
+   // ✅ السماح فقط بالتحقق من المقاس واللون
+const requiredAttributes = Object.keys(attributesMap).filter(
+  (label) =>
+    label.toLowerCase().includes("size") ||
+    label.toLowerCase().includes("color")
+);
+
+const missing = requiredAttributes.filter(
+  (attr) => !selectedAttributes[attr]
+);
+
     if (missing.length > 0) {
       alert(`Please select: ${missing.join(", ")}`);
       return;
@@ -84,14 +89,26 @@ export default function ProductDetailsSidebar({ product }) {
   return (
     <div className="flex flex-col gap-6 w-full">
       {/* Brand */}
-      {product.brand?.name && (
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 bg-gray-400 rotate-45" />
-          <span className="text-sm font-medium text-gray-600 uppercase">
-            {product.brand.name}
-          </span>
-        </div>
-      )}
+ {product.brand?.name && (
+  <div className="flex items-center gap-3">
+    <div className="w-2 h-2 bg-gray-400 rotate-45" />
+
+    {/* ✅ Brand Logo Responsive */}
+    <div className="relative w-20 h-10 sm:w-24 sm:h-12 flex items-center justify-center">
+      <img
+        src={product.brand.logo}
+        alt={product.brand.name}
+        className="w-full  h-full object-contain bg-gray-200 rounded-md shadow-sm"
+      />
+    </div>
+
+    {/* ✅ Brand Name */}
+    <span className="text-sm font-semibold text-gray-700 uppercase">
+      {product.brand.name}
+    </span>
+  </div>
+)}
+
 
       {/* SKU */}
       <div className="text-xs text-gray-400 font-mono">SKU {product.sku}</div>
@@ -118,13 +135,14 @@ export default function ProductDetailsSidebar({ product }) {
         )}
       </div>
 
-    {Object.keys(attributesMap).length > 0 && (
+{Object.keys(attributesMap).length > 0 && (
   <div className="space-y-6">
-    {/* 🟨 مجموعة المقاسات والألوان تفضل كما هي */}
+    {/* ✅ فقط المقاس واللون */}
     {Object.entries(attributesMap)
-      .filter(([label]) => 
-        label.toLowerCase().includes("size") ||
-        label.toLowerCase().includes("color")
+      .filter(
+        ([label]) =>
+          label.toLowerCase().includes("size") ||
+          label.toLowerCase().includes("color")
       )
       .sort(([a], [b]) => (a.toLowerCase().includes("size") ? -1 : 1))
       .map(([label, values]) => {
@@ -135,7 +153,9 @@ export default function ProductDetailsSidebar({ product }) {
               {label}
             </h3>
             <div
-              className={`flex flex-wrap gap-2 ${isColor ? "items-center" : ""}`}
+              className={`flex flex-wrap gap-2 ${
+                isColor ? "items-center" : ""
+              }`}
             >
               {values.map((val) => {
                 const selected = selectedAttributes[label] === val;
@@ -171,72 +191,9 @@ export default function ProductDetailsSidebar({ product }) {
           </div>
         );
       })}
-
-    {/* 🟦 باقي الخصائص تكون Dropdowns جنب بعض */}
-    <div className="flex flex-wrap gap-4">
-      {Object.entries(attributesMap)
-        .filter(
-          ([label]) =>
-            !label.toLowerCase().includes("size") &&
-            !label.toLowerCase().includes("color")
-        )
-        .map(([label, values]) => (
-          <div key={label} className="relative min-w-[160px]">
-            <h3 className="text-sm font-medium text-gray-900 uppercase tracking-wide mb-2">
-              {label}
-            </h3>
-            <button
-              onClick={() =>
-                setOpenDropdown(openDropdown === label ? null : label)
-              }
-              className="w-full flex justify-between items-center bg-white border border-gray-200 rounded-lg px-3 py-2 hover:border-gray-400 transition-colors"
-            >
-              <span className="text-gray-900 font-medium">
-                {selectedAttributes[label] || `Select ${label}`}
-              </span>
-              <ChevronDown
-                className={`w-4 h-4 text-gray-400 transition-transform ${
-                  openDropdown === label ? "rotate-180" : ""
-                }`}
-              />
-            </button>
-
-            <AnimatePresence>
-              {openDropdown === label && (
-                <motion.ul
-                  initial={{ opacity: 0, y: -8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
-                  transition={{ duration: 0.2 }}
-                  className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden"
-                >
-                  {values.map((val) => (
-                    <li
-                      key={val}
-                      onClick={() => {
-                        setSelectedAttributes((prev) => ({
-                          ...prev,
-                          [label]: val,
-                        }));
-                        setOpenDropdown(null);
-                      }}
-                      className={`px-3 py-2 cursor-pointer hover:bg-gray-50 text-sm ${
-                        selectedAttributes[label] === val
-                          ? "bg-gray-100 font-semibold text-gray-900"
-                          : "text-gray-700"
-                      }`}
-                    >
-                      {val}
-                    </li>
-                  ))}
-                </motion.ul>
-              )}
-            </AnimatePresence>
-          </div>
-        ))}
-    </div>
   </div>
 )}
+
 
 
       {/* Quantity Selector */}

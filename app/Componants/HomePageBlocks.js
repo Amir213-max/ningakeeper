@@ -259,7 +259,7 @@ export default function HomePageBlocks() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: idx * 0.1 }}
-                className="relative flex-shrink-0 w-[80vw] sm:w-[45vw] md:w-[30vw] lg:w-[25vw] h-[40vh] overflow-hidden rounded-xl shadow-md group"
+                className="relative flex-shrink-0 w-[50vw] sm:w-[45vw] md:w-[30vw] lg:w-[25vw] h-[30vh] overflow-hidden rounded-xl shadow-md group"
               >
                 <Image
                   src={imageSrc}
@@ -268,6 +268,7 @@ export default function HomePageBlocks() {
                   className="object-fill-fit transition-transform duration-500 group-hover:scale-105"
                   unoptimized
                   priority={isFirstBanner}
+                  
                 />
               </motion.a>
             );
@@ -287,21 +288,24 @@ export default function HomePageBlocks() {
                 <div className="px-4 md:px-8 overflow-hidden lg:px-12">
                   <Splide
                     key={lang}
-                    options={{
-                      type: "loop",
-                      perPage: block.content?.per_row || 6,
-                      gap: "1rem",
-                      autoplay: false,
-                      pauseOnHover: true,
-                      arrows: true,
-                      pagination: false,
-                      direction: lang === "ar" ? "rtl" : "ltr",
-                      breakpoints: {
-                        1280: { perPage: 5 },
-                        1024: { perPage: 4 },
-                        768: { perPage: 3 },
-                        640: { perPage: 2 },
-                      },
+                  options={{
+    type: "slide", // ✅ خليه slide عادي
+    perPage: block.content?.per_row || 5,
+    perMove: 1,
+    gap: "1rem",
+    rewind: false, // ✅ مهم جداً لإزالة الفراغات بعد آخر منتج
+    trimSpace: true, // ✅ يمنع إنشاء سلايدات فارغة بعد آخر عنصر
+    omitEnd: true, // ✅ يمنع Splide من حساب سلايدات ناقصة
+    pagination: false,
+    arrows: true,
+    direction: lang === "ar" ? "rtl" : "ltr",
+    updateOnMove: true,
+    breakpoints: {
+      1280: { perPage: 5 },
+      1024: { perPage: 5 },
+      768: { perPage: 3 },
+      640: { perPage: 2 },
+    },
                     }}
                   >
                     {productsMap[block.id].map((product, idx) => (
