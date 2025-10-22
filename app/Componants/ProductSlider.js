@@ -27,6 +27,7 @@ export default function ProductSlider({ images, productName }) {
           gap: '1rem',
           autoplay: false,
           direction: direction,
+       
         }}
         className="w-full h-full custom-splide"
       >
