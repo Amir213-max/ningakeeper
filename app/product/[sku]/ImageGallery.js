@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 import { Splide, SplideSlide } from '@splidejs/react-splide';
 import '@splidejs/react-splide/css';
 
@@ -47,13 +48,18 @@ export default function ImageGallery({
         >
           {images.map((img, index) => (
             <SplideSlide key={index}>
-              <button
+              <motion.button
                 onClick={() => handleImageClick(img)}
                 className={`w-[80%] mx-auto aspect-square rounded-lg border-2 transition-all duration-300 overflow-hidden group 
                 ${currentSelectedImage === img
                   ? 'border-yellow-400 shadow-lg ring-2 ring-yellow-200'
                   : 'border-gray-200 hover:border-yellow-300 hover:shadow-md'
                 }`}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.1 }}
               >
                 <img
                   src={img}
@@ -61,7 +67,7 @@ export default function ImageGallery({
                   className="w-full h-full object-cover rounded-md group-hover:scale-105 transition-transform duration-300"
                   style={{ maxWidth: '90%', maxHeight: '90%', margin: 'auto' }} // 👈 تصغير الصورة نفسها
                 />
-              </button>
+              </motion.button>
             </SplideSlide>
           ))}
         </Splide>
@@ -92,13 +98,18 @@ export default function ImageGallery({
       >
         {images.map((img, index) => (
           <SplideSlide key={index}>
-            <button
+            <motion.button
               onClick={() => handleImageClick(img)}
               className={`w-[70%] mx-auto aspect-square rounded-lg border-2 transition-all duration-300 overflow-hidden group 
               ${currentSelectedImage === img
                 ? 'border-yellow-400 shadow-lg ring-2 ring-yellow-200'
                 : 'border-gray-200 hover:border-yellow-300 hover:shadow-md'
               }`}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3, delay: index * 0.1 }}
             >
               <img
                 src={img}
@@ -106,7 +117,7 @@ export default function ImageGallery({
                 className="w-full h-full object-cover rounded-md group-hover:scale-105 transition-transform duration-300"
                 style={{ maxWidth: '85%', maxHeight: '85%', margin: 'auto' }} // 👈 تصغير الصورة نفسها
               />
-            </button>
+            </motion.button>
           </SplideSlide>
         ))}
       </Splide>

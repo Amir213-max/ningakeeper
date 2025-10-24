@@ -539,7 +539,7 @@ query GetOrders {
     video_thumbnail_url
     categories
     tier_prices
-    ets_identifier
+    a
     name
     name_without_brand
     url

@@ -101,7 +101,7 @@ export default function CartSidebar({ isOpen, onClose }) {
       {cart?.lineItems?.length > 0 && (
         <div className="p-4 border-t bg-white shadow-sm">
           <button
-            onClick={() => (window.location.href = "/checkout")}
+            onClick={() => (window.location.href = "/checkout_1")}
             className="w-full bg-black text-white py-3 rounded-xl font-semibold hover:bg-gray-800 transition"
           >
             Checkout →

@@ -14,11 +14,19 @@ import MultiSlider_6 from "./Slider_6";
 export default function HomePageBlocks() {
   const { lang } = useTranslation();
   const BASE_URL = "https://keeper.in-brackets.online/storage/";
-  
 
   const [blocks, setBlocks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [productsMap, setProductsMap] = useState({});
+  const [isMobile, setIsMobile] = useState(false); // ✅ متغير لمتابعة حجم الشاشة
+
+  // ✅ مراقبة تغيّر حجم الشاشة وتحديث حالة isMobile
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     async function fetchBlocks() {
@@ -27,7 +35,6 @@ export default function HomePageBlocks() {
         const activeBlocks = data.activeHomepageBlocks || [];
         setBlocks(activeBlocks);
 
-        // تحميل المنتجات الخاصة بالبلوكات من نوع products
         for (let block of activeBlocks) {
           if (block.type === "products" && block.content?.product_ids?.length) {
             const productIds = block.content.product_ids.map((p) => p.product_id);
@@ -60,16 +67,11 @@ export default function HomePageBlocks() {
     return path.startsWith("http") ? path : `${BASE_URL}${path}`;
   };
 
-  // 🧩 عزل أول بلوك من نوع text
   const firstTextBlock = blocks.find((b) => b.type === "text");
   const otherBlocks = blocks.filter((b) => b !== firstTextBlock);
 
   return (
     <>
-      {/* 🟢 أول بلوك نصي sticky فوق كل شيء */}
-  
-
-      {/* باقي البلوكات بعد الـ Navbar */}
       <div className="pt-3 space-y-3">
         {otherBlocks.map((block, index) => (
           <motion.div
@@ -85,7 +87,6 @@ export default function HomePageBlocks() {
               color: block.text_color || "#fff",
             }}
           >
-            {/* 🏷️ Title */}
             {block.title && (
               <h2 className="text-2xl sm:text-3xl md:text-4xl text-center font-bold mb-6 pt-6 text-white">
                 {block.title}
@@ -167,7 +168,7 @@ export default function HomePageBlocks() {
                           alt={img.title || ""}
                           width={400}
                           height={200}
-                          className="w-full h-full object-fill-fit" 
+                          className="w-full h-full object-fill-fit"
                           unoptimized
                         />
                         {img.title && (
@@ -183,129 +184,113 @@ export default function HomePageBlocks() {
                 </Splide>
               )}
 
+              {/* 🔹 Banners block بعد التعديل */}
+              {block.type === "banners" && block.content?.banners?.length > 0 && (
+                <>
+                  {block.content.banners.length <= 2 ? (
+                    <div className="w-full px-2 md:px-4">
+                      <div
+                        className={`grid gap-3 ${
+                          block.content.banners.length === 1 ? "grid-cols-1" : "grid-cols-2"
+                        }`}
+                      >
+                        {block.content.banners.map((banner, idx) => {
+                          const isFirstBanner = idx === 0;
+                          const bannersCount = block.content.banners.length;
+                          const imageSrc =
+                            isMobile && banner.mobile_image
+                              ? getImageUrl(banner.mobile_image)
+                              : getImageUrl(banner.image);
 
+                          return (
+                            <motion.a
+                              key={banner.id || idx}
+                              href={banner.link || "#"}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ duration: 0.6, delay: idx * 0.1 }}
+                              className={`relative overflow-hidden rounded-xl shadow-md group w-full ${
+                                bannersCount === 1
+                                  ? "h-[45vh] sm:h-[55vh] md:h-[60vh]"
+                                  : "h-[35vh] sm:h-[40vh] md:h-[45vh]"
+                              }`}
+                            >
+                              <Image
+                                src={imageSrc}
+                                alt={banner.title || ""}
+                                fill
+                                className="object-fill-fit transition-transform duration-500 group-hover:scale-105"
+                                unoptimized
+                                priority={isFirstBanner}
+                              />
+                            </motion.a>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="w-full overflow-x-auto no-scrollbar px-2 md:px-4">
+                      <div className="flex gap-3 min-w-max">
+                        {block.content.banners.map((banner, idx) => {
+                          const isFirstBanner = idx === 0;
+                          const imageSrc =
+                            isMobile && banner.mobile_image
+                              ? getImageUrl(banner.mobile_image)
+                              : getImageUrl(banner.image);
 
-{block.type === "banners" && block.content?.banners?.length > 0 && (
-  <>
-    {/* ✅ لو بانر واحد أو اتنين - شبكة عادية */}
-    {block.content.banners.length <= 2 ? (
-      <div className="w-full px-2 md:px-4">
-        <div
-          className={`grid gap-3 ${
-            block.content.banners.length === 1 ? "grid-cols-1" : "grid-cols-2"
-          }`}
-        >
-          {block.content.banners.map((banner, idx) => {
-            const isFirstBanner = idx === 0;
-            const bannersCount = block.content.banners.length;
-
-            // 🔹 تحديد الصورة حسب الجهاز
-            const imageSrc =
-              typeof window !== "undefined" &&
-              window.innerWidth < 768 &&
-              banner.mobile_image
-                ? getImageUrl(banner.mobile_image)
-                : getImageUrl(banner.image);
-
-            return (
-              <motion.a
-                key={banner.id || idx}
-                href={banner.link || "#"}
-                target="_blank"
-                rel="noopener noreferrer"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: idx * 0.1 }}
-                className={`relative overflow-hidden rounded-xl shadow-md group w-full ${
-                  bannersCount === 1
-                    ? "h-[45vh] sm:h-[55vh] md:h-[60vh]"
-                    : "h-[35vh] sm:h-[40vh] md:h-[45vh]"
-                }`}
-              >
-                <Image
-                  src={imageSrc}
-                  alt={banner.title || ""}
-                  fill
-                  className="object-fill-fit transition-transform duration-500 group-hover:scale-105"
-                  unoptimized
-                  priority={isFirstBanner}
-                />
-              </motion.a>
-            );
-          })}
-        </div>
-      </div>
-    ) : (
-      /* ✅ لو أكتر من صورتين - صف أفقي قابل للتمرير */
-      <div className="w-full overflow-x-auto no-scrollbar px-2 md:px-4">
-        <div className="flex gap-3 min-w-max">
-          {block.content.banners.map((banner, idx) => {
-            const isFirstBanner = idx === 0;
-
-            // 🔹 اختيار الصورة حسب حجم الشاشة
-            const imageSrc =
-              typeof window !== "undefined" &&
-              window.innerWidth < 768 &&
-              banner.mobile_image
-                ? getImageUrl(banner.mobile_image)
-                : getImageUrl(banner.image);
-
-            return (
-              <motion.a
-                key={banner.id || idx}
-                href={banner.link || "#"}
-                target="_blank"
-                rel="noopener noreferrer"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: idx * 0.1 }}
-                className="relative flex-shrink-0 w-[50vw] sm:w-[45vw] md:w-[30vw] lg:w-[25vw] h-[30vh] overflow-hidden rounded-xl shadow-md group"
-              >
-                <Image
-                  src={imageSrc}
-                  alt={banner.title || ""}
-                  fill
-                  className="object-fill-fit transition-transform duration-500 group-hover:scale-105"
-                  unoptimized
-                  priority={isFirstBanner}
-                  
-                />
-              </motion.a>
-            );
-          })}
-        </div>
-      </div>
-    )}
-  </>
-)}
-
-
-
-
+                          return (
+                            <motion.a
+                              key={banner.id || idx}
+                              href={banner.link || "#"}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ duration: 0.6, delay: idx * 0.1 }}
+                              className="relative flex-shrink-0 w-[50vw] sm:w-[45vw] md:w-[30vw] lg:w-[25vw] h-[30vh] overflow-hidden rounded-xl shadow-md group"
+                            >
+                              <Image
+                                src={imageSrc}
+                                alt={banner.title || ""}
+                                fill
+                                className="object-fill-fit transition-transform duration-500 group-hover:scale-105"
+                                unoptimized
+                                priority={isFirstBanner}
+                              />
+                            </motion.a>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
 
               {/* 🔹 Products */}
               {block.type === "products" && productsMap[block.id]?.length > 0 && (
                 <div className="px-4 md:px-8 overflow-hidden lg:px-12">
                   <Splide
                     key={lang}
-                  options={{
-    type: "slide", // ✅ خليه slide عادي
-    perPage: block.content?.per_row || 5,
-    perMove: 1,
-    gap: "1rem",
-    rewind: false, // ✅ مهم جداً لإزالة الفراغات بعد آخر منتج
-    trimSpace: true, // ✅ يمنع إنشاء سلايدات فارغة بعد آخر عنصر
-    omitEnd: true, // ✅ يمنع Splide من حساب سلايدات ناقصة
-    pagination: false,
-    arrows: true,
-    direction: lang === "ar" ? "rtl" : "ltr",
-    updateOnMove: true,
-    breakpoints: {
-      1280: { perPage: 5 },
-      1024: { perPage: 5 },
-      768: { perPage: 3 },
-      640: { perPage: 2 },
-    },
+                    options={{
+                      type: "slide",
+                      perPage: block.content?.per_row || 5,
+                      perMove: 1,
+                      gap: "1rem",
+                      rewind: false,
+                      trimSpace: true,
+                      omitEnd: true,
+                      pagination: false,
+                      arrows: true,
+                      direction: lang === "ar" ? "rtl" : "ltr",
+                      updateOnMove: true,
+                      breakpoints: {
+                        1280: { perPage: 5 },
+                        1024: { perPage: 5 },
+                        768: { perPage: 3 },
+                        640: { perPage: 2 },
+                      },
                     }}
                   >
                     {productsMap[block.id].map((product, idx) => (
@@ -316,11 +301,10 @@ export default function HomePageBlocks() {
                           transition={{ duration: 0.5, delay: idx * 0.1 }}
                           className="h-full overflow-hidden"
                         >
-                         <Link
-  href={`/product/${encodeURIComponent(product.sku)}`}
-  className="block bg-[#111] hover:bg-[#2b2a2a] rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 h-full"
->
-
+                          <Link
+                            href={`/product/${encodeURIComponent(product.sku)}`}
+                            className="block bg-[#111] hover:bg-[#2b2a2a] rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 h-full"
+                          >
                             <div className="relative flex items-center justify-center overflow-hidden aspect-[1.3/1.5]">
                               {product.images?.[0] ? (
                                 <Image
