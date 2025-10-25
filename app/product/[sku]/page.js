@@ -28,7 +28,7 @@ export default async function ProductPageSku({ params }) {
   }
 
   return (
-    <div className="min-h-screen">
+    <div>
    
       
       {/* Main Product Page */}
