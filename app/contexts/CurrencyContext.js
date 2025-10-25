@@ -23,6 +23,7 @@ export const CurrencyProvider = ({ children }) => {
   useEffect(() => {
     const savedCurrency = localStorage.getItem('selectedCurrency');
     if (savedCurrency && (savedCurrency === 'EUR' || savedCurrency === 'SAR')) {
+      console.log('🔄 Loading saved currency from localStorage:', savedCurrency);
       setCurrency(savedCurrency);
     }
   }, []);
@@ -31,16 +32,19 @@ export const CurrencyProvider = ({ children }) => {
   useEffect(() => {
     const fetchRate = async () => {
       try {
+        console.log('🔄 Fetching currency conversion rate...');
         setLoading(true);
         setError(null);
         const rate = await getCurrencyRate();
+        console.log('✅ Currency rate fetched successfully:', rate);
         setConversionRate(rate);
-        console.log('✅ Currency rate loaded:', rate);
       } catch (err) {
         console.error('❌ Error loading currency rate:', err);
         setError('Failed to load currency rate');
         // Fallback to default rate
-        setConversionRate(4.6);
+        const fallbackRate = 4.6;
+        console.log('⚠️ Using fallback rate:', fallbackRate);
+        setConversionRate(fallbackRate);
       } finally {
         setLoading(false);
       }
@@ -52,21 +56,35 @@ export const CurrencyProvider = ({ children }) => {
   // Save currency to localStorage when it changes
   useEffect(() => {
     if (currency) {
+      console.log('💾 Saving currency to localStorage:', currency);
       localStorage.setItem('selectedCurrency', currency);
     }
   }, [currency]);
 
   const switchCurrency = (newCurrency) => {
     if (newCurrency === 'EUR' || newCurrency === 'SAR') {
+      console.log('🔄 Switching currency from', currency, 'to', newCurrency);
+      console.log('📊 Current conversion rate:', conversionRate);
       setCurrency(newCurrency);
+    } else {
+      console.warn('⚠️ Invalid currency code:', newCurrency);
     }
   };
 
   const convertPrice = (eurPrice) => {
+    if (!eurPrice || isNaN(eurPrice)) {
+      console.warn('⚠️ Invalid price for conversion:', eurPrice);
+      return 0;
+    }
+
     if (currency === 'EUR') {
+      console.log(`💰 Converting ${eurPrice} EUR → ${eurPrice} EUR (no conversion needed)`);
       return eurPrice;
     }
-    return eurPrice * conversionRate;
+    
+    const convertedPrice = eurPrice * conversionRate;
+    console.log(`💰 Converting ${eurPrice} EUR → ${convertedPrice} SAR (rate: ${conversionRate})`);
+    return convertedPrice;
   };
 
   const formatPrice = (eurPrice, showCurrency = true) => {
@@ -77,7 +95,12 @@ export const CurrencyProvider = ({ children }) => {
       return formattedPrice;
     }
     
-    return `${formattedPrice} ${currency}`;
+    const currencySymbol = currency === 'EUR' ? '€' : 'SAR';
+    return `${formattedPrice} ${currencySymbol}`;
+  };
+
+  const getCurrencySymbol = () => {
+    return currency === 'EUR' ? '€' : 'SAR';
   };
 
   const value = {
@@ -88,6 +111,7 @@ export const CurrencyProvider = ({ children }) => {
     switchCurrency,
     convertPrice,
     formatPrice,
+    getCurrencySymbol,
   };
 
   return (

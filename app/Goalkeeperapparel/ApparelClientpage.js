@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useState, useEffect, useMemo } from "react";
 import BrandsSlider from "../Componants/brandsSplide_1";
 import FilterDropdown from "../Componants/CheckboxDropdown ";
+import { useCurrency } from "../contexts/CurrencyContext";
+import PriceDisplay from "../components/PriceDisplay";
 import ProductSlider from "../Componants/ProductSlider";
 import Sidebar from "../Componants/sidebar";
 import { useTranslation } from "../contexts/TranslationContext";
@@ -20,6 +22,7 @@ export default function ApparelClientPage({ products, brands, attributeValues })
   const [filteredProducts, setFilteredProducts] = useState(products);
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 20;
+ const { loading: currencyLoading } = useCurrency();
 
   const { t, language } = useTranslation();
   const isRTL = language === "ar"; // ✅ اتجاه الموقع
@@ -192,11 +195,11 @@ useEffect(() => {
                       <>
                        {product.list_price_amount !== product.price_range_exact_amount && (
                       <div className="line-through text-gray-500 text-sm">
-                        SAR {(product.list_price_amount * currencyRate).toFixed(2)}
+                       <PriceDisplay price={product.list_price_amount} loading={currencyLoading} />
                       </div>
                     )}
                     <span className="text-lg font-bold text-neutral-900">
-                      SAR {(product.price_range_exact_amount * currencyRate).toFixed(2)}
+                     <PriceDisplay price={product.price_range_exact_amount} loading={currencyLoading} />
                     </span>
                       </>
                    

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from '@/app/contexts/TranslationContext';
 import Image from 'next/image';
@@ -12,7 +12,13 @@ export default function ProductPage({ product }) {
   const [selectedImage, setSelectedImage] = useState(null);
   const [selectedIndex, setSelectedIndex] = useState(0);
 
-  // ✅ Set first image as default current image
+  const [isZoomed, setIsZoomed] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [zoomPosition, setZoomPosition] = useState({ x: 50, y: 50 });
+
+  const imageContainerRef = useRef(null);
+
+  // ✅ Set default image
   useEffect(() => {
     if (product.images?.length > 0 && !selectedImage) {
       setSelectedImage(product.images[0]);
@@ -20,32 +26,99 @@ export default function ProductPage({ product }) {
     }
   }, [product.images, selectedImage]);
 
-  // ✅ When user selects a new image from gallery
   const handleImageSelect = (img, index) => {
     setSelectedImage(img);
     setSelectedIndex(index);
   };
 
+  const handleZoomMove = (x, y, width, height, left, top) => {
+    const newX = ((x - left) / width) * 100;
+    const newY = ((y - top) / height) * 100;
+    setZoomPosition({ x: newX, y: newY });
+  };
+
+  const handleMouseMove = (e) => {
+    const { left, top, width, height } =
+      imageContainerRef.current.getBoundingClientRect();
+    handleZoomMove(e.pageX, e.pageY, width, height, left, top);
+  };
+
+  // ✅ دعم الزووم باللمس (Touch Zoom)
+  const handleTouchMove = (e) => {
+    const touch = e.touches[0];
+    const { left, top, width, height } =
+      imageContainerRef.current.getBoundingClientRect();
+    handleZoomMove(touch.pageX, touch.pageY, width, height, left, top);
+  };
+
+  const handleTouchStart = (e) => {
+    setIsZoomed(true);
+    handleTouchMove(e); // عشان الزووم يبدأ من أول لمسة
+  };
+
+  const handleTouchEnd = () => {
+    setIsZoomed(false);
+  };
+
   return (
-    <div className="bg-white min-h-screen">
+    <div className="bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {/* ✅ Fullscreen Zoom Modal */}
+        <AnimatePresence>
+          {isModalOpen && selectedImage && (
+            <motion.div
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 cursor-zoom-out"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsModalOpen(false)}
+            >
+              <motion.div
+                initial={{ scale: 0.9 }}
+                animate={{ scale: 1 }}
+                exit={{ scale: 0.9 }}
+                transition={{ duration: 0.4, ease: 'easeInOut' }}
+                className="relative w-[90vw] h-[90vh]"
+              >
+                <Image
+                  src={selectedImage}
+                  alt="Zoomed Product"
+                  fill
+                  className="object-contain"
+                  priority
+                />
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-        {/* Mobile Layout */}
-        <div className="block md:hidden">
-          <div className="space-y-6">
-            <div className="mb-4">
-              <ImageGallery 
-                images={product.images} 
-                productName={product.name}
-                selectedImage={selectedImage}
-                selectedIndex={selectedIndex}
-                onImageSelect={handleImageSelect}
-                isVertical={false}
-              />
-            </div>
+        {/* ✅ Layout */}
+        <div className="grid grid-cols-6 gap-6">
+          {/* ✅ Gallery - للشاشات المتوسطة والكبيرة */}
+          <div className="hidden md:block col-span-1">
+            <ImageGallery
+              images={product.images}
+              productName={product.name}
+              selectedImage={selectedImage}
+              selectedIndex={selectedIndex}
+              onImageSelect={handleImageSelect}
+              isVertical={true}
+            />
+          </div>
 
-            {/* Main Image */}
-            <div className="relative w-full aspect-square bg-gray-50 flex items-center justify-center overflow-hidden group cursor-zoom-in border border-gray-100 rounded-lg shadow-sm">
+          {/* ✅ Main Image */}
+          <div className="col-span-6 md:col-span-3">
+            <div
+              ref={imageContainerRef}
+              className="relative w-full aspect-square bg-gray-50 flex items-center justify-center overflow-hidden border border-gray-100 rounded-lg shadow-sm group select-none"
+              onMouseMove={handleMouseMove}
+              onMouseEnter={() => setIsZoomed(true)}
+              onMouseLeave={() => setIsZoomed(false)}
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+              onClick={() => setIsModalOpen(true)}
+            >
               <AnimatePresence mode="wait">
                 {selectedImage ? (
                   <motion.div
@@ -56,12 +129,23 @@ export default function ProductPage({ product }) {
                     transition={{ duration: 0.4, ease: 'easeInOut' }}
                     className="relative w-full h-full"
                   >
+                    <div
+                      className="absolute inset-0 transition-all duration-500 ease-out"
+                      style={{
+                        backgroundImage: `url(${selectedImage})`,
+                        backgroundRepeat: 'no-repeat',
+                        backgroundSize: isZoomed ? '200%' : 'contain',
+                        backgroundPosition: isZoomed
+                          ? `${zoomPosition.x}% ${zoomPosition.y}%`
+                          : 'center',
+                      }}
+                    ></div>
                     <Image
                       src={selectedImage}
                       alt={product.name}
                       fill
-                      className="object-contain transition-transform duration-500 ease-out group-hover:scale-125"
-                      sizes="(max-width: 768px) 100vw"
+                      className="object-contain opacity-0"
+                      sizes="(min-width: 1024px) 50vw"
                       priority
                     />
                   </motion.div>
@@ -71,148 +155,28 @@ export default function ProductPage({ product }) {
               </AnimatePresence>
             </div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.1 }}
-            >
-              <ProductDetailsSidebar 
-                product={product} 
-                selectedImage={selectedImage}
-                onImageSelect={handleImageSelect}
-              />
-            </motion.div>
-          </div>
-        </div>
-
-        {/* Tablet Layout */}
-        <div className="hidden md:block lg:hidden">
-          <div className="grid grid-cols-12 gap-4 md:gap-6">
-            <motion.div 
-              className="col-span-2"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.4 }}
-            >
-              <ImageGallery 
-                images={product.images} 
+            {/* ✅ Gallery في الموبايل (أفقي تحت الصورة) */}
+            <div className="block md:hidden mt-4">
+              <ImageGallery
+                images={product.images}
                 productName={product.name}
                 selectedImage={selectedImage}
                 selectedIndex={selectedIndex}
                 onImageSelect={handleImageSelect}
-                isVertical={true}
-              />
-            </motion.div>
-
-            <motion.div 
-              className="col-span-6"
-              initial={{ opacity: 0, scale: 0.98 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.3, delay: 0.1 }}
-            >
-              <div className="relative w-full h-[500px] bg-gray-50 flex items-center justify-center overflow-hidden group cursor-zoom-in border border-gray-100 rounded-lg shadow-sm">
-                <AnimatePresence mode="wait">
-                  {selectedImage ? (
-                    <motion.div
-                      key={selectedImage}
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 1.05 }}
-                      transition={{ duration: 0.4, ease: 'easeInOut' }}
-                      className="relative w-full h-full"
-                    >
-                      <Image
-                        src={selectedImage}
-                        alt={product.name}
-                        fill
-                        className="object-contain transition-transform duration-500 ease-out group-hover:scale-110"
-                        sizes="(min-width: 768px) and (max-width: 1024px) 50vw"
-                        priority
-                      />
-                    </motion.div>
-                  ) : (
-                    <span className="text-gray-400">No Image Available</span>
-                  )}
-                </AnimatePresence>
-              </div>
-            </motion.div>
-
-            <motion.div 
-              className="col-span-4"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.4, delay: 0.2 }}
-            >
-              <div className="sticky top-6 h-fit">
-                <ProductDetailsSidebar 
-                  product={product} 
-                  selectedImage={selectedImage}
-                  onImageSelect={handleImageSelect}
-                />
-              </div>
-            </motion.div>
-          </div>
-        </div>
-
-        {/* Desktop Layout */}
-        <div className="hidden lg:block">
-          <div className="grid grid-cols-6 gap-6 lg:gap-8">
-            <div className="col-span-1">
-              <ImageGallery 
-                images={product.images} 
-                productName={product.name}
-                selectedImage={selectedImage}
-                selectedIndex={selectedIndex}
-                onImageSelect={handleImageSelect}
-                isVertical={true}
+                isVertical={false}
               />
             </div>
+          </div>
 
-            <div className="col-span-3">
-              <div className="relative w-full aspect-square bg-gray-50 flex items-center justify-center overflow-hidden group cursor-zoom-in border border-gray-100 rounded-lg shadow-sm">
-                <AnimatePresence mode="wait">
-                  {selectedImage ? (
-                    <motion.div
-                      key={selectedImage}
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 1.05 }}
-                      transition={{ duration: 0.4, ease: 'easeInOut' }}
-                      className="relative w-full h-full"
-                    >
-                      <Image
-                        src={selectedImage}
-                        alt={product.name}
-                        fill
-                        className="object-contain transition-transform duration-500 ease-out group-hover:scale-110"
-                        sizes="(min-width: 1024px) 50vw"
-                        priority
-                      />
-                    </motion.div>
-                  ) : (
-                    <span className="text-gray-400">No Image Available</span>
-                  )}
-                </AnimatePresence>
-              </div>
-            </div>
-
-            <div className="col-span-2">
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.4, delay: 0.1 }}
-                className="sticky top-6"
-              >
-                <ProductDetailsSidebar 
-                  product={product} 
-                  selectedImage={selectedImage}
-                  onImageSelect={handleImageSelect}
-                />
-              </motion.div>
-            </div>
+          {/* ✅ Sidebar */}
+          <div className="col-span-6 md:col-span-2">
+            <ProductDetailsSidebar
+              product={product}
+              selectedImage={selectedImage}
+              onImageSelect={handleImageSelect}
+            />
           </div>
         </div>
-
       </div>
     </div>
   );

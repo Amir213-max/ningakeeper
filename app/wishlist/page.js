@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { graphqlClient } from "../lib/graphqlClient";
 import { gql } from "graphql-request";
 import Link from "next/link";
+import { useCurrency } from "../contexts/CurrencyContext";
+import PriceDisplay from "../components/PriceDisplay";
 
 const GET_WISHLIST = gql`
   query GetWishlist($id: ID!) {
@@ -30,20 +32,7 @@ const GET_WISHLIST = gql`
 export default function WishlistPage() {
   const [wishlist, setWishlist] = useState(null);
   const [loading, setLoading] = useState(true);
-const [currencyRate, setCurrencyRate] = useState(null);
-
-useEffect(() => {
-  const fetchRate = async () => {
-    try {
-      const { getCurrencyRate } = await import("../lib/getCurrencyRate");
-      const rate = await getCurrencyRate();
-      setCurrencyRate(rate);
-    } catch (err) {
-      console.error("Error loading currency rate:", err);
-    }
-  };
-  fetchRate();
-}, []);
+  const { loading: currencyLoading } = useCurrency();
 
   // ⚠️ هنا لازم تستخدم الـ wishlist id اللي بيرجع من الـ API
   const wishlistId = "1"; 
@@ -98,19 +87,14 @@ useEffect(() => {
 
                 <div className="text-center">
                 
-                    {currencyRate && (
-                      <>
-                       {product.list_price_amount !== product.price_range_exact_amount && (
+                    {product.list_price_amount !== product.price_range_exact_amount && (
                       <div className="line-through text-gray-500 text-sm">
-                        SAR {(product.list_price_amount * currencyRate).toFixed(2)}
+                        <PriceDisplay price={product.list_price_amount} loading={currencyLoading} />
                       </div>
                     )}
                     <span className="text-lg font-bold text-neutral-900">
-                      SAR {(product.price_range_exact_amount * currencyRate).toFixed(2)}
+                      <PriceDisplay price={product.price_range_exact_amount} loading={currencyLoading} />
                     </span>
-                      </>
-                   
-                    )}
                  
 
                 </div>

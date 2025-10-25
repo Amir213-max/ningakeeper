@@ -82,8 +82,9 @@ useEffect(() => {
               onClick={() => setCartOpen(true)}
               className="text-white hover:text-amber-400 transition-colors duration-200 cursor-pointer"
             >
-              <FaShoppingCart size={20} />
+              <FaShoppingCart className='hidden md:flex'  size={20} />
             </button>
+             <CurrencySwitcher />
           </div>
 
           {/* ✅ Center (Logo) */}
@@ -107,10 +108,10 @@ useEffect(() => {
           <div className="navbar-right order-2 flex items-center gap-4">
             {/* 🔑 لو المستخدم مسجل دخول */}
             {user ? (
-              <div className="text-white flex items-center gap-3">
+              <div className="hidden lg:flex  text-white flex items-center gap-3">
                 <span className="text-sm hidden sm:inline">{user.name}</span>
                 <button className="text-white hover:text-amber-600 cursor-pointer transition-colors duration-200">
-                  <FaUser size={20} />
+                  <FaUser className='hidden  lg-flex' size={20} />
                 </button>
               </div>
             ) : (
@@ -118,7 +119,7 @@ useEffect(() => {
                 href="/login"
                 className="text-white hover:text-amber-600 cursor-pointer transition-colors duration-200"
               >
-                <FaUser size={20} />
+                <FaUser className='hidden md:flex'  size={20} />
               </Link>
             )}
 
@@ -139,7 +140,7 @@ useEffect(() => {
             )}
 
             {/* 💰 Currency Switcher */}
-            {/* <CurrencySwitcher /> */}
+            
 
             {/* 🌐 Language Selector */}
             <select

@@ -7,28 +7,16 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, ShoppingCart } from "lucide-react";
 import Link from "next/link";
 import { useTranslation } from "@/app/contexts/TranslationContext";
+import { useCurrency } from "@/app/contexts/CurrencyContext";
 
 export default function ProductDetailsSidebar({ product }) {
   const [quantity, setQuantity] = useState(1);
   const [adding, setAdding] = useState(false);
   const [selectedAttributes, setSelectedAttributes] = useState({});
   const [openDropdown, setOpenDropdown] = useState(null);
-  const [currencyRate, setCurrencyRate] = useState(null);
   const router = useRouter();
   const { t } = useTranslation();
-
-  useEffect(() => {
-    const fetchRate = async () => {
-      try {
-        const { getCurrencyRate } = await import("../../lib/getCurrencyRate");
-        const rate = await getCurrencyRate();
-        setCurrencyRate(rate);
-      } catch (err) {
-        console.error("Error loading currency rate:", err);
-      }
-    };
-    fetchRate();
-  }, []);
+  const { currency, convertPrice, formatPrice, getCurrencySymbol, loading: currencyLoading } = useCurrency();
 
   // 🧩 تجهيز الخصائص
   const attributesMap = {};
@@ -75,14 +63,12 @@ const missing = requiredAttributes.filter(
     }
   };
 
-  // 💰 الأسعار
-  const listPrice = currencyRate
-    ? (product.list_price_amount * currencyRate).toFixed(2)
-    : "...";
-  const finalPrice = currencyRate
-    ? (product.price_range_exact_amount * currencyRate).toFixed(2)
-    : "...";
-  const listCurrency = "SAR";
+  // 💰 الأسعار - Using CurrencyContext
+  const listPrice = currencyLoading ? "..." : convertPrice(product.list_price_amount || 0);
+  const finalPrice = currencyLoading ? "..." : convertPrice(product.price_range_exact_amount || 0);
+  const listPriceFormatted = currencyLoading ? "..." : formatPrice(product.list_price_amount || 0);
+  const finalPriceFormatted = currencyLoading ? "..." : formatPrice(product.price_range_exact_amount || 0);
+  const currencySymbol = getCurrencySymbol();
   const discountPercent = product.productBadges?.[0]?.label || null;
   const hasDiscount = listPrice && finalPrice && finalPrice < listPrice;
 
@@ -122,11 +108,11 @@ const missing = requiredAttributes.filter(
       <div className="flex items-center gap-3">
         {hasDiscount && (
           <span className="text-sm text-gray-400 line-through">
-            {listCurrency} {listPrice}
+            {listPriceFormatted}
           </span>
         )}
         <span className="text-3xl font-bold text-gray-900">
-          {listCurrency} {finalPrice}
+          {finalPriceFormatted}
         </span>
         {discountPercent && (
           <span className="bg-yellow-400 text-gray-900 text-sm font-bold px-2 py-1 rounded">

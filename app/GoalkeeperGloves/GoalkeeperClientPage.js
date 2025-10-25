@@ -3,13 +3,16 @@
 import Link from "next/link";
 import { useState, useEffect, useMemo } from "react";
 import BrandsSlider from "../Componants/brandsSplide_1";
-import FilterDropdown from "../Componants/CheckboxDropdown ";
 import ProductSlider from "../Componants/ProductSlider";
 import Sidebar from "../Componants/sidebar";
 import { useTranslation } from "../contexts/TranslationContext";
+import FilterDropdown from "../Componants/CheckboxDropdown ";
+import { useCurrency } from "../contexts/CurrencyContext";
+import PriceDisplay from "../components/PriceDisplay";
 import { graphqlClient } from "../lib/graphqlClient";
 import { GET_CATEGORIES_QUERY } from "../lib/queries";
 import { useCategory } from "../contexts/CategoryContext";
+
 
 export default function GoalKeeperClientPage({ products, brands, attributeValues }) {
   const [categories, setCategories] = useState([]);
@@ -20,23 +23,10 @@ export default function GoalKeeperClientPage({ products, brands, attributeValues
   const [filteredProducts, setFilteredProducts] = useState(products);
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 20;
-
+ const { loading: currencyLoading } = useCurrency();
   const { t, language } = useTranslation();
-  const isRTL = language === "ar"; // ✅ اتجاه الموقع
-const [currencyRate, setCurrencyRate] = useState(null);
 
-useEffect(() => {
-  const fetchRate = async () => {
-    try {
-      const { getCurrencyRate } = await import("../lib/getCurrencyRate");
-      const rate = await getCurrencyRate();
-      setCurrencyRate(rate);
-    } catch (err) {
-      console.error("Error loading currency rate:", err);
-    }
-  };
-  fetchRate();
-}, []);
+  const isRTL = language === "ar"; // ✅ اتجاه الموقع
 
   // Fetch categories
   useEffect(() => {
@@ -188,19 +178,14 @@ useEffect(() => {
 
                   <div className="text-center">
                   
-                    {currencyRate && (
-                      <>
-                       {product.list_price_amount !== product.price_range_exact_amount && (
+                    {product.list_price_amount !== product.price_range_exact_amount && (
                       <div className="line-through text-gray-500 text-sm">
-                        SAR {(product.list_price_amount * currencyRate).toFixed(2)}
+                        <PriceDisplay price={product.list_price_amount} loading={currencyLoading} />
                       </div>
                     )}
                     <span className="text-lg font-bold text-neutral-900">
-                      SAR {(product.price_range_exact_amount * currencyRate).toFixed(2)}
+                      <PriceDisplay price={product.price_range_exact_amount} loading={currencyLoading} />
                     </span>
-                      </>
-                   
-                    )}
                  
 
                   </div>

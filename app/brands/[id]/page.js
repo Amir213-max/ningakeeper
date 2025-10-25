@@ -15,6 +15,8 @@ import { ADD_TO_WISHLIST } from "../../lib/mutations";
 import { GET_WISHLIST_ITEMS } from "../../lib/queries";
 import Link from "next/link";
 import { Heart } from "lucide-react";
+import { useCurrency } from "@/app/contexts/CurrencyContext";
+import PriceDisplay from "@/app/components/PriceDisplay";
 
 const GET_PRODUCTS_BY_BRAND = gql`
   query getProductsByBrand($brand_id: ID!) {
@@ -58,6 +60,7 @@ export default function BrandPage() {
   const wishlistId = user?.defaultWishlist?.id || user?.wishlists?.[0]?.id;
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 20;
+ const { loading: currencyLoading } = useCurrency();
 const [currencyRate, setCurrencyRate] = useState(null);
 
 useEffect(() => {
@@ -248,11 +251,11 @@ useEffect(() => {
                       <>
                        {product.list_price_amount !== product.price_range_exact_amount && (
                       <div className="line-through text-gray-500 text-sm">
-                        SAR {(product.list_price_amount * currencyRate).toFixed(2)}
+                       <PriceDisplay price={product.list_price_amount} loading={currencyLoading} />
                       </div>
                     )}
                     <span className="text-lg font-bold text-neutral-900">
-                      SAR {(product.price_range_exact_amount * currencyRate).toFixed(2)}
+                     <PriceDisplay price={product.price_range_exact_amount} loading={currencyLoading} />
                     </span>
                       </>
                    

@@ -1,6 +1,7 @@
 'use client';
 
 import { useTranslation } from '@/app/contexts/TranslationContext';
+import { useCurrency } from '@/app/contexts/CurrencyContext';
 import { graphqlClient } from '@/app/lib/graphqlClient';
 import { RECOMMENDED_PRODUCTS_QUERY } from '@/app/lib/queries';
 import { Splide, SplideSlide } from '@splidejs/react-splide';
@@ -15,21 +16,8 @@ import { useEffect, useState } from 'react';
 
 export default function RecommendedSlider({ productId }) {
   const { t, lang } = useTranslation();
+  const { formatPrice, loading: currencyLoading } = useCurrency();
   const [products, setProducts] = useState([]);
-const [currencyRate, setCurrencyRate] = useState(null);
-
-useEffect(() => {
-  const fetchRate = async () => {
-    try {
-      const { getCurrencyRate } = await import("../../lib/getCurrencyRate");
-      const rate = await getCurrencyRate();
-      setCurrencyRate(rate);
-    } catch (err) {
-      console.error("Error loading currency rate:", err);
-    }
-  };
-  fetchRate();
-}, []);
 
   useEffect(() => {
     const fetchRecommended = async () => {
@@ -100,8 +88,7 @@ useEffect(() => {
                     {item.name}
                   </h3>
                   <h2 className="font-bold text-2xl mt-8 flex justify-center line-clamp-1">
-                  {`SAR ${(item.price_range_from ? item.price_range_from * currencyRate : 0).toFixed(2)}`}
-
+                    {currencyLoading ? "..." : formatPrice(item.price_range_from || 0)}
                   </h2>
                 </div>
               </div>

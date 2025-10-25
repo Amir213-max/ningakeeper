@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { graphqlClient } from "../lib/graphqlClient";
 import { GET_ACTIVE_HOME_PAGE_BLOCKS, PRODUCTS_BY_IDS_QUERY } from "../lib/queries";
 import Link from "next/link";
 import Image from "next/image";
+import { useCurrency } from "../contexts/CurrencyContext";
+import PriceDisplay from "../components/PriceDisplay";
 import { Splide, SplideSlide } from "@splidejs/react-splide";
 import "@splidejs/react-splide/css";
 import { useTranslation } from "../contexts/TranslationContext";
@@ -14,13 +16,12 @@ import MultiSlider_6 from "./Slider_6";
 export default function HomePageBlocks() {
   const { lang } = useTranslation();
   const BASE_URL = "https://keeper.in-brackets.online/storage/";
-
+  const { loading: currencyLoading } = useCurrency();
   const [blocks, setBlocks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [productsMap, setProductsMap] = useState({});
-  const [isMobile, setIsMobile] = useState(false); // ✅ متغير لمتابعة حجم الشاشة
+  const [isMobile, setIsMobile] = useState(false);
 
-  // ✅ مراقبة تغيّر حجم الشاشة وتحديث حالة isMobile
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     handleResize();
@@ -69,21 +70,22 @@ export default function HomePageBlocks() {
 
   const firstTextBlock = blocks.find((b) => b.type === "text");
   const otherBlocks = blocks.filter((b) => b !== firstTextBlock);
+  const firstBannerBlockIndex = blocks.findIndex((b) => b.type === "banners");
 
   return (
-    <>
-      <div className="pt-3 space-y-3">
-        {otherBlocks.map((block, index) => (
+    <div className="pt-3 space-y-3">
+      {otherBlocks.map((block, blockIndex) => {
+        const isFirstBannerBlock = block.type === "banners" && blockIndex === firstBannerBlockIndex;
+
+        return (
           <motion.div
             key={block.id}
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut", delay: index * 0.2 }}
+            transition={{ duration: 0.8, ease: "easeOut", delay: blockIndex * 0.2 }}
             className={`rounded-xl overflow-hidden shadow-lg w-full ${block.css_class || ""}`}
             style={{
-              backgroundColor:
-                block.background_color ||
-                (block.type === "banners" ? "#000" : "#f9f9f9"),
+              backgroundColor: block.background_color || (block.type === "banners" ? "#000" : "#f9f9f9"),
               color: block.text_color || "#fff",
             }}
           >
@@ -94,7 +96,7 @@ export default function HomePageBlocks() {
             )}
 
             <div className="px-1 pb-2 mt-4 space-y-3">
-              {/* 🔹 Slider */}
+              {/* 🔹 Slider Block */}
               {block.type === "slider" && block.content?.slides?.length > 0 && (
                 <Splide
                   options={{
@@ -136,55 +138,7 @@ export default function HomePageBlocks() {
                 </Splide>
               )}
 
-              {/* 🔹 Images block */}
-              {block.type === "images" && block.content?.images?.length > 0 && (
-                <Splide
-                  options={{
-                    perPage: 4,
-                    perMove: 1,
-                    gap: "1rem",
-                    rewind: true,
-                    breakpoints: {
-                      1024: { perPage: 3 },
-                      768: { perPage: 2 },
-                      640: { perPage: 1 },
-                    },
-                    pagination: false,
-                    arrows: true,
-                    drag: "free",
-                  }}
-                  className="my-6"
-                >
-                  {block.content.images.map((img, idx) => (
-                    <SplideSlide key={idx}>
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 0.5, delay: idx * 0.1 }}
-                        className="relative rounded-lg overflow-hidden shadow-md hover:shadow-xl transition h-40 md:h-48"
-                      >
-                        <Image
-                          src={getImageUrl(img.image)}
-                          alt={img.title || ""}
-                          width={400}
-                          height={200}
-                          className="w-full h-full object-fill-fit"
-                          unoptimized
-                        />
-                        {img.title && (
-                          <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-                            <p className="text-white text-sm md:text-base font-semibold">
-                              {img.title}
-                            </p>
-                          </div>
-                        )}
-                      </motion.div>
-                    </SplideSlide>
-                  ))}
-                </Splide>
-              )}
-
-              {/* 🔹 Banners block بعد التعديل */}
+              {/* 🔹 Banners Block */}
               {block.type === "banners" && block.content?.banners?.length > 0 && (
                 <>
                   {block.content.banners.length <= 2 ? (
@@ -195,8 +149,6 @@ export default function HomePageBlocks() {
                         }`}
                       >
                         {block.content.banners.map((banner, idx) => {
-                          const isFirstBanner = idx === 0;
-                          const bannersCount = block.content.banners.length;
                           const imageSrc =
                             isMobile && banner.mobile_image
                               ? getImageUrl(banner.mobile_image)
@@ -211,19 +163,17 @@ export default function HomePageBlocks() {
                               initial={{ opacity: 0, y: 20 }}
                               animate={{ opacity: 1, y: 0 }}
                               transition={{ duration: 0.6, delay: idx * 0.1 }}
-                              className={`relative overflow-hidden rounded-xl shadow-md group w-full ${
-                                bannersCount === 1
-                                  ? "h-[45vh] sm:h-[55vh] md:h-[60vh]"
-                                  : "h-[35vh] sm:h-[40vh] md:h-[45vh]"
-                              }`}
+                              className="relative overflow-hidden rounded-xl shadow-md group w-full h-[45vh] sm:h-[50vh] md:h-[55vh]"
                             >
                               <Image
                                 src={imageSrc}
                                 alt={banner.title || ""}
                                 fill
-                                className="object-fill-fit transition-transform duration-500 group-hover:scale-105"
+                                className={`transition-transform duration-500 group-hover:scale-105 ${
+                                  isFirstBannerBlock ? "object-fill" : "object-fill"
+                                }`}
                                 unoptimized
-                                priority={isFirstBanner}
+                                priority={isFirstBannerBlock}
                               />
                             </motion.a>
                           );
@@ -234,7 +184,6 @@ export default function HomePageBlocks() {
                     <div className="w-full overflow-x-auto no-scrollbar px-2 md:px-4">
                       <div className="flex gap-3 min-w-max">
                         {block.content.banners.map((banner, idx) => {
-                          const isFirstBanner = idx === 0;
                           const imageSrc =
                             isMobile && banner.mobile_image
                               ? getImageUrl(banner.mobile_image)
@@ -249,15 +198,17 @@ export default function HomePageBlocks() {
                               initial={{ opacity: 0, y: 20 }}
                               animate={{ opacity: 1, y: 0 }}
                               transition={{ duration: 0.6, delay: idx * 0.1 }}
-                              className="relative flex-shrink-0 w-[50vw] sm:w-[45vw] md:w-[30vw] lg:w-[25vw] h-[30vh] overflow-hidden rounded-xl shadow-md group"
+                              className="relative flex-shrink-0 w-[60vw] sm:w-[40vw] md:w-[30vw] lg:w-[25vw] h-[45vh] overflow-hidden rounded-xl shadow-md group"
                             >
                               <Image
                                 src={imageSrc}
                                 alt={banner.title || ""}
                                 fill
-                                className="object-fill-fit transition-transform duration-500 group-hover:scale-105"
+                                className={`transition-transform duration-500 group-hover:scale-105 ${
+                                  isFirstBannerBlock ? "object-fill" : "object-contain"
+                                }`}
                                 unoptimized
-                                priority={isFirstBanner}
+                                priority={isFirstBannerBlock}
                               />
                             </motion.a>
                           );
@@ -268,7 +219,7 @@ export default function HomePageBlocks() {
                 </>
               )}
 
-              {/* 🔹 Products */}
+              {/* 🔹 Products Block */}
               {block.type === "products" && productsMap[block.id]?.length > 0 && (
                 <div className="px-4 md:px-8 overflow-hidden lg:px-12">
                   <Splide
@@ -287,7 +238,7 @@ export default function HomePageBlocks() {
                       updateOnMove: true,
                       breakpoints: {
                         1280: { perPage: 5 },
-                        1024: { perPage: 5 },
+                        1024: { perPage: 4 },
                         768: { perPage: 3 },
                         640: { perPage: 2 },
                       },
@@ -331,7 +282,7 @@ export default function HomePageBlocks() {
                                 {product.name}
                               </h3>
                               <p className="text-white font-bold text-lg">
-                                SAR {product.list_price_amount?.toFixed(2)}
+                                <PriceDisplay price={product.price_range_exact_amount} loading={currencyLoading} />
                               </p>
                             </div>
                           </Link>
@@ -358,9 +309,9 @@ export default function HomePageBlocks() {
               )}
             </div>
           </motion.div>
-        ))}
-        <MultiSlider_6 />
-      </div>
-    </>
+        );
+      })}
+      <MultiSlider_6 />
+    </div>
   );
 }

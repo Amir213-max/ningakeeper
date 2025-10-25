@@ -17,6 +17,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import Sidebar from "./Componants/sidebar";
 import HomePageBlocks from "./Componants/HomePageBlocks";
 import { CategoryProvider } from "./contexts/CategoryContext";
+import CurrencyTest from "./components/CurrencyTest";
 
 
 const geistSans = Geist({
@@ -65,6 +66,7 @@ export default function RootLayout({ children  }) {
   </CartProvider>
 <ChatSidebar />
 <WhatsAppButton phoneNumber="201234567890" />
+{/* <CurrencyTest /> */}
 </ChatProvider>
         <Footer />
      </CartProvider>
