@@ -93,7 +93,7 @@ export default function ProductPage({ product }) {
         </AnimatePresence>
 
         {/* ✅ Layout */}
-        <div className="grid grid-cols-6 gap-6">
+        <div className="grid grid-cols-8 gap-2">
           {/* ✅ Gallery - للشاشات المتوسطة والكبيرة */}
           <div className="hidden md:block col-span-1">
             <ImageGallery
@@ -107,10 +107,10 @@ export default function ProductPage({ product }) {
           </div>
 
           {/* ✅ Main Image */}
-          <div className="col-span-6 md:col-span-3">
+          <div className="col-span-8 md:col-span-5">
             <div
               ref={imageContainerRef}
-              className="relative w-full aspect-square bg-gray-50 flex items-center justify-center overflow-hidden border border-gray-100 rounded-lg shadow-sm group select-none"
+              className="relative w-full h-[-webkit-fill-available] aspect-square bg-white flex items-center justify-center overflow-hidden border border-gray-100 group select-none"
               onMouseMove={handleMouseMove}
               onMouseEnter={() => setIsZoomed(true)}
               onMouseLeave={() => setIsZoomed(false)}
@@ -169,7 +169,7 @@ export default function ProductPage({ product }) {
           </div>
 
           {/* ✅ Sidebar */}
-          <div className="col-span-6 md:col-span-2">
+          <div className="col-span-8 md:col-span-2 p-3 ">
             <ProductDetailsSidebar
               product={product}
               selectedImage={selectedImage}

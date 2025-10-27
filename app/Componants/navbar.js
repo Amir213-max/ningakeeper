@@ -70,7 +70,7 @@ useEffect(() => {
       <header className="w-full bg-black shadow py-4">
         <div className="navbar-container container mx-auto px-4 flex items-center justify-between">
           {/* ✅ Left side (Menu + Cart) */}
-          <div className="navbar-left flex items-center gap-4 order-3 sm:order-1">
+          <div className="navbar-left flex items-center gap-2 order-3 sm:order-1">
             <button
               onClick={() => setSidebarOpen(true)}
               className="text-white hover:text-amber-400 transition-colors duration-200 cursor-pointer lg:hidden"
@@ -148,8 +148,8 @@ useEffect(() => {
               value={lang}
               className="bg-black text-white border border-gray-500 px-2 py-1 rounded text-sm"
             >
-              <option value="en">English</option>
-              <option value="ar">العربية</option>
+              <option value="en">en</option>
+              <option value="ar">ar</option>
             </select>
           </div>
         </div>

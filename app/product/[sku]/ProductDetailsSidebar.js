@@ -16,7 +16,13 @@ export default function ProductDetailsSidebar({ product }) {
   const [openDropdown, setOpenDropdown] = useState(null);
   const router = useRouter();
   const { t } = useTranslation();
-  const { currency, convertPrice, formatPrice, getCurrencySymbol, loading: currencyLoading } = useCurrency();
+  const {
+    currency,
+    convertPrice,
+    formatPrice,
+    getCurrencySymbol,
+    loading: currencyLoading,
+  } = useCurrency();
 
   // 🧩 تجهيز الخصائص
   const attributesMap = {};
@@ -31,16 +37,15 @@ export default function ProductDetailsSidebar({ product }) {
 
   // 🛒 إضافة المنتج للسلة
   const addToCart = async () => {
-   // ✅ السماح فقط بالتحقق من المقاس واللون
-const requiredAttributes = Object.keys(attributesMap).filter(
-  (label) =>
-    label.toLowerCase().includes("size") ||
-    label.toLowerCase().includes("color")
-);
+    const requiredAttributes = Object.keys(attributesMap).filter(
+      (label) =>
+        label.toLowerCase().includes("size") ||
+        label.toLowerCase().includes("color")
+    );
 
-const missing = requiredAttributes.filter(
-  (attr) => !selectedAttributes[attr]
-);
+    const missing = requiredAttributes.filter(
+      (attr) => !selectedAttributes[attr]
+    );
 
     if (missing.length > 0) {
       alert(`Please select: ${missing.join(", ")}`);
@@ -63,55 +68,65 @@ const missing = requiredAttributes.filter(
     }
   };
 
-  // 💰 الأسعار - Using CurrencyContext
-  const listPrice = currencyLoading ? "..." : convertPrice(product.list_price_amount || 0);
-  const finalPrice = currencyLoading ? "..." : convertPrice(product.price_range_exact_amount || 0);
-  const listPriceFormatted = currencyLoading ? "..." : formatPrice(product.list_price_amount || 0);
-  const finalPriceFormatted = currencyLoading ? "..." : formatPrice(product.price_range_exact_amount || 0);
+  // 💰 الأسعار
+  const listPrice = currencyLoading
+    ? "..."
+    : convertPrice(product.list_price_amount || 0);
+  const finalPrice = currencyLoading
+    ? "..."
+    : convertPrice(product.price_range_exact_amount || 0);
+  const listPriceFormatted = currencyLoading
+    ? "..."
+    : formatPrice(product.list_price_amount || 0);
+  const finalPriceFormatted = currencyLoading
+    ? "..."
+    : formatPrice(product.price_range_exact_amount || 0);
   const currencySymbol = getCurrencySymbol();
   const discountPercent = product.productBadges?.[0]?.label || null;
   const hasDiscount = listPrice && finalPrice && finalPrice < listPrice;
 
   return (
-    <div className="flex flex-col gap-6 w-full">
-      {/* Brand */}
- {product.brand?.name && (
-  <div className="flex items-center gap-3">
-    <div className="w-2 h-2 bg-gray-400 rotate-45" />
-
-    {/* ✅ Brand Logo Responsive */}
-    <div className="relative w-20 h-10 sm:w-24 sm:h-12 flex items-center justify-center">
-      <img
-        src={product.brand.logo}
-        alt={product.brand.name}
-        className="w-full  h-full object-contain bg-gray-200 rounded-md shadow-sm"
-      />
-    </div>
-
-    {/* ✅ Brand Name */}
-    <span className="text-sm font-semibold text-gray-700 uppercase">
-      {product.brand.name}
-    </span>
-  </div>
-)}
-
+    <div
+      className="
+        flex flex-col gap-3 w-full 
+        sm:px-2 md:px-3 
+        lg:px-0
+        max-md:mt-6
+      "
+    >
+      {/* ✅ Brand Section */}
+      {product.brand?.name && (
+        <div className="flex items-center gap-3">
+          <div className="w-2 h-2 bg-gray-400 rotate-45" />
+          <div className="relative w-16 h-8 sm:w-20 sm:h-10 flex items-center justify-center">
+            <img
+              src={product.brand.logo}
+              alt={product.brand.name}
+              className="w-full h-full object-contain bg-gray-100 rounded-md"
+            />
+          </div>
+          <span className="text-sm font-semibold text-gray-700 uppercase">
+            {product.brand.name}
+          </span>
+        </div>
+      )}
 
       {/* SKU */}
       <div className="text-xs text-gray-400 font-mono">SKU {product.sku}</div>
 
       {/* Title */}
-      <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 leading-tight">
+      <h1 className="text-xl sm:text-xl lg:text-xl font-bold text-gray-900 leading-tight break-words">
         {product.name}
       </h1>
 
       {/* Price */}
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         {hasDiscount && (
           <span className="text-sm text-gray-400 line-through">
             {listPriceFormatted}
           </span>
         )}
-        <span className="text-3xl font-bold text-gray-900">
+        <span className="text-xl sm:text-xl font-bold text-gray-900">
           {finalPriceFormatted}
         </span>
         {discountPercent && (
@@ -121,75 +136,77 @@ const missing = requiredAttributes.filter(
         )}
       </div>
 
-{Object.keys(attributesMap).length > 0 && (
-  <div className="space-y-6">
-    {/* ✅ فقط المقاس واللون */}
-    {Object.entries(attributesMap)
-      .filter(
-        ([label]) =>
-          label.toLowerCase().includes("size") ||
-          label.toLowerCase().includes("color")
-      )
-      .sort(([a], [b]) => (a.toLowerCase().includes("size") ? -1 : 1))
-      .map(([label, values]) => {
-        const isColor = label.toLowerCase().includes("color");
-        return (
-          <div key={label} className="space-y-3">
-            <h3 className="text-sm font-medium text-gray-900 uppercase tracking-wide">
-              {label}
-            </h3>
-            <div
-              className={`flex flex-wrap gap-2 ${
-                isColor ? "items-center" : ""
-              }`}
-            >
-              {values.map((val) => {
-                const selected = selectedAttributes[label] === val;
-                return (
-                  <button
-                    key={val}
-                    onClick={() =>
-                      setSelectedAttributes((prev) => ({
-                        ...prev,
-                        [label]: val,
-                      }))
-                    }
-                    className={`${
-                      isColor
-                        ? "w-10 h-10 rounded-full border-2"
-                        : "px-4 py-2 rounded-lg border-2 text-sm font-medium"
-                    } transition-all duration-200 ${
-                      selected
-                        ? "border-gray-900 bg-gray-900 text-white"
-                        : "border-gray-200 text-gray-600 hover:border-gray-400 hover:bg-gray-50"
+      {/* Attributes */}
+      {Object.keys(attributesMap).length > 0 && (
+        <div className="space-y-6">
+          {Object.entries(attributesMap)
+            .filter(
+              ([label]) =>
+                label.toLowerCase().includes("size") ||
+                label.toLowerCase().includes("color")
+            )
+            .sort(([a], [b]) =>
+              a.toLowerCase().includes("size") ? -1 : 1
+            )
+            .map(([label, values]) => {
+              const isColor = label.toLowerCase().includes("color");
+              return (
+                <div key={label} className="space-y-3">
+                  <h3 className="text-sm font-medium text-gray-900 uppercase tracking-wide">
+                    {label}
+                  </h3>
+                  <div
+                    className={`flex flex-wrap gap-2 ${
+                      isColor ? "items-center" : ""
                     }`}
-                    style={
-                      isColor
-                        ? { backgroundColor: val.toLowerCase() }
-                        : undefined
-                    }
                   >
-                    {!isColor && val}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        );
-      })}
-  </div>
-)}
-
-
+                    {values.map((val) => {
+                      const selected = selectedAttributes[label] === val;
+                      return (
+                        <button
+                          key={val}
+                          onClick={() =>
+                            setSelectedAttributes((prev) => ({
+                              ...prev,
+                              [label]: val,
+                            }))
+                          }
+                          className={`${
+                            isColor
+                              ? "w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2"
+                              : "px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg border-2 text-sm font-medium"
+                          } transition-all duration-200 ${
+                            selected
+                              ? "border-gray-900 bg-gray-900 text-white"
+                              : "border-gray-200 text-gray-600 hover:border-gray-400 hover:bg-gray-50"
+                          }`}
+                          style={
+                            isColor
+                              ? { backgroundColor: val.toLowerCase() }
+                              : undefined
+                          }
+                        >
+                          {!isColor && val}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+        </div>
+      )}
 
       {/* Quantity Selector */}
       <div className="space-y-3">
         <h3 className="text-sm font-medium text-gray-900 uppercase tracking-wide">
           Quantity
         </h3>
-        <div className="relative w-32">
+        <div className="relative w-28 sm:w-32">
           <button
-            onClick={() => setOpenDropdown(openDropdown === "Qty" ? null : "Qty")}
+            onClick={() =>
+              setOpenDropdown(openDropdown === "Qty" ? null : "Qty")
+            }
             className="w-full flex justify-between items-center bg-white border border-gray-200 rounded-lg px-3 py-2 hover:border-gray-400 transition-colors"
           >
             <span className="text-gray-900 font-medium">{quantity}</span>
@@ -231,15 +248,17 @@ const missing = requiredAttributes.filter(
         </div>
       </div>
 
-         <div className="sticky bottom-0  bg-white pt-4 lg:relative lg:sticky lg:top-6 flex flex-col gap-3">
-        {/* زر إضافة للسلة */}
+      {/* ✅ Buttons Section */}
+      <div className="sticky bottom-0 bg-white  pt-2 pb-2 
+                      flex flex-col gap-2 
+                      lg:relative lg:top-6 lg:pb-0">
         <button
           onClick={addToCart}
           disabled={adding}
-          className="w-full cursor-pointer bg-yellow-400 hover:bg-yellow-500 disabled:bg-yellow-300 text-gray-900 font-bold py-4 px-6 rounded-lg text-lg transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
+          className="w-full cursor-pointer bg-yellow-400 hover:bg-yellow-500 disabled:bg-yellow-300 text-gray-900 font-bold py-2 sm:py-3 px-4 rounded-lg text-base sm:text-base transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
         >
           {adding ? (
-            <div className="w-5 h-5 border-2 border-gray-900 border-t-transparent rounded-full z-50 animate-spin" />
+            <div className="w-5 h-5 border-2 border-gray-900 border-t-transparent rounded-full animate-spin" />
           ) : (
             <>
               <ShoppingCart className="w-5 h-5" />
@@ -248,21 +267,13 @@ const missing = requiredAttributes.filter(
           )}
         </button>
 
-        {/* زر Checkout */}
         <Link
           href="/checkout_1"
-          className="w-full cursor-pointer text-black bg-yellow-400 hover:bg-yellow-600 z-50 font-bold py-4 px-6 rounded-lg text-lg transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
+          className="w-full cursor-pointer bg-yellow-400 hover:bg-yellow-500 disabled:bg-yellow-300 text-gray-900 font-bold py-2 sm:py-3 px-4 rounded-lg text-base sm:text-base transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
         >
-       
           Checkout
-          
         </Link>
       </div>
-
-
-
-     
-
     </div>
   );
 }

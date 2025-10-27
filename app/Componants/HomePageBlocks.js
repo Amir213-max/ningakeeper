@@ -126,7 +126,7 @@ export default function HomePageBlocks() {
                           {slide.button_text && (
                             <Link
                               href={slide.button_link || "#"}
-                              className="bg-yellow-500 hover:bg-yellow-400 text-black px-6 py-2 rounded-md font-semibold"
+                              className="bg-yellow-500 hover:bg-yellow-400 text-black px-6 py-2  font-semibold"
                             >
                               {slide.button_text}
                             </Link>
@@ -163,7 +163,7 @@ export default function HomePageBlocks() {
                               initial={{ opacity: 0, y: 20 }}
                               animate={{ opacity: 1, y: 0 }}
                               transition={{ duration: 0.6, delay: idx * 0.1 }}
-                              className="relative overflow-hidden rounded-xl shadow-md group w-full h-[45vh] sm:h-[50vh] md:h-[55vh]"
+                              className="relative overflow-hidden  shadow-md group w-full h-[45vh] sm:h-[50vh] md:h-[55vh]"
                             >
                               <Image
                                 src={imageSrc}
@@ -198,7 +198,7 @@ export default function HomePageBlocks() {
                               initial={{ opacity: 0, y: 20 }}
                               animate={{ opacity: 1, y: 0 }}
                               transition={{ duration: 0.6, delay: idx * 0.1 }}
-                              className="relative flex-shrink-0 w-[60vw] sm:w-[40vw] md:w-[30vw] lg:w-[25vw] h-[45vh] overflow-hidden rounded-xl shadow-md group"
+                              className="relative flex-shrink-0 w-[60vw] sm:w-[40vw] md:w-[30vw] lg:w-[25vw] h-[25vh] overflow-hidden  shadow-md group"
                             >
                               <Image
                                 src={imageSrc}

@@ -31,16 +31,16 @@ export default function ImageGallery({
         <Splide
           options={{
             direction: 'ttb',
-            height: '550px', // 👈 تقليل الارتفاع الكلي
-            perPage: 4,
+            height: '700px', // 👈 تقليل الارتفاع الكلي
+            perPage: 6,
             gap: '15px', // 👈 زيادة المسافة بين الصور
             pagination: false,
-            arrows: true,
+            arrows: false,
             wheel: true,
             drag: true,
             breakpoints: {
-              1024: { perPage: 4, height: '380px' },
-              768: { perPage: 3, height: '320px' },
+              1024: { perPage: 6, height: '480px' },
+              768: { perPage: 5, height: '420px' },
             },
           }}
           aria-label="Product side images"
@@ -50,10 +50,10 @@ export default function ImageGallery({
             <SplideSlide key={index}>
               <motion.button
                 onClick={() => handleImageClick(img)}
-                className={`w-[80%] mx-auto aspect-square rounded-lg border-2 transition-all duration-300 overflow-hidden group 
+                className={`w-[80%] mx-auto aspect-square rounded-lg transition-all duration-300 overflow-hidden group 
                 ${currentSelectedImage === img
-                  ? 'border-yellow-400 shadow-lg ring-2 ring-yellow-200'
-                  : 'border-gray-200 hover:border-yellow-300 hover:shadow-md'
+                  ? ' shadow-lg ring-2 '
+                  : '  hover:shadow-md'
                 }`}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
@@ -82,14 +82,14 @@ export default function ImageGallery({
         options={{
           direction: 'ltr',
           height: 'auto',
-          perPage: 4, // 👈 يعرض 4 صور أصغر بدل 3
+          perPage: 5, // 👈 يعرض 4 صور أصغر بدل 3
           pagination: false,
-          arrows: true,
-          gap: 16, // 👈 زيادة المسافة بين الصور
+          arrows: false,
+          gap:8, // 👈 زيادة المسافة بين الصور
           wheel: true,
           breakpoints: {
             640: {
-              perPage: 4,
+              perPage: 5,
             },
           },
         }}

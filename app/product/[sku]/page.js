@@ -1,11 +1,7 @@
-// app/product/[sku]/page.js
+// ✅ app/product/[sku]/page.js  (Server Component)
 import { graphqlClient } from "@/app/lib/graphqlClient";
 import { GET_PRODUCT_BY_SKU } from "@/app/lib/queries";
-import ProductPage from "./ProductPage";
-
-import RecommendedSlider from "./RecommendedProducts";
-import ProductDescription from "./ProductDescription";
-
+import ProductPageClient from "./ProductPageClient";
 
 export default async function ProductPageSku({ params }) {
   const sku = decodeURIComponent(params.sku);
@@ -27,26 +23,6 @@ export default async function ProductPageSku({ params }) {
     );
   }
 
-  return (
-    <div>
-   
-      
-      {/* Main Product Page */}
-      <ProductPage product={product} />
-
-      {/* Product Description - Responsive spacing */}
-      <div className="mx-auto bg-white px-2 sm:px-2 md:px-4 lg:px-3 py-3">
-        <div className="max-w-7xl mx-auto">
-          <ProductDescription product={product} />
-        </div>
-      </div>
-
-      {/* Recommended Products - Responsive spacing */}
-      <div className="mx-auto bg-white px-2 sm:px-3 md:px-4 lg:px-3 pb-4">
-        <div className="max-w-7xl mx-auto">
-          <RecommendedSlider productId={product.id} />
-        </div>
-      </div>
-    </div>
-  );
+  // ✅ مرّر الداتا للـ Client Component
+  return <ProductPageClient product={product} />;
 }

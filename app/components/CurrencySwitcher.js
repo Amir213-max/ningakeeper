@@ -10,8 +10,8 @@ const CurrencySwitcher = () => {
   const dropdownRef = useRef(null);
 
   const currencies = [
-    { code: 'EUR', name: 'Euro', symbol: '€', flag: '🇪🇺' },
-    { code: 'SAR', name: 'Saudi Riyal', symbol: 'ر.س', flag: '🇸🇦' },
+    { code: 'EUR', name: 'Euro',  flag: '🇪🇺' },
+    { code: 'SAR', name: 'Saudi Riyal', flag: '🇸🇦' },
   ];
 
   const currentCurrency = currencies.find(c => c.code === currency);
@@ -44,36 +44,40 @@ const CurrencySwitcher = () => {
 
   return (
     <div className="relative" ref={dropdownRef}>
+      {/* الزر الرئيسي */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center  bg-white border border-gray-200 rounded-lg shadow-sm hover:border-[#FFD300] transition-all duration-200 text-sm sm:text-base"
+        className="flex items-center bg-black text-white border border-gray-600 rounded-lg shadow-sm hover:border-[#FFD300] transition-all duration-200 text-sm sm:text-base px-2 py-1"
         aria-label="Select currency"
       >
-        <span className="text-base sm:text-lg">{currentCurrency?.flag}</span>
-        <span className="font-medium text-[#111]">{currentCurrency?.code}</span>
+        <span className="text-base text-white sm:text-base">{currentCurrency?.flag}</span> {/* تكبير العلم */}
+        <span className=" text-white ml-1">{currentCurrency?.code}</span>
+        <span className="ml-1 text-white">{currentCurrency?.symbol}</span>
         <ChevronDown
           size={14}
-          className={`text-gray-500 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+          className={`text-white transition-transform duration-200 ml-1 ${isOpen ? 'rotate-180' : ''}`}
         />
       </button>
 
+      {/* القائمة المنسدلة */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-36 sm:w-44 bg-white border border-gray-200 rounded-lg shadow-lg z-50 overflow-hidden text-sm">
+        <div className="absolute text-white right-0 mt-1 w-30 sm:w-35 bg-gray-900 border border-gray-600 rounded-lg shadow-lg z-50 overflow-hidden text-sm">
           {currencies.map((curr) => (
             <button
               key={curr.code}
               onClick={() => handleCurrencySelect(curr.code)}
-              className={`w-full flex items-center space-x-2 px-3 py-2 hover:bg-gray-50 transition ${
+              className={`w-full flex text-white items-center space-x-2 px-2 cursor-pointer py-2 hover:bg-gray-800 transition ${
                 currency === curr.code ? 'bg-[#FFD300]/10' : ''
               }`}
             >
-              <span className="text-lg">{curr.flag}</span>
+              <span className="text-base text-white sm:text-base">{curr.flag}</span> {/* تكبير العلم */}
               <div className="flex-1">
-                <div className="flex items-center justify-between">
-                  <span className="font-medium text-[#111]">{curr.code}</span>
+                <div className="flex items-center text-white justify-between">
+                  <span className="font-medium text-white">{curr.code}</span>
+                  <span className="font-medium text-white">{curr.symbol}</span>
                   {currency === curr.code && (
                     <svg
-                      className="w-4 h-4 text-[#FFD300]"
+                      className="w-4 h-4 text-white"
                       fill="currentColor"
                       viewBox="0 0 20 20"
                     >
@@ -85,7 +89,7 @@ const CurrencySwitcher = () => {
                     </svg>
                   )}
                 </div>
-                <p className="text-[11px] text-[#777]">{curr.name}</p>
+                <p className="text-[11px] text-white">{curr.name}</p>
               </div>
             </button>
           ))}
