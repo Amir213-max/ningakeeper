@@ -39,8 +39,8 @@ export default function ImageGallery({
             wheel: true,
             drag: true,
             breakpoints: {
-              1024: { perPage: 6, height: '480px' },
-              768: { perPage: 5, height: '420px' },
+              1024: { perPage: 7, height: '600px' },
+              768: { perPage: 6, height: '420px' },
             },
           }}
           aria-label="Product side images"

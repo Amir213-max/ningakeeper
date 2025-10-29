@@ -76,7 +76,7 @@ export default function PageSlug({ params }) {
     >
      
 <h1 className="text-3xl mx-7 font-bold mb-6 text-yellow-400 ">
-        {page.name} :
+      {page.name}
       </h1>
       <div
         className="prose prose-invert max-w-3xl mx-7 prose-headings:text-yellow-400 prose-a:text-yellow-400"

@@ -163,7 +163,7 @@ export default function HomePageBlocks() {
                               initial={{ opacity: 0, y: 20 }}
                               animate={{ opacity: 1, y: 0 }}
                               transition={{ duration: 0.6, delay: idx * 0.1 }}
-                              className="relative overflow-hidden  shadow-md group w-full h-[45vh] sm:h-[50vh] md:h-[55vh]"
+                              className="relative overflow-hidden  shadow-md group w-full h-[45vh] lg:h-[65vh] sm:h-[50vh] md:h-[30vh]"
                             >
                               <Image
                                 src={imageSrc}
