@@ -8,7 +8,7 @@ import toast from "react-hot-toast";
 export default function MyProfilePage() {
   const [activeTab, setActiveTab] = useState("profile");
   const [orders, setOrders] = useState([]);
-  const [wishlists, setWishlists] = useState([]);
+  
   const [user, setUser] = useState({
     name: "Loading...",
     email: "Loading...",
@@ -22,7 +22,7 @@ export default function MyProfilePage() {
   useEffect(() => {
     fetchUserData();
     fetchOrders();
-    fetchWishlists();
+    
   }, []);
 
   const fetchUserData = async () => {
@@ -43,15 +43,7 @@ export default function MyProfilePage() {
     }
   };
 
-  const fetchWishlists = async () => {
-    try {
-      const { wishlists } = await graphqlClient.request(GET_DEFAULT_WISHLIST);
-      setWishlists(wishlists);
-    } catch (error) {
-      console.error(error);
-      toast.error("Failed to fetch wishlists");
-    }
-  };
+  
 
   const handleProfileSave = () => {
     // هنا ممكن تعمل Mutation لتحديث بيانات المستخدم
@@ -92,12 +84,7 @@ export default function MyProfilePage() {
         >
           Orders
         </button>
-        <button
-          className={`pb-2 ${activeTab === "wishlists" ? "border-b-2 border-blue-500 font-semibold" : ""}`}
-          onClick={() => setActiveTab("wishlists")}
-        >
-          Wishlists
-        </button>
+      
       </div>
 
       {/* Tab Content */}
@@ -213,20 +200,7 @@ export default function MyProfilePage() {
         </div>
       )}
 
-      {activeTab === "wishlists" && (
-        <div className="border p-4 rounded-lg shadow max-w-md">
-          <h2 className="text-xl font-semibold mb-4">Default Wishlists</h2>
-          {wishlists.length > 0 ? (
-            <ul className="list-disc pl-5">
-              {wishlists.map((w) => (
-                <li key={w.id}>{w.name}</li>
-              ))}
-            </ul>
-          ) : (
-            <p>No default wishlists found.</p>
-          )}
-        </div>
-      )}
+    
     </div>
   );
 }

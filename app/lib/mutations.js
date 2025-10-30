@@ -157,7 +157,19 @@ export const EMPTY_CART = gql`
   }
 `;
   
-
+export const UPDATE_CART_ITEM_QUANTITY = gql`
+  mutation UpdateCartItemQuantity($id: ID!, $quantity: Int!) {
+    updateCartItem(id: $id, input: { quantity: $quantity }) {
+      id
+      quantity
+      product {
+        id
+        name
+        price_range_exact_amount
+      }
+    }
+  }
+`;
 
 export const REMOVE_ITEM_FROM_CART = gql`
   mutation RemoveFromCart($id: ID!) {

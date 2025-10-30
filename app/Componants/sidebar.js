@@ -53,7 +53,7 @@ export default function Sidebar({ isOpen, setIsOpen, onSelectCategory, isRTL = f
   return (
     <>
       {/* Sidebar للشاشات الكبيرة */}
-      <aside className={`hidden lg:block bg-black absolut text-white w-64 min-h-screen py-4 px-3 font-sans ${isRTL ? "rtl" : "ltr"}`}>
+      <aside className={`hidden lg:block bg-black absolut text-white w-full min-h-screen py-4 px-3 font-sans ${isRTL ? "rtl" : "ltr"}`}>
         <SidebarContent
           parentCategories={parentCategories}
           categories={categories}

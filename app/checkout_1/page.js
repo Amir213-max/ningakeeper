@@ -1,9 +1,10 @@
 "use client";
 import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { gql } from "graphql-request";
 import { graphqlClient } from "../lib/graphqlClient";
-import { fetchUserCart } from "../lib/mutations";
+import { fetchUserCart, REMOVE_ITEM_FROM_CART, UPDATE_CART_ITEM_QUANTITY } from "../lib/mutations";
 import PriceDisplay from "../components/PriceDisplay";
 
 const GET_COUNTRIES = gql`
@@ -27,6 +28,8 @@ export default function CheckoutPage() {
   const [couponCode, setCouponCode] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [discountAmount, setDiscountAmount] = useState(0);
+  const [loadingItem, setLoadingItem] = useState(null);
+  const [removingItem, setRemovingItem] = useState(null);
 
   useEffect(() => {
     const loadCart = async () => {
@@ -43,6 +46,46 @@ export default function CheckoutPage() {
     };
     loadCountries();
   }, []);
+
+  const handleRemoveItem = async (itemId) => {
+    try {
+      setRemovingItem(itemId);
+      await new Promise((resolve) => setTimeout(resolve, 300)); // Delay for animation
+      await graphqlClient.request(REMOVE_ITEM_FROM_CART, { id: itemId });
+      setCart((prev) => ({
+        ...prev,
+        lineItems: prev.lineItems.filter((i) => i.id !== itemId),
+      }));
+    } catch (err) {
+      console.error("Error removing item:", err);
+      alert("حدث خطأ أثناء حذف المنتج، حاول مرة أخرى.");
+    } finally {
+      setRemovingItem(null);
+    }
+  };
+
+  const handleQuantityChange = async (itemId, newQuantity) => {
+    if (newQuantity < 1) return;
+    try {
+      setLoadingItem(itemId);
+      await graphqlClient.request(UPDATE_CART_ITEM_QUANTITY, {
+        id: itemId,
+        quantity: newQuantity,
+      });
+
+      setCart((prev) => ({
+        ...prev,
+        lineItems: prev.lineItems.map((i) =>
+          i.id === itemId ? { ...i, quantity: newQuantity } : i
+        ),
+      }));
+    } catch (err) {
+      console.error("Error updating quantity:", err);
+      alert("حدث خطأ أثناء تحديث الكمية");
+    } finally {
+      setLoadingItem(null);
+    }
+  };
 
   const applyCoupon = () => {
     if (!couponCode) {
@@ -61,13 +104,9 @@ export default function CheckoutPage() {
       )
     : 0;
 
-  // المجموع بعد الخصم
   const totalAfterDiscount = cartSubtotal - discountAmount;
-
-  // تحديد الدولة المختارة
   const selectedCountryData = countries.find((c) => c.id === selectedCountry);
 
-  // حساب الضريبة لو الدولة هي السعودية
   const isSaudi =
     selectedCountryData &&
     (selectedCountryData.name.toLowerCase().includes("saudi") ||
@@ -90,14 +129,15 @@ export default function CheckoutPage() {
     router.push(`/checkout_1/customer?${params.toString()}`);
   };
 
-  if (!cart) return (
-    <div className="min-h-screen bg-white md:bg-gray-50 flex items-center justify-center">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FFD300] mx-auto mb-4"></div>
-        <p className="text-[#111] text-lg">Loading your cart...</p>
+  if (!cart)
+    return (
+      <div className="min-h-screen bg-white md:bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FFD300] mx-auto mb-4"></div>
+          <p className="text-[#111] text-lg">Loading your cart...</p>
+        </div>
       </div>
-    </div>
-  );
+    );
 
   return (
     <div className="min-h-screen bg-white md:bg-gray-50 text-[#111]">
@@ -115,7 +155,6 @@ export default function CheckoutPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Left Column - Cart Summary */}
           <div className="space-y-6">
-            {/* Cart Items */}
             <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8 border border-gray-100 hover:shadow-xl transition-all duration-300">
               <div className="flex items-center mb-6">
                 <div className="w-8 h-8 bg-[#FFD300] rounded-full flex items-center justify-center mr-3">
@@ -123,47 +162,88 @@ export default function CheckoutPage() {
                 </div>
                 <h2 className="text-2xl font-bold text-[#111]">Your Cart</h2>
               </div>
-              
+
               <div className="space-y-4">
-                {cart.lineItems.map((item) => (
-                  <div
-                    key={item.id}
-                    className="flex items-center p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors duration-200"
-                  >
-                    <div className="flex-shrink-0 w-16 h-16 md:w-20 md:h-20 bg-gray-200 rounded-lg overflow-hidden">
-                      {item.product.images?.[0] ? (
-                        <img
-                          src={item.product.images[0]}
-                          alt={item.product.name}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-gray-500 font-bold text-xs">
-                          No Image
+                <AnimatePresence>
+                  {cart.lineItems.map((item) => (
+                    <motion.div
+                      key={item.id}
+                      initial={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20, transition: { duration: 0.3 } }}
+                      className="relative flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors duration-200"
+                    >
+                      {/* زر الإزالة */}
+                      <button
+                        onClick={() => handleRemoveItem(item.id)}
+                        className="absolute top-2 right-2 w-7 h-7 flex items-center justify-center rounded-full bg-gray-200 text-gray-500 hover:bg-red-500 hover:text-white transition-all duration-200 shadow-sm"
+                        title="Remove item"
+                      >
+                        ✕
+                      </button>
+
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0 w-16 h-16 md:w-20 md:h-20 bg-gray-200 rounded-lg overflow-hidden">
+                          {item.product.images?.[0] ? (
+                            <img
+                              src={item.product.images[0]}
+                              alt={item.product.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-gray-500 font-bold text-xs">
+                              No Image
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
-                    
-                    <div className="ml-4 flex-1">
-                      <h3 className="font-semibold text-[#111] text-sm md:text-base line-clamp-2">
-                        {item.product.name}
-                      </h3>
-                      <p className="text-[#555] text-sm">Quantity: {item.quantity}</p>
-                    </div>
-                    
-                    <div className="text-right">
-                      <PriceDisplay 
-                        price={item.product.price_range_exact_amount * item.quantity}
-                        size="base"
-                      />
-                    </div>
-                  </div>
-                ))}
+
+                        <div className="ml-4">
+                          <h3 className="font-semibold text-[#111] text-sm md:text-base line-clamp-2">
+                            {item.product.name}
+                          </h3>
+
+                          {/* Quantity Controls */}
+                          <div className="flex items-center gap-3 mt-2">
+                            <button
+                              onClick={() =>
+                                handleQuantityChange(item.id, item.quantity - 1)
+                              }
+                              disabled={loadingItem === item.id}
+                              className="w-7 h-7 flex items-center justify-center bg-gray-200 rounded-md hover:bg-gray-300 disabled:opacity-50"
+                            >
+                              -
+                            </button>
+                            <span className="w-6 text-center font-medium text-[#111]">
+                              {loadingItem === item.id ? "..." : item.quantity}
+                            </span>
+                            <button
+                              onClick={() =>
+                                handleQuantityChange(item.id, item.quantity + 1)
+                              }
+                              disabled={loadingItem === item.id}
+                              className="w-7 h-7 flex items-center justify-center bg-gray-200 rounded-md hover:bg-gray-300 disabled:opacity-50"
+                            >
+                              +
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col mt-auto items-end">
+                        <PriceDisplay
+                          price={item.product.price_range_exact_amount * item.quantity}
+                          size="base"
+                        />
+                      </div>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
               </div>
 
               {/* Coupon Section */}
               <div className="mt-6 pt-6 border-t border-gray-200">
-                <h3 className="text-lg font-semibold text-[#111] mb-4">Discount Code</h3>
+                <h3 className="text-lg font-semibold text-[#111] mb-4">
+                  Discount Code
+                </h3>
                 <div className="flex gap-3">
                   <input
                     type="text"
@@ -183,9 +263,8 @@ export default function CheckoutPage() {
             </div>
           </div>
 
-          {/* Right Column - Country Selection & Continue */}
+          {/* Right Column */}
           <div className="space-y-6">
-            {/* Country Selection */}
             <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8 border border-gray-100 hover:shadow-xl transition-all duration-300">
               <div className="flex items-center mb-6">
                 <div className="w-8 h-8 bg-[#FFD300] rounded-full flex items-center justify-center mr-3">
@@ -193,7 +272,7 @@ export default function CheckoutPage() {
                 </div>
                 <h2 className="text-2xl font-bold text-[#111]">Shipping Destination</h2>
               </div>
-              
+
               <div className="space-y-4">
                 <label className="block">
                   <span className="text-[#111] font-medium mb-2 block">Select Country</span>
@@ -213,20 +292,22 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-            {/* Order Summary */}
             <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8 border border-gray-100">
               <h3 className="text-xl font-bold text-[#111] mb-6">Order Summary</h3>
-              
+
               <div className="space-y-3">
                 <div className="flex justify-between text-[#555]">
                   <span>Subtotal:</span>
                   <PriceDisplay price={cartSubtotal} showCurrency={true} />
                 </div>
-                
+
                 {discountAmount > 0 && (
                   <div className="flex justify-between text-green-600">
                     <span>Discount:</span>
-                    <span>- <PriceDisplay price={discountAmount} showCurrency={true} /></span>
+                    <span>
+                      -{" "}
+                      <PriceDisplay price={discountAmount} showCurrency={true} />
+                    </span>
                   </div>
                 )}
 
@@ -238,18 +319,21 @@ export default function CheckoutPage() {
                     </div>
                     <div className="flex justify-between text-orange-600">
                       <span>VAT (15%):</span>
-                      <span>+ <PriceDisplay price={taxAmount} showCurrency={true} /></span>
+                      <span>
+                        +{" "}
+                        <PriceDisplay price={taxAmount} showCurrency={true} />
+                      </span>
                     </div>
                   </>
                 )}
-                
+
                 <div className="border-t border-gray-200 pt-3">
                   <div className="flex justify-between text-lg font-bold text-[#111]">
                     <span>Total:</span>
                     <span className="text-[#FFD300]">
-                      <PriceDisplay 
-                        price={isSaudi ? totalWithTax : totalAfterDiscount} 
-                        showCurrency={true} 
+                      <PriceDisplay
+                        price={isSaudi ? totalWithTax : totalAfterDiscount}
+                        showCurrency={true}
                         size="lg"
                       />
                     </span>
@@ -258,7 +342,6 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-            {/* Continue Button */}
             <button
               onClick={handleContinue}
               className="w-full bg-[#FFD300] text-[#111] py-4 px-6 rounded-xl font-bold text-lg hover:bg-[#E6BE00] transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl"

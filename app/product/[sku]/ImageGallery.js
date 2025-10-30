@@ -82,14 +82,15 @@ export default function ImageGallery({
         options={{
           direction: 'ltr',
           height: 'auto',
-          perPage: 5, // 👈 يعرض 4 صور أصغر بدل 3
+          perPage: 6,
           pagination: false,
           arrows: false,
-          gap:8, // 👈 زيادة المسافة بين الصور
+           gap: '-10px', // 👈 زيادة المسافة بين الصور
           wheel: true,
           breakpoints: {
             640: {
-              perPage: 5,
+              perPage: 6,
+               gap: '-10px',
             },
           },
         }}
@@ -100,7 +101,7 @@ export default function ImageGallery({
           <SplideSlide key={index}>
             <motion.button
               onClick={() => handleImageClick(img)}
-              className={`w-[70%] mx-auto aspect-square rounded-lg border-2 transition-all duration-300 overflow-hidden group 
+              className={`w-[70%]  aspect-square rounded-lg border-2 transition-all duration-300 overflow-hidden group 
               ${currentSelectedImage === img
                 ? 'border-yellow-400 shadow-lg ring-2 ring-yellow-200'
                 : 'border-gray-200 hover:border-yellow-300 hover:shadow-md'

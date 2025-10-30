@@ -107,13 +107,18 @@ useEffect(() => {
           {/* ✅ Right side (User + Search + Notifications + Lang) */}
           <div className="navbar-right order-2 flex items-center gap-4">
             {/* 🔑 لو المستخدم مسجل دخول */}
+             
             {user ? (
-              <div className="hidden lg:flex  text-white flex items-center gap-3">
+                <Link
+                href="/myprofile">
+                  <div className="hidden lg:flex  text-white flex items-center gap-3">
                 <span className="text-sm hidden sm:inline">{user.name}</span>
                 <button className="text-white hover:text-amber-600 cursor-pointer transition-colors duration-200">
-                  <FaUser className='hidden  lg-flex' size={20} />
+                  <FaUser className='  lg-flex' size={20} />
                 </button>
               </div>
+                </Link>
+              
             ) : (
               <Link
                 href="/login"
