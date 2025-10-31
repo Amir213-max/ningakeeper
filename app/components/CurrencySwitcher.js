@@ -10,8 +10,8 @@ const CurrencySwitcher = () => {
   const dropdownRef = useRef(null);
 
   const currencies = [
-    { code: 'EUR', name: 'Euro',  flag: '🇪🇺' },
-    { code: 'SAR', name: 'Saudi Riyal', flag: '🇸🇦' },
+    { code: 'EUR', name: '€',  flag: '🇪🇺' },
+    { code: 'SAR', name: '﷼', flag: '🇸🇦' },
   ];
 
   const currentCurrency = currencies.find(c => c.code === currency);
@@ -50,9 +50,9 @@ const CurrencySwitcher = () => {
         className="flex items-center bg-black text-white border border-gray-600 rounded-lg shadow-sm hover:border-[#FFD300] transition-all duration-200 text-sm sm:text-base px-2 py-1"
         aria-label="Select currency"
       >
-        <span className="text-base text-white sm:text-base">{currentCurrency?.flag}</span> {/* تكبير العلم */}
-        <span className=" text-white ml-1">{currentCurrency?.code}</span>
-        <span className="ml-1 text-white">{currentCurrency?.symbol}</span>
+        {/* <span className="text-base text-white sm:text-base">{currentCurrency?.flag}</span> */}
+        <span className=" text-white ml-1">{currentCurrency?.name}</span>
+        {/* <span className="ml-1 text-white">{currentCurrency?.symbol}</span> */}
         <ChevronDown
           size={14}
           className={`text-white transition-transform duration-200 ml-1 ${isOpen ? 'rotate-180' : ''}`}
@@ -61,7 +61,7 @@ const CurrencySwitcher = () => {
 
       {/* القائمة المنسدلة */}
       {isOpen && (
-        <div className="absolute text-white right-0 mt-1 w-30 sm:w-35 bg-gray-900 border border-gray-600 rounded-lg shadow-lg z-50 overflow-hidden text-sm">
+        <div className="absolute text-white right-0 mt-1 w-12 sm:w-12 bg-gray-900 border border-gray-600 rounded-lg shadow-lg z-50 overflow-hidden text-sm">
           {currencies.map((curr) => (
             <button
               key={curr.code}
@@ -70,11 +70,11 @@ const CurrencySwitcher = () => {
                 currency === curr.code ? 'bg-[#FFD300]/10' : ''
               }`}
             >
-              <span className="text-base text-white sm:text-base">{curr.flag}</span> {/* تكبير العلم */}
+              {/* <span className="text-base text-white sm:text-base">{curr.flag}</span> تكبير العلم */}
               <div className="flex-1">
                 <div className="flex items-center text-white justify-between">
-                  <span className="font-medium text-white">{curr.code}</span>
-                  <span className="font-medium text-white">{curr.symbol}</span>
+                  <span className="font-medium text-white">{curr.name}</span>
+                  {/* <span className="font-medium text-white">{curr.symbol}</span> */}
                   {currency === curr.code && (
                     <svg
                       className="w-4 h-4 text-white"
@@ -89,7 +89,7 @@ const CurrencySwitcher = () => {
                     </svg>
                   )}
                 </div>
-                <p className="text-[11px] text-white">{curr.name}</p>
+      
               </div>
             </button>
           ))}
