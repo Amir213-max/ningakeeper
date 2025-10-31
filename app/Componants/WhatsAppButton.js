@@ -13,7 +13,7 @@ const WhatsAppButton = ({ phoneNumber = "201234567890" }) => {
   };
 
   return (
-    <div className="fixed bottom-6 left-15 z-50">
+    <div className="fixed bottom-15 left-10 z-50">
       {/* Tooltip */}
       <AnimatePresence>
         {showTooltip && (
@@ -70,20 +70,7 @@ const WhatsAppButton = ({ phoneNumber = "201234567890" }) => {
       </motion.button>
 
       {/* Mobile-specific positioning adjustment */}
-      <style jsx>{`
-        @media (max-width: 768px) {
-          .fixed {
-            bottom: 1.5rem;
-            right: 1.5rem;
-          }
-        }
-        @media (min-width: 769px) {
-          .fixed {
-            bottom: 1.5rem;
-            right: 5rem;
-          }
-        }
-      `}</style>
+
     </div>
   );
 };

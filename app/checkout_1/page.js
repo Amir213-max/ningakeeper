@@ -165,77 +165,77 @@ export default function CheckoutPage() {
 
               <div className="space-y-4">
                 <AnimatePresence>
-                  {cart.lineItems.map((item) => (
-                    <motion.div
-                      key={item.id}
-                      initial={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20, transition: { duration: 0.3 } }}
-                      className="relative flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors duration-200"
-                    >
-                      {/* زر الإزالة */}
-                      <button
-                        onClick={() => handleRemoveItem(item.id)}
-                        className="absolute top-2 right-2 w-7 h-7 flex items-center justify-center rounded-full bg-gray-200 text-gray-500 hover:bg-red-500 hover:text-white transition-all duration-200 shadow-sm"
-                        title="Remove item"
-                      >
-                        ✕
-                      </button>
+                 {cart.lineItems.map((item) => (
+  <motion.div
+    key={item.id}
+    initial={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: -20, transition: { duration: 0.3 } }}
+    className="relative flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors duration-200"
+  >
+    {/* زر الإزالة */}
+    <button
+      onClick={() => handleRemoveItem(item.id)}
+      className="absolute top-2 right-2 w-7 h-7 flex items-center justify-center rounded-full bg-gray-200 text-gray-500 hover:bg-red-500 hover:text-white transition-all duration-200 shadow-sm"
+      title="Remove item"
+    >
+      ✕
+    </button>
 
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0 w-16 h-16 md:w-20 md:h-20 bg-gray-200 rounded-lg overflow-hidden">
-                          {item.product.images?.[0] ? (
-                            <img
-                              src={item.product.images[0]}
-                              alt={item.product.name}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-gray-500 font-bold text-xs">
-                              No Image
-                            </div>
-                          )}
-                        </div>
+    <div className="flex gap-3 items-center w-full flex-col sm:flex-row sm:items-start">
+      {/* صورة المنتج */}
+      <div className="flex-shrink-0 w-24 h-24 sm:w-20 sm:h-20 bg-gray-200 rounded-lg overflow-hidden">
+        {item.product.images?.[0] ? (
+          <img
+            src={item.product.images[0]}
+            alt={item.product.name}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-gray-500 font-bold text-xs">
+            No Image
+          </div>
+        )}
+      </div>
 
-                        <div className="ml-4">
-                          <h3 className="font-semibold text-[#111] text-sm md:text-base line-clamp-2">
-                            {item.product.name}
-                          </h3>
+      {/* معلومات المنتج */}
+      <div className="flex flex-col sm:flex-1 sm:justify-between w-full sm:w-auto text-center sm:text-left">
+        <h3 className="font-semibold text-[#111] text-sm md:text-base line-clamp-2 mb-2 sm:mb-1">
+          {item.product.name}
+        </h3>
 
-                          {/* Quantity Controls */}
-                          <div className="flex items-center gap-3 mt-2">
-                            <button
-                              onClick={() =>
-                                handleQuantityChange(item.id, item.quantity - 1)
-                              }
-                              disabled={loadingItem === item.id}
-                              className="w-7 h-7 flex items-center justify-center bg-gray-200 rounded-md hover:bg-gray-300 disabled:opacity-50"
-                            >
-                              -
-                            </button>
-                            <span className="w-6 text-center font-medium text-[#111]">
-                              {loadingItem === item.id ? "..." : item.quantity}
-                            </span>
-                            <button
-                              onClick={() =>
-                                handleQuantityChange(item.id, item.quantity + 1)
-                              }
-                              disabled={loadingItem === item.id}
-                              className="w-7 h-7 flex items-center justify-center bg-gray-200 rounded-md hover:bg-gray-300 disabled:opacity-50"
-                            >
-                              +
-                            </button>
-                          </div>
-                        </div>
-                      </div>
+        {/* التحكم في الكمية */}
+        <div className="flex justify-center sm:justify-start items-center gap-3 mt-1 mb-3">
+          <button
+            onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
+            disabled={loadingItem === item.id}
+            className="w-7 h-7 flex items-center justify-center bg-gray-200 rounded-md hover:bg-gray-300 disabled:opacity-50"
+          >
+            -
+          </button>
+          <span className="w-6 text-center font-medium text-[#111]">
+            {loadingItem === item.id ? "..." : item.quantity}
+          </span>
+          <button
+            onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
+            disabled={loadingItem === item.id}
+            className="w-7 h-7 flex items-center justify-center bg-gray-200 rounded-md hover:bg-gray-300 disabled:opacity-50"
+          >
+            +
+          </button>
+        </div>
 
-                      <div className="flex flex-col mt-auto items-end">
-                        <PriceDisplay
-                          price={item.product.price_range_exact_amount * item.quantity}
-                          size="base"
-                        />
-                      </div>
-                    </motion.div>
-                  ))}
+        {/* السعر */}
+        <div className="flex justify-center sm:justify-end">
+          <PriceDisplay
+            price={item.product.price_range_exact_amount * item.quantity}
+            size="base"
+          />
+        </div>
+      </div>
+    </div>
+  </motion.div>
+))}
+
                 </AnimatePresence>
               </div>
 
@@ -244,7 +244,7 @@ export default function CheckoutPage() {
                 <h3 className="text-lg font-semibold text-[#111] mb-4">
                   Discount Code
                 </h3>
-                <div className="flex gap-3">
+                <div className="flex flex-wrap gap-3">
                   <input
                     type="text"
                     placeholder="Enter discount code"
