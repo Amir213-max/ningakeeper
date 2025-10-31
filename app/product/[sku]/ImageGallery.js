@@ -50,7 +50,7 @@ export default function ImageGallery({
             <SplideSlide key={index}>
               <motion.button
                 onClick={() => handleImageClick(img)}
-                className={`w-[80%] mx-auto aspect-square rounded-lg transition-all duration-300 overflow-hidden group 
+                className={`w-[80%] mx-auto aspect-square  transition-all duration-300 overflow-hidden group 
                 ${currentSelectedImage === img
                   ? ' shadow-lg ring-2 '
                   : '  hover:shadow-md'
@@ -101,7 +101,7 @@ export default function ImageGallery({
           <SplideSlide key={index}>
             <motion.button
               onClick={() => handleImageClick(img)}
-              className={`w-[70%]  aspect-square rounded-lg border-2 transition-all duration-300 overflow-hidden group 
+              className={`w-[90%]  aspect-square border-2 transition-all duration-300 overflow-hidden group 
               ${currentSelectedImage === img
                 ? 'border-yellow-400 shadow-lg ring-2 ring-yellow-200'
                 : 'border-gray-200 hover:border-yellow-300 hover:shadow-md'

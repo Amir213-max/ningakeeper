@@ -142,7 +142,7 @@ export default function HomePageBlocks() {
               {block.type === "banners" && block.content?.banners?.length > 0 && (
                 <>
                   {block.content.banners.length <= 2 ? (
-                    <div className="w-full px-2 md:px-4">
+                    <div className="w-full ">
                       <div
                         className={`grid gap-3 ${
                           block.content.banners.length === 1 ? "grid-cols-1" : "grid-cols-2"

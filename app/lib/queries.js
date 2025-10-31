@@ -52,13 +52,6 @@ export const GET_ME = gql`
         id
         name
         email
-      defaultWishlist{
-        id
-      }
-        wishlists{
-          id
-          name
-      }
     }
   }
 `;
