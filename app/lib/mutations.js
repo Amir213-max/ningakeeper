@@ -55,6 +55,9 @@ const GET_USER_CART = gql`
           offer_code
           id
           name
+           productBadges{
+        label
+      }
           list_price_amount
       list_price_currency
       relative_list_price_difference
@@ -80,6 +83,7 @@ export const ADD_TO_WISHLIST = gql`
       wishlist_item {
         id
         product {
+
           id
           name
         }
@@ -109,6 +113,9 @@ const ADD_ITEM_TO_CART = gql`
       quantity
       product {
         id
+         productBadges{
+        label
+      }
         name
         list_price_amount
         list_price_currency
@@ -138,6 +145,7 @@ mutation CreateOrderFromCart($cart_id: ID!, $input: CreateOrderFromCartInput!) {
       updated_at
       
     }
+
     number
     shipping_type
     shipping_cost
@@ -163,9 +171,13 @@ export const UPDATE_CART_ITEM_QUANTITY = gql`
       id
       quantity
       product {
+       productBadges{
+        label
+      }
         id
         name
         price_range_exact_amount
+        list_price_amount
       }
     }
   }

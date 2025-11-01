@@ -294,43 +294,51 @@ export default function HomePageBlocks() {
                                   <div className="text-gray-500 text-sm">No Image</div>
                                 )}
                               </div>
+{/* 🔹 Product Info */}
+<div className="p-4 text-center overflow-hidden flex flex-col justify-between">
+  {product.brand?.name && (
+    <p className="text-gray-300 text-sm mb-1">{product.brand.name}</p>
+  )}
 
-                              {/* 🔹 Product Info */}
-                              <div className="p-4 text-center overflow-hidden flex flex-col justify-between">
-                                {product.brand?.name && (
-                                  <p className="text-gray-300 text-sm mb-1">{product.brand.name}</p>
-                                )}
-                                <h3 className="text-white text-sm sm:text-base font-medium line-clamp-2 mb-2">
-                                  {product.name}
-                                </h3>
+  <h3 className="text-white text-sm sm:text-base font-medium line-clamp-2 mb-2">
+    {product.name}
+  </h3>
 
-                                <div className="text-white font-bold text-lg">
-                                  {badgeLabel ? (
-                                    <>
-                                      <div className="text-gray-400 text-sm line-through">
-                                        <PriceDisplay
-                                          price={product.list_price_amount}
-                                          loading={currencyLoading}
-                                        />
-                                      </div>
-                                      <PriceDisplay
-                                        price={
-                                          product.list_price_amount -
-                                          (product.list_price_amount *
-                                            parseFloat(badgeLabel.replace("%", ""))) /
-                                            100
-                                        }
-                                        loading={currencyLoading}
-                                      />
-                                    </>
-                                  ) : (
-                                    <PriceDisplay
-                                      price={product.list_price_amount}
-                                      loading={currencyLoading}
-                                    />
-                                  )}
-                                </div>
-                              </div>
+  <div className="text-white font-bold text-lg">
+    {badgeLabel && badgeLabel.includes("%") ? (
+      <>
+        {/* السعر القديم */}
+        <div className="text-gray-400 text-sm line-through mb-1">
+          <PriceDisplay
+            price={product.list_price_amount}
+            loading={currencyLoading}
+          />
+        </div>
+
+        {/* السعر بعد الخصم */}
+        <div className="text-white text-lg">
+          <PriceDisplay
+            price={
+              product.list_price_amount -
+              (product.list_price_amount * Math.abs(parseFloat(badgeLabel.replace("%", "")))) / 100
+              
+            }
+          
+            
+            loading={currencyLoading}
+          />
+        </div>
+      </>
+    ) : (
+      // لو مفيش badge
+      <PriceDisplay
+        price={product.list_price_amount}
+        loading={currencyLoading}
+      />
+    )}
+  </div>
+</div>
+
                             </Link>
                           </motion.div>
                         </SplideSlide>

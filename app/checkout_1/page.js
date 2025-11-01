@@ -29,6 +29,7 @@ export default function CheckoutPage() {
   const [cartId, setCartId] = useState("1");
   const [countries, setCountries] = useState([]);
   const [selectedCountry, setSelectedCountry] = useState("");
+  const [selectedShipping, setSelectedShipping] = useState(""); // ✅ نوع الشحن
   const [couponCode, setCouponCode] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [discountAmount, setDiscountAmount] = useState(0);
@@ -54,7 +55,7 @@ export default function CheckoutPage() {
   const handleRemoveItem = async (itemId) => {
     try {
       setRemovingItem(itemId);
-      await new Promise((resolve) => setTimeout(resolve, 300)); // Delay for animation
+      await new Promise((resolve) => setTimeout(resolve, 300));
       await graphqlClient.request(REMOVE_ITEM_FROM_CART, { id: itemId });
       setCart((prev) => ({
         ...prev,
@@ -101,13 +102,23 @@ export default function CheckoutPage() {
     alert(`تم تطبيق الكوبون: ${couponCode}`);
   };
 
-  // ✅ المجموع الفرعي باستخدام list_price_amount
-  const cartSubtotal = cart
-    ? cart.lineItems.reduce(
-        (sum, i) => sum + (i.product.list_price_amount || 0) * i.quantity,
-        0
-      )
-    : 0;
+// ✅ جمع الأسعار بعد الخصم لو فيه badge
+const cartSubtotal = cart
+  ? cart.lineItems.reduce((sum, i) => {
+      const price =
+        i.product.productBadges?.length > 0
+          ? i.product.list_price_amount -
+            (i.product.list_price_amount *
+              Math.abs(
+                parseFloat(i.product.productBadges[0].label.replace("%", ""))
+              )) /
+              100
+          : i.product.list_price_amount || 0;
+
+      return sum + price * i.quantity;
+    }, 0)
+  : 0;
+
 
   const totalAfterDiscount = cartSubtotal - discountAmount;
   const selectedCountryData = countries.find((c) => c.id === selectedCountry);
@@ -119,16 +130,27 @@ export default function CheckoutPage() {
 
   const taxRate = isSaudi ? 0.15 : 0;
   const taxAmount = totalAfterDiscount * taxRate;
-  const totalWithTax = totalAfterDiscount + taxAmount;
+
+  // ✅ حساب تكلفة الشحن بناءً على الاختيار
+  const shippingCost =
+    selectedShipping === "fast"
+      ? selectedCountryData?.fast_shipping_cost || 0
+      : selectedShipping === "normal"
+      ? selectedCountryData?.normal_shipping_cost || 0
+      : 0;
+
+  const totalWithTaxAndShipping =
+    totalAfterDiscount + taxAmount + shippingCost;
 
   const handleContinue = () => {
-    if (!selectedCountry) {
-      alert("من فضلك اختر الدولة");
+    if (!selectedCountry || !selectedShipping) {
+      alert("من فضلك اختر الدولة ونوع الشحن");
       return;
     }
     const params = new URLSearchParams({
       cartId,
       countryId: selectedCountry,
+      shippingType: selectedShipping,
       appliedCoupon: appliedCoupon || "",
     });
     router.push(`/checkout_1/customer?${params.toString()}`);
@@ -160,7 +182,7 @@ export default function CheckoutPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Left Column - Cart Summary */}
           <div className="space-y-6">
-            <div className="bg-white shadow-lg p-6 md:p-8 border border-gray-100 hover:shadow-xl transition-all duration-300">
+            <div className="bg-white  shadow-lg p-6 md:p-8 border border-gray-100 hover:shadow-xl transition-all duration-300">
               <div className="flex items-center mb-6">
                 <div className="w-8 h-8 bg-[#FFD300] rounded-full flex items-center justify-center mr-3">
                   <span className="text-[#111] font-bold text-sm">1</span>
@@ -170,87 +192,88 @@ export default function CheckoutPage() {
 
               <div className="space-y-4">
                 <AnimatePresence>
-                  {cart.lineItems.map((item) => (
-                    <motion.div
-                      key={item.id}
-                      initial={{ opacity: 1, y: 0 }}
-                      exit={{
-                        opacity: 0,
-                        y: -20,
-                        transition: { duration: 0.3 },
-                      }}
-                      className="relative flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors duration-200"
-                    >
-                      {/* زر الإزالة */}
-                      <button
-                        onClick={() => handleRemoveItem(item.id)}
-                        className="absolute top-2 right-2 w-7 h-7 flex items-center justify-center rounded-full bg-gray-200 text-gray-500 hover:bg-red-500 hover:text-white transition-all duration-200 shadow-sm"
-                        title="Remove item"
-                      >
-                        ✕
-                      </button>
+                 {cart.lineItems.map((item) => (
+  <motion.div
+    key={item.id}
+    initial={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: -20, transition: { duration: 0.3 } }}
+    className="relative flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors duration-200"
+  >
+    {/* زر الإزالة */}
+    <button
+      onClick={() => handleRemoveItem(item.id)}
+      className="absolute top-2 right-2 w-7 h-7 flex items-center justify-center rounded-full bg-gray-200 text-gray-500 hover:bg-red-500 hover:text-white transition-all duration-200 shadow-sm"
+      title="Remove item"
+    >
+      ✕
+    </button>
 
-                      <div className="flex gap-3 items-center w-full flex-col sm:flex-row sm:items-start">
-                        {/* صورة المنتج */}
-                        <div className="flex-shrink-0 w-24 h-24 sm:w-20 sm:h-20 bg-gray-200 rounded-lg overflow-hidden">
-                          {item.product.images?.[0] ? (
-                            <img
-                              src={item.product.images[0]}
-                              alt={item.product.name}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-gray-500 font-bold text-xs">
-                              No Image
-                            </div>
-                          )}
-                        </div>
+    <div className="flex gap-3 items-center w-full flex-col sm:flex-row sm:items-start">
+      {/* صورة المنتج */}
+      <div className="flex-shrink-0 w-24 h-24 sm:w-20 sm:h-20 bg-gray-200 rounded-lg overflow-hidden">
+        {item.product.images?.[0] ? (
+          <img
+            src={item.product.images[0]}
+            alt={item.product.name}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-gray-500 font-bold text-xs">
+            No Image
+          </div>
+        )}
+      </div>
 
-                        {/* معلومات المنتج */}
-                        <div className="flex flex-col sm:flex-1 sm:justify-between w-full sm:w-auto text-center sm:text-left">
-                          <h3 className="font-semibold text-[#111] text-sm md:text-base line-clamp-2 mb-2 sm:mb-1">
-                            {item.product.name}
-                          </h3>
+      {/* معلومات المنتج */}
+      <div className="flex flex-col sm:flex-1 sm:justify-between w-full sm:w-auto text-center sm:text-left">
+        <h3 className="font-semibold text-[#111] text-sm md:text-base line-clamp-2 mb-2 sm:mb-1">
+          {item.product.name}
+        </h3>
 
-                          {/* التحكم في الكمية */}
-                          <div className="flex justify-center sm:justify-start items-center gap-3 mt-1 mb-3">
-                            <button
-                              onClick={() =>
-                                handleQuantityChange(item.id, item.quantity - 1)
-                              }
-                              disabled={loadingItem === item.id}
-                              className="w-7 h-7 flex items-center justify-center bg-gray-200 rounded-md hover:bg-gray-300 disabled:opacity-50"
-                            >
-                              -
-                            </button>
-                            <span className="w-6 text-center font-medium text-[#111]">
-                              {loadingItem === item.id ? "..." : item.quantity}
-                            </span>
-                            <button
-                              onClick={() =>
-                                handleQuantityChange(item.id, item.quantity + 1)
-                              }
-                              disabled={loadingItem === item.id}
-                              className="w-7 h-7 flex items-center justify-center bg-gray-200 rounded-md hover:bg-gray-300 disabled:opacity-50"
-                            >
-                              +
-                            </button>
-                          </div>
+        {/* التحكم في الكمية */}
+        <div className="flex justify-center sm:justify-start items-center gap-3 mt-1 mb-3">
+          <button
+            onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
+            disabled={loadingItem === item.id}
+            className="w-7 h-7 flex items-center justify-center bg-gray-200 rounded-md hover:bg-gray-300 disabled:opacity-50"
+          >
+            -
+          </button>
+          <span className="w-6 text-center font-medium text-[#111]">
+            {loadingItem === item.id ? "..." : item.quantity}
+          </span>
+          <button
+            onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
+            disabled={loadingItem === item.id}
+            className="w-7 h-7 flex items-center justify-center bg-gray-200 rounded-md hover:bg-gray-300 disabled:opacity-50"
+          >
+            +
+          </button>
+        </div>
 
-                          {/* ✅ السعر الصحيح */}
-                          <div className="flex justify-center sm:justify-end">
-                            <PriceDisplay
-                              price={
-                                (item.product.list_price_amount || 0) *
-                                item.quantity
-                              }
-                              size="base"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))}
+        {/* السعر */}
+        <div className="flex justify-center sm:justify-end">
+        {/* ✅ السعر الصحيح مع الخصم إن وجد */}
+<PriceDisplay
+  price={
+    (
+      item.product.productBadges?.length > 0
+        ? item.product.list_price_amount - (
+            item.product.list_price_amount *
+            Math.abs(parseFloat(item.product.productBadges[0].label.replace("%", "")))
+          ) / 100
+        : item.product.list_price_amount
+    ) * item.quantity
+  }
+  size="base"
+/>
+
+        </div>
+      </div>
+    </div>
+  </motion.div>
+))}
+
                 </AnimatePresence>
               </div>
 
@@ -277,8 +300,8 @@ export default function CheckoutPage() {
               </div>
             </div>
           </div>
-
-          {/* Right Column */}
+          {/* ... */}
+          {/* ✅ Country & Shipping */}
           <div className="space-y-6">
             <div className="bg-white shadow-lg p-6 md:p-8 border border-gray-100 hover:shadow-xl transition-all duration-300">
               <div className="flex items-center mb-6">
@@ -291,14 +314,18 @@ export default function CheckoutPage() {
               </div>
 
               <div className="space-y-4">
+                {/* Country */}
                 <label className="block">
                   <span className="text-[#111] font-medium mb-2 block">
                     Select Country
                   </span>
                   <select
                     value={selectedCountry}
-                    onChange={(e) => setSelectedCountry(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-[#FFD300] focus:ring-2 focus:ring-[#FFD300] focus:ring-opacity-20 outline-none transition-all duration-200 text-[#111] bg-white"
+                    onChange={(e) => {
+                      setSelectedCountry(e.target.value);
+                      setSelectedShipping("");
+                    }}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-[#FFD300] focus:ring-2 focus:ring-[#FFD300] outline-none"
                   >
                     <option value="">-- Select Country --</option>
                     {countries.map((c) => (
@@ -308,9 +335,50 @@ export default function CheckoutPage() {
                     ))}
                   </select>
                 </label>
+
+                {/* ✅ Shipping Type */}
+                {selectedCountry && (
+                  <div className="mt-4">
+                    <span className="text-[#111] font-medium mb-2 block">
+                      Shipping Type
+                    </span>
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => setSelectedShipping("normal")}
+                        className={`flex-1 px-4 py-3 rounded-xl border text-sm font-semibold transition-all duration-200 ${
+                          selectedShipping === "normal"
+                            ? "border-[#FFD300] bg-[#FFF7CC] text-[#111]"
+                            : "border-gray-300 text-gray-600 hover:bg-gray-50"
+                        }`}
+                      >
+                        Normal Shipping (
+                        <PriceDisplay
+                          price={selectedCountryData?.normal_shipping_cost || 0}
+                        />
+                        )
+                      </button>
+
+                      <button
+                        onClick={() => setSelectedShipping("fast")}
+                        className={`flex-1 px-4 py-3 rounded-xl border text-sm font-semibold transition-all duration-200 ${
+                          selectedShipping === "fast"
+                            ? "border-[#FFD300] bg-[#FFF7CC] text-[#111]"
+                            : "border-gray-300 text-gray-600 hover:bg-gray-50"
+                        }`}
+                      >
+                        Fast Shipping (
+                        <PriceDisplay
+                          price={selectedCountryData?.fast_shipping_cost || 0}
+                        />
+                        )
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
+            {/* ✅ Order Summary */}
             <div className="bg-white shadow-lg p-6 md:p-8 border border-gray-100">
               <h3 className="text-xl font-bold text-[#111] mb-6">
                 Order Summary
@@ -319,36 +387,31 @@ export default function CheckoutPage() {
               <div className="space-y-3">
                 <div className="flex justify-between text-[#555]">
                   <span>Subtotal:</span>
-                  <PriceDisplay price={cartSubtotal} showCurrency={true} />
+                  <PriceDisplay price={cartSubtotal} />
                 </div>
 
                 {discountAmount > 0 && (
                   <div className="flex justify-between text-green-600">
                     <span>Discount:</span>
                     <span>
-                      -{" "}
-                      <PriceDisplay
-                        price={discountAmount}
-                        showCurrency={true}
-                      />
+                      - <PriceDisplay price={discountAmount} />
                     </span>
+                  </div>
+                )}
+
+                {shippingCost > 0 && (
+                  <div className="flex justify-between text-[#555]">
+                    <span>Shipping:</span>
+                    <PriceDisplay price={shippingCost} />
                   </div>
                 )}
 
                 {isSaudi && (
                   <>
                     <div className="flex justify-between text-[#555]">
-                      <span>Subtotal (excl. tax):</span>
-                      <PriceDisplay
-                        price={totalAfterDiscount}
-                        showCurrency={true}
-                      />
-                    </div>
-                    <div className="flex justify-between text-orange-600">
                       <span>VAT (15%):</span>
                       <span>
-                        +{" "}
-                        <PriceDisplay price={taxAmount} showCurrency={true} />
+                        + <PriceDisplay price={taxAmount} />
                       </span>
                     </div>
                   </>
@@ -358,20 +421,22 @@ export default function CheckoutPage() {
                   <div className="flex justify-between text-lg font-bold text-[#111]">
                     <span>Total:</span>
                     <span className="text-[#FFD300]">
-                      <PriceDisplay
-                        price={isSaudi ? totalWithTax : totalAfterDiscount}
-                        showCurrency={true}
-                        size="lg"
-                      />
+                      <PriceDisplay price={totalWithTaxAndShipping} size="lg" />
                     </span>
                   </div>
                 </div>
               </div>
             </div>
 
+            {/* ✅ Continue Button Disabled Logic */}
             <button
               onClick={handleContinue}
-              className="w-full bg-[#FFD300] text-[#111] py-4 px-6 rounded-xl font-bold text-lg hover:bg-[#E6BE00] transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl"
+              disabled={!selectedCountry || !selectedShipping}
+              className={`w-full py-4 px-6 rounded-xl font-bold text-lg shadow-lg transition-all duration-200 transform ${
+                !selectedCountry || !selectedShipping
+                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  : "bg-[#FFD300] text-[#111] hover:bg-[#E6BE00] hover:scale-[1.02] active:scale-[0.98]"
+              }`}
             >
               Continue to Shipping
             </button>

@@ -72,7 +72,7 @@ export default function Sidebar({ isOpen, setIsOpen, onSelectCategory, isRTL = f
           <>
             {/* Backdrop */}
             <motion.div
-              className="fixed inset-0 bg-black z-40 lg:hidden"
+              className="fixed inset-0 bg-black z-60 lg:hidden"
               initial={{ opacity: 0 }}
               animate={{ opacity: 0.8 }}
               exit={{ opacity: 0 }}
@@ -82,7 +82,7 @@ export default function Sidebar({ isOpen, setIsOpen, onSelectCategory, isRTL = f
 
             {/* Drawer */}
             <motion.div
-              className="fixed top-0 h-full w-64 bg-black text-white z-50 shadow-xl py-4 px-3 font-sans overflow-y-auto lg:hidden flex flex-col"
+              className="fixed top-0 h-full w-64 bg-black text-white z-70 shadow-xl py-4 px-3 font-sans overflow-y-auto lg:hidden flex flex-col"
               initial={{ x: isRTL ? '100%' : '-100%' }}
               animate={{ x: 0 }}
               exit={{ x: isRTL ? '100%' : '-100%' }}
