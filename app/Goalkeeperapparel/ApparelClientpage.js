@@ -152,65 +152,76 @@ useEffect(() => {
             />
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-4 gap-3 p-2 sm:p-4">
-            {currentProducts.map((product) => (
-              <div
-                key={product.sku}
-                className="relative bg-gradient-to-br from-white to-neutral-300 shadow-lg overflow-hidden flex flex-col transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
-              >
-              {product.productBadges?.length > 0 &&
-  product.productBadges[0]?.label && (
-    <div
-      className="absolute top-3 left-[-20px] w-[90px] text-center text-white text-xs font-bold py-1 rotate-[-45deg] shadow-md z-10"
-      style={{
-        backgroundColor: product.productBadges[0]?.color || "#888", // fallback gray if no color
-      }}
-    >
-      {product.productBadges[0].label}
-    </div>
-  )}
+         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-4 gap-3 p-2 sm:p-4">
+  {currentProducts.map((product) => {
+    const basePrice = product.list_price_amount;
+    let finalPrice = product.price_range_exact_amount;
 
+    // لو فيه بادج فيها نسبة خصم زي "20%"
+    const badgeLabel = product.productBadges?.[0]?.label || "";
+    const discountMatch = badgeLabel.match(/(\d+)%/); // يجيب الرقم من "20%"
+    if (discountMatch) {
+      const discountPercent = parseFloat(discountMatch[1]);
+      finalPrice = basePrice - (basePrice * discountPercent) / 100;
+    }
 
-                <div className="flex justify-center items-center h-[220px]">
-                  <ProductSlider images={product.images} productName={product.name} />
-                </div>
-
-                <Link
-                  href={`/product/${encodeURIComponent(product.sku)}`}
-                  className="p-4 flex flex-col flex-grow justify-between"
-                >
-              
-
-                  <h3 className="text-base text-gray-700 text-center font-bold mb-1">
-                    {product.brand?.name}
-                  </h3>
-
-                  <p className="text-center text-sm text-gray-500 line-clamp-2 mb-3">
-                    {product.name}
-                  </p>
-
-                  <div className="text-center">
-                  
-                    {currencyRate && (
-                      <>
-                       {product.list_price_amount !== product.price_range_exact_amount && (
-                      <div className="line-through text-gray-500 text-sm">
-                       <PriceDisplay price={product.list_price_amount} loading={currencyLoading} />
-                      </div>
-                    )}
-                    <span className="text-lg font-bold text-neutral-900">
-                     <PriceDisplay price={product.price_range_exact_amount} loading={currencyLoading} />
-                    </span>
-                      </>
-                   
-                    )}
-                 
-
-                  </div>
-                </Link>
-              </div>
-            ))}
+    return (
+      <div
+        key={product.sku}
+        className="relative bg-gradient-to-br from-white to-neutral-300 shadow-lg overflow-hidden flex flex-col transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
+      >
+        {/* Badge */}
+        {badgeLabel && (
+          <div
+            className="absolute top-3 left-[-20px] w-[90px] text-center text-white text-xs font-bold py-1 rotate-[-45deg] shadow-md z-10"
+            style={{
+              backgroundColor: product.productBadges?.[0]?.color || "#888",
+            }}
+          >
+            {badgeLabel}
           </div>
+        )}
+
+        {/* صورة المنتج */}
+        <div className="flex justify-center items-center h-[220px]">
+          <ProductSlider images={product.images} productName={product.name} />
+        </div>
+
+        {/* تفاصيل المنتج */}
+        <Link
+          href={`/product/${encodeURIComponent(product.sku)}`}
+          className="p-4 flex flex-col flex-grow justify-between"
+        >
+          <h3 className="text-base text-gray-700 text-center font-bold mb-1">
+            {product.brand?.name}
+          </h3>
+
+          <p className="text-center text-sm text-gray-500 line-clamp-2 mb-3">
+            {product.name}
+          </p>
+
+          {/* السعر */}
+          <div className="text-center">
+            {discountMatch ? (
+              <>
+                <div className="line-through text-gray-500 text-sm">
+                  <PriceDisplay price={basePrice} loading={currencyLoading} />
+                </div>
+                <span className="text-lg font-bold text-neutral-900">
+                  <PriceDisplay price={finalPrice} loading={currencyLoading} />
+                </span>
+              </>
+            ) : (
+              <span className="text-lg font-bold text-neutral-900">
+                <PriceDisplay price={basePrice} loading={currencyLoading} />
+              </span>
+            )}
+          </div>
+        </Link>
+      </div>
+    );
+  })}
+</div>
 
          {totalPages > 1 && (
   <div className="flex justify-center items-center gap-4 mt-6 select-none">

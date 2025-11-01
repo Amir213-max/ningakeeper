@@ -98,9 +98,9 @@ export default function CheckoutClientPage() {
         {cart.lineItems.map(item => (
           <div
             key={item.id}
-            className="flex bg-white rounded-2xl shadow-md p-4 hover:shadow-xl transition duration-300"
+            className="flex bg-white  shadow-md p-4 hover:shadow-xl transition duration-300"
           >
-            <div className="flex-shrink-0 w-24 h-24 bg-gray-200 rounded-lg overflow-hidden">
+            <div className="flex-shrink-0 w-24 h-24 bg-gray-200  overflow-hidden">
               {item.product.images?.length > 0 ? (
                 <img
                   src={item.product.images[0]}
@@ -142,7 +142,7 @@ export default function CheckoutClientPage() {
       {/* Order Summary & Customer Info */}
       <div className="space-y-6">
         {/* Summary */}
-        <div className="bg-white rounded-2xl shadow-md p-6 space-y-3">
+        <div className="bg-white  shadow-md p-6 space-y-3">
           <h2 className="text-xl font-semibold text-gray-900 mb-2">Order Summary</h2>
           <div className="flex justify-between text-gray-700">
             <span>Subtotal</span>
@@ -159,7 +159,7 @@ export default function CheckoutClientPage() {
         </div>
   
         {/* Customer Info */}
-        <div className="bg-white rounded-2xl shadow-md p-6 space-y-4">
+        <div className="bg-white  shadow-md p-6 space-y-4">
           <h2 className="text-xl font-semibold text-gray-900 mb-2">Customer Info</h2>
           <input
             type="text"
@@ -167,7 +167,7 @@ export default function CheckoutClientPage() {
             placeholder="Full Name"
             value={customerInfo.name}
             onChange={handleInputChange}
-            className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-300 outline-none bg-gray-50 text-gray-900 placeholder-gray-400"
+            className="w-full p-3 border border-gray-300  focus:ring-2 focus:ring-amber-300 outline-none bg-gray-50 text-gray-900 placeholder-gray-400"
           />
           <input
             type="email"
@@ -175,7 +175,7 @@ export default function CheckoutClientPage() {
             placeholder="Email"
             value={customerInfo.email}
             onChange={handleInputChange}
-            className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-300 outline-none bg-gray-50 text-gray-900 placeholder-gray-400"
+            className="w-full p-3 border border-gray-300  focus:ring-2 focus:ring-amber-300 outline-none bg-gray-50 text-gray-900 placeholder-gray-400"
           />
           <input
             type="tel"

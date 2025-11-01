@@ -64,7 +64,7 @@ export default function ImageGallery({
                 <img
                   src={img}
                   alt={`${productName} - Image ${index + 1}`}
-                  className="w-full h-full object-cover rounded-md group-hover:scale-105 transition-transform duration-300"
+                  className="w-full h-full object-cover  group-hover:scale-105 transition-transform duration-300"
                   style={{ maxWidth: '90%', maxHeight: '90%', margin: 'auto' }} // 👈 تصغير الصورة نفسها
                 />
               </motion.button>
@@ -115,7 +115,7 @@ export default function ImageGallery({
               <img
                 src={img}
                 alt={`${productName} - Image ${index + 1}`}
-                className="w-full h-full object-cover rounded-md group-hover:scale-105 transition-transform duration-300"
+                className="w-full h-full object-cover  group-hover:scale-105 transition-transform duration-300"
                 style={{ maxWidth: '85%', maxHeight: '85%', margin: 'auto' }} // 👈 تصغير الصورة نفسها
               />
             </motion.button>

@@ -17,7 +17,6 @@ export default function ProductDetailsSidebar({ product }) {
   const router = useRouter();
   const { t } = useTranslation();
   const {
-    currency,
     convertPrice,
     formatPrice,
     getCurrencySymbol,
@@ -68,22 +67,20 @@ export default function ProductDetailsSidebar({ product }) {
     }
   };
 
-  // 💰 الأسعار
-  const listPrice = currencyLoading
-    ? "..."
-    : convertPrice(product.list_price_amount || 0);
-  const finalPrice = currencyLoading
-    ? "..."
-    : convertPrice(product.price_range_exact_amount || 0);
-  const listPriceFormatted = currencyLoading
-    ? "..."
-    : formatPrice(product.list_price_amount || 0);
-  const finalPriceFormatted = currencyLoading
-    ? "..."
-    : formatPrice(product.price_range_exact_amount || 0);
-  const currencySymbol = getCurrencySymbol();
-  const discountPercent = product.productBadges?.[0]?.label || null;
-  const hasDiscount = listPrice && finalPrice && finalPrice < listPrice;
+  // 💰 الأسعار مع خصم إن وجد
+  const basePrice = product.list_price_amount || product.price_range_exact_amount || 0;
+  let finalPrice = basePrice;
+  const badgeLabel = product.productBadges?.[0]?.label || "";
+  const discountMatch = badgeLabel.match(/(\d+)%/);
+
+  if (discountMatch) {
+    const discountPercent = parseFloat(discountMatch[1]);
+    finalPrice = basePrice - (basePrice * discountPercent) / 100;
+  }
+
+  const listPriceFormatted = currencyLoading ? "..." : formatPrice(basePrice);
+  const finalPriceFormatted = currencyLoading ? "..." : formatPrice(finalPrice);
+  const hasDiscount = !!discountMatch;
 
   return (
     <div
@@ -119,7 +116,7 @@ export default function ProductDetailsSidebar({ product }) {
         {product.name}
       </h1>
 
-      {/* Price */}
+      {/* ✅ Price Section */}
       <div className="flex flex-wrap items-center gap-3">
         {hasDiscount && (
           <span className="text-sm text-gray-400 line-through">
@@ -129,9 +126,9 @@ export default function ProductDetailsSidebar({ product }) {
         <span className="text-xl sm:text-xl font-bold text-gray-900">
           {finalPriceFormatted}
         </span>
-        {discountPercent && (
+        {discountMatch && (
           <span className="bg-yellow-400 text-gray-900 text-sm font-bold px-2 py-1 rounded">
-            {discountPercent}
+            {discountMatch[0]}
           </span>
         )}
       </div>
@@ -249,9 +246,11 @@ export default function ProductDetailsSidebar({ product }) {
       </div>
 
       {/* ✅ Buttons Section */}
-      <div className="sticky bottom-0 bg-white  pt-2 pb-2 
-                      flex flex-col gap-2 
-                      lg:relative lg:top-6 lg:pb-0">
+      <div
+        className="sticky bottom-0 bg-white pt-2 pb-2 
+                    flex flex-col gap-2 
+                    lg:relative lg:top-6 lg:pb-0"
+      >
         <button
           onClick={addToCart}
           disabled={adding}
@@ -269,7 +268,7 @@ export default function ProductDetailsSidebar({ product }) {
 
         <Link
           href="/checkout_1"
-          className="w-full cursor-pointer bg-yellow-400 hover:bg-yellow-500 disabled:bg-yellow-300 text-gray-900 font-bold py-2 sm:py-3 px-4 rounded-lg text-base sm:text-base transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
+          className="w-full cursor-pointer bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold py-2 sm:py-3 px-4 rounded-lg text-base sm:text-base transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
         >
           Checkout
         </Link>

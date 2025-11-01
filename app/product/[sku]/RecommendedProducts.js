@@ -51,7 +51,7 @@ export default function RecommendedSlider({ productId }) {
     }
   }, []);
 
-  // ✅ تحديد المنتجات المعروضة أولًا قبل أي استخدام
+  // ✅ تحديد المنتجات المعروضة
   const displayedProducts =
     activeTab === 'recommended' ? products : recentProducts;
 
@@ -61,7 +61,7 @@ export default function RecommendedSlider({ productId }) {
     gap: '1rem',
     autoplay: false,
     pauseOnHover: true,
-    arrows: false, // 🔥 إخفاء الأسهم لو منتج واحد
+    arrows: false,
     pagination: false,
     breakpoints: {
       1024: { perPage: 4 },
@@ -75,7 +75,7 @@ export default function RecommendedSlider({ productId }) {
   return (
     <div className="w-full max-w-9xl mx-auto px-4 space-y-6 py-10">
       {/* ✅ التبويبات */}
-      <div className="flex  gap-6 border-b border-gray-200 mb-4">
+      <div className="flex gap-6 border-b border-gray-200 mb-4">
         <button
           onClick={() => setActiveTab('recommended')}
           className={`pb-2 cursor-pointer font-semibold text-base transition-all duration-300 ${
@@ -110,7 +110,7 @@ export default function RecommendedSlider({ productId }) {
         >
           {displayedProducts.length > 0 ? (
             displayedProducts.length === 1 ? (
-              // 🔹 منتج واحد فقط (بدون أسهم أو سلايدر)
+              // 🔹 منتج واحد فقط
               <div className="flex py-6 justify-center">
                 <Link
                   href={`/product/${displayedProducts[0].sku}`}
@@ -133,19 +133,51 @@ export default function RecommendedSlider({ productId }) {
                       )}
                     </div>
 
+                    {/* ✅ السعر مع الخصم */}
                     <div className="p-5 text-center">
                       <h3 className="text-base font-semibold mb-2 line-clamp-2">
                         {displayedProducts[0].name}
                       </h3>
-                      <h2 className="font-bold text-xl mt-4">
-                        {currencyLoading
-                          ? '...'
-                          : formatPrice(
-                              displayedProducts[0].price_range_from ||
-                                displayedProducts[0].price ||
-                                0
+
+                      {(() => {
+                        const product = displayedProducts[0];
+                        const basePrice =
+                          product.list_price_amount || 0;
+                        let finalPrice = basePrice;
+                        const badgeLabel = product.productBadges?.[0]?.label || '';
+                        const discountMatch = badgeLabel.match(/(\d+)%/);
+
+                        if (discountMatch) {
+                          const discountPercent = parseFloat(discountMatch[1]);
+                          finalPrice =
+                            basePrice - (basePrice * discountPercent) / 100;
+                        }
+
+                        return (
+                          <div className="mt-4">
+                            {discountMatch ? (
+                              <>
+                                <div className="line-through text-gray-500 text-sm">
+                                  {currencyLoading
+                                    ? '...'
+                                    : formatPrice(basePrice)}
+                                </div>
+                                <h2 className="font-bold text-xl text-neutral-900">
+                                  {currencyLoading
+                                    ? '...'
+                                    : formatPrice(finalPrice)}
+                                </h2>
+                              </>
+                            ) : (
+                              <h2 className="font-bold text-xl text-neutral-900">
+                                {currencyLoading
+                                  ? '...'
+                                  : formatPrice(basePrice)}
+                              </h2>
                             )}
-                      </h2>
+                          </div>
+                        );
+                      })()}
                     </div>
                   </div>
                 </Link>
@@ -157,51 +189,79 @@ export default function RecommendedSlider({ productId }) {
                 options={sliderOptions}
                 aria-label="Products Slider"
               >
-                {displayedProducts.map((item, index) => (
-                  <SplideSlide key={item.id || item.sku}>
-                    <motion.div
-                      initial={{ opacity: 0, y: 30 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{
-                        duration: 0.4,
-                        delay: index * 0.1, // ✨ تأثير stagger بسيط
-                      }}
-                    >
-                      <Link href={`/product/${item.sku}`} className="block">
-                        <div className="hover:bg-gray-200 transition duration-500 text-neutral-700 rounded-lg shadow-md overflow-hidden flex flex-col h-96">
-                          <div className="relative w-full h-48 flex items-center justify-center">
-                            {item.images?.[0] ? (
-                              <Image
-                                src={item.images[0]}
-                                alt={item.name}
-                                fill
-                                className="object-contain pt-6"
-                                unoptimized
-                              />
-                            ) : (
-                              <div className="w-full h-full  flex items-center justify-center text-gray-400">
-                                No Image
-                              </div>
-                            )}
-                          </div>
+                {displayedProducts.map((item, index) => {
+                  const basePrice =
+                    item.list_price_amount || item.price_range_from || item.price || 0;
+                  let finalPrice = basePrice;
+                  const badgeLabel = item.productBadges?.[0]?.label || '';
+                  const discountMatch = badgeLabel.match(/(\d+)%/);
 
-                          <div className="p-5">
-                            <h3 className="text-base text-center font-semibold mb-2 line-clamp-2">
-                              {item.name}
-                            </h3>
-                            <h2 className="font-bold text-xl mt-8 flex justify-center">
-                              {currencyLoading
-                                ? '...'
-                                : formatPrice(
-                                    item.price_range_from || item.price || 0
-                                  )}
-                            </h2>
+                  if (discountMatch) {
+                    const discountPercent = parseFloat(discountMatch[1]);
+                    finalPrice = basePrice - (basePrice * discountPercent) / 100;
+                  }
+
+                  return (
+                    <SplideSlide key={item.id || item.sku}>
+                      <motion.div
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{
+                          duration: 0.4,
+                          delay: index * 0.1,
+                        }}
+                      >
+                        <Link href={`/product/${item.sku}`} className="block">
+                          <div className="hover:bg-gray-200 transition duration-500 text-neutral-700 rounded-lg shadow-md overflow-hidden flex flex-col h-96">
+                            <div className="relative w-full h-48 flex items-center justify-center">
+                              {item.images?.[0] ? (
+                                <Image
+                                  src={item.images[0]}
+                                  alt={item.name}
+                                  fill
+                                  className="object-contain pt-6"
+                                  unoptimized
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                  No Image
+                                </div>
+                              )}
+                            </div>
+
+                            <div className="p-5 text-center">
+                              <h3 className="text-base font-semibold mb-2 line-clamp-2">
+                                {item.name}
+                              </h3>
+
+                              {/* ✅ السعر مع الخصم */}
+                              {discountMatch ? (
+                                <>
+                                  <div className="line-through text-gray-500 text-sm">
+                                    {currencyLoading
+                                      ? '...'
+                                      : formatPrice(basePrice)}
+                                  </div>
+                                  <h2 className="font-bold text-xl text-neutral-900">
+                                    {currencyLoading
+                                      ? '...'
+                                      : formatPrice(finalPrice)}
+                                  </h2>
+                                </>
+                              ) : (
+                                <h2 className="font-bold text-xl text-neutral-900">
+                                  {currencyLoading
+                                    ? '...'
+                                    : formatPrice(basePrice)}
+                                </h2>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      </Link>
-                    </motion.div>
-                  </SplideSlide>
-                ))}
+                        </Link>
+                      </motion.div>
+                    </SplideSlide>
+                  );
+                })}
               </Splide>
             )
           ) : (

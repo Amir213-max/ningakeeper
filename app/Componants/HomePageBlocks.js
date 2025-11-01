@@ -71,7 +71,7 @@ export default function HomePageBlocks() {
   const firstTextBlock = blocks.find((b) => b.type === "text");
   const otherBlocks = blocks.filter((b) => b !== firstTextBlock);
   const firstBannerBlockIndex = blocks.findIndex((b) => b.type === "banners");
-
+    
   return (
     <div className="pt-3 space-y-3">
       {otherBlocks.map((block, blockIndex) => {
@@ -83,7 +83,7 @@ export default function HomePageBlocks() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: "easeOut", delay: blockIndex * 0.2 }}
-            className={`rounded-xl overflow-hidden shadow-lg w-full ${block.css_class || ""}`}
+            className={`overflow-hidden shadow-lg w-full ${block.css_class || ""}`}
             style={{
               backgroundColor: block.background_color || (block.type === "banners" ? "#000" : "#f9f9f9"),
               color: block.text_color || "#fff",
@@ -126,7 +126,7 @@ export default function HomePageBlocks() {
                           {slide.button_text && (
                             <Link
                               href={slide.button_link || "#"}
-                              className="bg-yellow-500 hover:bg-yellow-400 text-black px-6 py-2  font-semibold"
+                              className="bg-yellow-500 hover:bg-yellow-400 text-black px-6 py-2 font-semibold"
                             >
                               {slide.button_text}
                             </Link>
@@ -142,7 +142,7 @@ export default function HomePageBlocks() {
               {block.type === "banners" && block.content?.banners?.length > 0 && (
                 <>
                   {block.content.banners.length <= 2 ? (
-                    <div className="w-full ">
+                    <div className="w-full">
                       <div
                         className={`grid gap-3 ${
                           block.content.banners.length === 1 ? "grid-cols-1" : "grid-cols-2"
@@ -166,9 +166,10 @@ export default function HomePageBlocks() {
                               animate={{ opacity: 1, y: 0 }}
                               transition={{ duration: 0.6, delay: idx * 0.1 }}
                               className={`relative overflow-hidden shadow-md group w-full 
-                                ${isTwoBanners
-                                  ? " md:h-[250px] lg:h-[400px] sm:h-[200px] h-[200px] " // ✅ لما يكون فيه بانرين فقط
-                                  : "h-[45vh] sm:h-[50vh] md:h-[30vh] lg:h-[65vh]" // الافتراضي
+                                ${
+                                  isTwoBanners
+                                    ? "md:h-[250px] lg:h-[400px] sm:h-[200px] h-[200px]"
+                                    : "h-[45vh] sm:h-[50vh] md:h-[30vh] lg:h-[65vh]"
                                 }`}
                             >
                               <Image
@@ -226,6 +227,8 @@ export default function HomePageBlocks() {
               )}
 
               {/* 🔹 Products Block */}
+        
+              {/* 🔹 Products Block */}
               {block.type === "products" && productsMap[block.id]?.length > 0 && (
                 <div className="px-4 md:px-8 overflow-hidden lg:px-12">
                   <Splide
@@ -236,12 +239,9 @@ export default function HomePageBlocks() {
                       perMove: 1,
                       gap: "1rem",
                       rewind: false,
-                      trimSpace: true,
-                      omitEnd: true,
                       pagination: false,
                       arrows: true,
                       direction: lang === "ar" ? "rtl" : "ltr",
-                      updateOnMove: true,
                       breakpoints: {
                         1280: { perPage: 5 },
                         1024: { perPage: 4 },
@@ -250,51 +250,92 @@ export default function HomePageBlocks() {
                       },
                     }}
                   >
-                    {productsMap[block.id].map((product, idx) => (
-                      <SplideSlide key={`${product.id}-${idx}`}>
-                        <motion.div
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.5, delay: idx * 0.1 }}
-                          className="h-full overflow-hidden"
-                        >
-                          <Link
-                            href={`/product/${encodeURIComponent(product.sku)}`}
-                            className="block bg-[#111] hover:bg-[#2b2a2a] rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 h-full"
-                          >
-                            <div className="relative flex items-center justify-center overflow-hidden aspect-[1.3/1.5]">
-                              {product.images?.[0] ? (
-                                <Image
-                                  src={
-                                    typeof product.images[0] === "string"
-                                      ? product.images[0]
-                                      : product.images[0]?.url
-                                  }
-                                  alt={product.name}
-                                  fill
-                                  className="object-contain p-3"
-                                  unoptimized
-                                />
-                              ) : (
-                                <div className="text-gray-500 text-sm">No Image</div>
-                              )}
-                            </div>
+                    {productsMap[block.id].map((product, idx) => {
+                      const badgeLabel = product.productBadges?.[0]?.label || "";
+                      const badgeColor = product.productBadges?.[0]?.color || "#888";
 
-                            <div className="p-4 text-center overflow-hidden flex flex-col justify-between">
-                              {product.brand?.name && (
-                                <p className="text-gray-300 text-sm mb-1">{product.brand.name}</p>
-                              )}
-                              <h3 className="text-white text-sm sm:text-base font-medium line-clamp-2 mb-2">
-                                {product.name}
-                              </h3>
-                              <p className="text-white font-bold text-lg">
-                                <PriceDisplay price={product.price_range_exact_amount} loading={currencyLoading} />
-                              </p>
-                            </div>
-                          </Link>
-                        </motion.div>
-                      </SplideSlide>
-                    ))}
+                      return (
+                        <SplideSlide key={`${product.id}-${idx}`}>
+                          <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5, delay: idx * 0.1 }}
+                            className="h-full overflow-hidden"
+                          >
+                            <Link
+                              href={`/product/${encodeURIComponent(product.sku)}`}
+                              className="block bg-[#111] hover:bg-[#2b2a2a] overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 h-full"
+                            >
+                              <div className="relative flex items-center justify-center overflow-hidden aspect-[1.3/1.5]">
+                                {/* 🔹 Badge */}
+                                {badgeLabel && (
+                                  <div
+                                    className="absolute top-3 left-[-20px] w-[90px] text-center text-white text-xs font-bold py-1 rotate-[-45deg] shadow-md z-10"
+                                    style={{ backgroundColor: badgeColor }}
+                                  >
+                                    {badgeLabel}
+                                  </div>
+                                )}
+
+                                {/* 🔹 Product Image */}
+                                {product.images?.[0] ? (
+                                  <Image
+                                    src={
+                                      typeof product.images[0] === "string"
+                                        ? product.images[0]
+                                        : product.images[0]?.url
+                                    }
+                                    alt={product.name}
+                                    fill
+                                    className="object-contain p-3"
+                                    unoptimized
+                                  />
+                                ) : (
+                                  <div className="text-gray-500 text-sm">No Image</div>
+                                )}
+                              </div>
+
+                              {/* 🔹 Product Info */}
+                              <div className="p-4 text-center overflow-hidden flex flex-col justify-between">
+                                {product.brand?.name && (
+                                  <p className="text-gray-300 text-sm mb-1">{product.brand.name}</p>
+                                )}
+                                <h3 className="text-white text-sm sm:text-base font-medium line-clamp-2 mb-2">
+                                  {product.name}
+                                </h3>
+
+                                <div className="text-white font-bold text-lg">
+                                  {badgeLabel ? (
+                                    <>
+                                      <div className="text-gray-400 text-sm line-through">
+                                        <PriceDisplay
+                                          price={product.list_price_amount}
+                                          loading={currencyLoading}
+                                        />
+                                      </div>
+                                      <PriceDisplay
+                                        price={
+                                          product.list_price_amount -
+                                          (product.list_price_amount *
+                                            parseFloat(badgeLabel.replace("%", ""))) /
+                                            100
+                                        }
+                                        loading={currencyLoading}
+                                      />
+                                    </>
+                                  ) : (
+                                    <PriceDisplay
+                                      price={product.list_price_amount}
+                                      loading={currencyLoading}
+                                    />
+                                  )}
+                                </div>
+                              </div>
+                            </Link>
+                          </motion.div>
+                        </SplideSlide>
+                      );
+                    })}
                   </Splide>
 
                   {block.button_text && (
@@ -313,6 +354,8 @@ export default function HomePageBlocks() {
                   )}
                 </div>
               )}
+                
+
             </div>
           </motion.div>
         );
@@ -321,3 +364,10 @@ export default function HomePageBlocks() {
     </div>
   );
 }
+
+
+
+
+
+
+
