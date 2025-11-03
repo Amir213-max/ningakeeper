@@ -60,7 +60,7 @@ export default function NotificationsPage() {
             <Link
               key={notif.id}
               href={`/notifications/${notif.id}`}
-              className={`block p-4 border rounded-lg shadow hover:shadow-lg transition-all duration-200 ${
+              className={`block p-4 border   shadow hover:shadow-lg transition-all duration-200 ${
                 !notif.read_at
                   ? 'bg-yellow-50 border-yellow-300'
                   : 'bg-white border-gray-200'
@@ -77,7 +77,7 @@ export default function NotificationsPage() {
                 </div>
 
                 {!notif.read_at && (
-                  <span className="ml-2 w-3 h-3 bg-red-500 rounded-full mt-1 animate-pulse" />
+                  <span className="ml-2 w-3 h-3 bg-red-500   mt-1 animate-pulse" />
                 )}
               </div>
             </Link>

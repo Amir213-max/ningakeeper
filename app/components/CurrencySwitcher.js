@@ -36,7 +36,7 @@ const CurrencySwitcher = () => {
   if (loading) {
     return (
       <div className="flex items-center space-x-1 px-2 py-1 text-xs">
-        <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-[#FFD300]"></div>
+        <div className="animate-spin   h-3 w-3 border-b-2 border-[#FFD300]"></div>
         <span className="text-[#666]">Loading...</span>
       </div>
     );
@@ -47,7 +47,7 @@ const CurrencySwitcher = () => {
       {/* الزر الرئيسي */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center bg-black text-white border border-gray-600 rounded-lg shadow-sm hover:border-[#FFD300] transition-all duration-200 text-sm sm:text-base px-2 py-1"
+        className="flex items-center bg-black text-white border border-gray-600   shadow-sm hover:border-[#FFD300] transition-all duration-200 text-sm sm:text-base px-2 py-1"
         aria-label="Select currency"
       >
         {/* <span className="text-base text-white sm:text-base">{currentCurrency?.flag}</span> */}
@@ -61,7 +61,7 @@ const CurrencySwitcher = () => {
 
       {/* القائمة المنسدلة */}
       {isOpen && (
-        <div className="absolute text-white right-0 mt-1 w-12 sm:w-12 bg-gray-900 border border-gray-600 rounded-lg shadow-lg z-50 overflow-hidden text-sm">
+        <div className="absolute text-white right-0 mt-1 w-12 sm:w-12 bg-gray-900 border border-gray-600   shadow-lg z-50 overflow-hidden text-sm">
           {currencies.map((curr) => (
             <button
               key={curr.code}

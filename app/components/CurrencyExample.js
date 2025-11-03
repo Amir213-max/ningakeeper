@@ -19,7 +19,7 @@ const CurrencyExample = () => {
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Product Card Example */}
-        <div className="bg-gray-50 p-6 rounded-xl">
+        <div className="bg-gray-50 p-6  ">
           <h3 className="text-lg font-semibold text-[#111] mb-4">Product Card</h3>
           <div className="space-y-3">
             <h4 className="font-medium text-[#111]">{exampleProduct.name}</h4>
@@ -32,7 +32,7 @@ const CurrencyExample = () => {
         </div>
 
         {/* Currency Info */}
-        <div className="bg-gray-50 p-6 rounded-xl">
+        <div className="bg-gray-50 p-6  ">
           <h3 className="text-lg font-semibold text-[#111] mb-4">Current Settings</h3>
           <div className="space-y-2 text-sm">
             <p><span className="font-medium">Selected Currency:</span> {currency}</p>
@@ -44,7 +44,7 @@ const CurrencyExample = () => {
       </div>
 
       {/* Usage Examples */}
-      <div className="mt-6 p-6 bg-blue-50 rounded-xl">
+      <div className="mt-6 p-6 bg-blue-50  ">
         <h3 className="text-lg font-semibold text-[#111] mb-4">Usage Examples</h3>
         <div className="space-y-3 text-sm">
           <div>

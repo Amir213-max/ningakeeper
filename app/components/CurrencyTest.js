@@ -8,7 +8,7 @@ export default function CurrencyTest() {
   const testPrice = 100; // EUR 100
 
   return (
-    <div className="fixed bottom-4 left-4 bg-white p-4 rounded-lg shadow-lg border z-50 max-w-sm">
+    <div className="fixed bottom-4 left-4 bg-white p-4   shadow-lg border z-50 max-w-sm">
       <h3 className="font-bold text-lg mb-2">Currency Test</h3>
       
       <div className="space-y-2 text-sm">

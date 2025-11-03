@@ -47,7 +47,7 @@ export default function RootLayout({ children  }) {
    <TranslationProvider>
 <AuthProvider>
 <CurrencyProvider>
-   <Toaster position="top-center" />
+  
      <CategoryProvider>
      <CartProvider>
      

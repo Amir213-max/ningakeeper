@@ -350,7 +350,7 @@ export default function HomePageBlocks() {
                     <div className="flex justify-center mt-4">
                       <Link
                         href={block.button_url || "#"}
-                        className={`rounded-md font-semibold px-6 py-3 text-lg ${
+                        className={`  font-semibold px-6 py-3 text-lg ${
                           block.button_style === "red"
                             ? "bg-red-500 text-white hover:bg-red-600"
                             : "bg-yellow-500 text-black hover:bg-yellow-400"

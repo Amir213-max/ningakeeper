@@ -56,7 +56,7 @@ export default function FilterDropdown({ attributeValues, onFilterChange }) {
         <div>
           <button
             onClick={() => setShowMore(!showMore)}
-            className="flex items-center px-4 py-2 text-sm font-medium text-black bg-gray-100 rounded hover:bg-gray-200 duration-150 cursor-pointer transition"
+            className="flex items-center px-4 py-2 text-sm font-medium text-black bg-gray-100  hover:bg-gray-200 duration-150 cursor-pointer transition"
           >
             {showMore ? (
               <>
@@ -118,7 +118,7 @@ function Dropdown({ attribute, values, selected, onConfirm }) {
     <div className="relative w-full sm:w-64 md:w-48" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex justify-between items-center cursor-pointer px-3 py-2 text-sm text-neutral-700 font-medium bg-white border border-gray-300 rounded shadow hover:bg-gray-50 focus:outline-none"
+        className="w-full flex justify-between items-center cursor-pointer px-3 py-2 text-sm text-neutral-700 font-medium bg-white border border-gray-300  shadow hover:bg-gray-50 focus:outline-none"
         aria-haspopup="listbox"
         aria-expanded={isOpen}
       >
@@ -129,7 +129,7 @@ function Dropdown({ attribute, values, selected, onConfirm }) {
       </button>
 
       <div
-        className={`absolute mt-2 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto transition-opacity duration-300 ease-in-out
+        className={`absolute mt-2 w-full bg-white border border-gray-200   shadow-lg z-50 max-h-64 overflow-y-auto transition-opacity duration-300 ease-in-out
           ${isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}
         `}
         style={{ transformOrigin: 'top center' }}
@@ -138,7 +138,7 @@ function Dropdown({ attribute, values, selected, onConfirm }) {
           {values.map((value) => (
             <label
               key={value}
-              className="flex items-center justify-between cursor-pointer hover:bg-gray-100 rounded-md px-2 py-1"
+              className="flex items-center justify-between cursor-pointer hover:bg-gray-100   px-2 py-1"
             >
               <div className="flex items-center space-x-2">
                 <input
@@ -156,7 +156,7 @@ function Dropdown({ attribute, values, selected, onConfirm }) {
           <div className="flex justify-end mt-4">
             <button
               onClick={confirm}
-              className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
+              className="px-3 py-1 text-sm bg-blue-600 text-white  hover:bg-blue-700"
             >
              { t("Done ✔")}
             </button>

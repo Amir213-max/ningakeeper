@@ -283,7 +283,7 @@ useEffect(() => {
     <button
       onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
       disabled={currentPage === 1}
-      className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
+      className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold transition-all duration-200 ${
         currentPage === 1
           ? "bg-gray-200 text-gray-400 cursor-not-allowed"
           : "bg-[#1f2323] text-white hover:bg-[#333]"
@@ -300,7 +300,7 @@ useEffect(() => {
     <button
       onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
       disabled={currentPage === totalPages}
-      className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
+      className={`flex items-center gap-2 px-4 py-2  text-sm font-semibold transition-all duration-200 ${
         currentPage === totalPages
           ? "bg-gray-200 text-gray-400 cursor-not-allowed"
           : "bg-[#1f2323] text-white hover:bg-[#333]"

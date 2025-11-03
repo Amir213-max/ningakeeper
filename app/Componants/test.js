@@ -65,7 +65,7 @@ export default function HomePageBlocks() {
       {blocks.map((block) => (
         <div
           key={block.id}
-          className={`rounded-lg shadow-lg overflow-hidden w-full ${block.css_class || ""}`}
+          className={`  shadow-lg overflow-hidden w-full ${block.css_class || ""}`}
           style={{
             backgroundColor:
               block.background_color || (block.type === "banners" ? "#000" : "#f9f9f9"),
@@ -95,7 +95,7 @@ export default function HomePageBlocks() {
               >
                 {block.content.slides.map((slide, i) => (
                   <SplideSlide key={i}>
-                    <div className="relative w-full h-[400px] md:h-[500px] overflow-hidden rounded-lg">
+                    <div className="relative w-full h-[400px] md:h-[500px] overflow-hidden  ">
                       <Image
                         src={getImageUrl(slide.image)}
                         alt={slide.title || ""}
@@ -109,7 +109,7 @@ export default function HomePageBlocks() {
                         {slide.button_text && (
                           <Link
                             href={slide.button_link || "#"}
-                            className="bg-yellow-500 hover:bg-yellow-400 text-black px-6 py-2 rounded-md font-semibold"
+                            className="bg-yellow-500 hover:bg-yellow-400 text-black px-6 py-2   font-semibold"
                           >
                             {slide.button_text}
                           </Link>
@@ -125,7 +125,7 @@ export default function HomePageBlocks() {
             {block.type === "images" && block.content?.images?.length > 0 && (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {block.content.images.map((img, idx) => (
-                  <div key={idx} className="relative rounded-lg overflow-hidden shadow-md">
+                  <div key={idx} className="relative   overflow-hidden shadow-md">
                     <Image
                       src={getImageUrl(img.image)}
                       alt={img.title || ""}
@@ -178,7 +178,7 @@ export default function HomePageBlocks() {
                   <Link
                     href={banner.link || "#"}
                     key={idx}
-                    className="relative overflow-hidden shadow-md rounded-lg w-full"
+                    className="relative overflow-hidden shadow-md   w-full"
                   >
                     <Image
                       src={getImageUrl(banner.image)}
@@ -219,7 +219,7 @@ export default function HomePageBlocks() {
                   <SplideSlide key={product.id}>
                     <Link
                       href={`/product/${product.sku}`}
-                      className="block bg-neutral-900 hover:bg-neutral-800 rounded-lg shadow-md overflow-hidden flex flex-col transition h-full"
+                      className="block bg-neutral-900 hover:bg-neutral-800   shadow-md overflow-hidden flex flex-col transition h-full"
                     >
                       <div className="relative w-full aspect-[1/2] bg-neutral-900 flex items-center justify-center">
                         {product.images?.[0] ? (

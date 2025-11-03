@@ -112,14 +112,14 @@ export default function MyProfilePage() {
 
       {/* Profile Tab */}
       {activeTab === "profile" && (
-        <div className="border p-6 rounded-lg shadow">
+        <div className="border p-6   shadow">
           <h2 className="text-xl font-semibold mb-4">Edit Profile</h2>
           <div className="space-y-4 max-w-md">
             <div>
               <label className="block font-medium mb-1">Name</label>
               <input
                 type="text"
-                className="w-full border p-2 rounded"
+                className="w-full border p-2 "
                 value={user.name || ""}
                 onChange={(e) => setUser({ ...user, name: e.target.value })}
               />
@@ -128,13 +128,13 @@ export default function MyProfilePage() {
               <label className="block font-medium mb-1">Email</label>
               <input
                 type="email"
-                className="w-full border p-2 rounded bg-gray-100 cursor-not-allowed text-black"
+                className="w-full border p-2  bg-gray-100 cursor-not-allowed text-black"
                 value={user.email || ""}
                 readOnly
               />
             </div>
             <button
-              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+              className="bg-blue-500 text-white px-4 py-2  hover:bg-blue-600"
               onClick={handleProfileSave}
             >
               Save Changes
@@ -145,14 +145,14 @@ export default function MyProfilePage() {
 
       {/* Password Tab */}
       {activeTab === "password" && (
-        <div className="border p-6 rounded-lg shadow max-w-md">
+        <div className="border p-6   shadow max-w-md">
           <h2 className="text-xl font-semibold mb-4">Change Password</h2>
           <div className="space-y-4">
             <div>
               <label className="block font-medium mb-1">Current Password</label>
               <input
                 type="password"
-                className="w-full border p-2 rounded"
+                className="w-full border p-2  "
                 value={passwords.current}
                 onChange={(e) => setPasswords({ ...passwords, current: e.target.value })}
               />
@@ -161,7 +161,7 @@ export default function MyProfilePage() {
               <label className="block font-medium mb-1">New Password</label>
               <input
                 type="password"
-                className="w-full border p-2 rounded"
+                className="w-full border p-2  "
                 value={passwords.new}
                 onChange={(e) => setPasswords({ ...passwords, new: e.target.value })}
               />
@@ -170,13 +170,13 @@ export default function MyProfilePage() {
               <label className="block font-medium mb-1">Confirm New Password</label>
               <input
                 type="password"
-                className="w-full border p-2 rounded"
+                className="w-full border p-2  "
                 value={passwords.confirm}
                 onChange={(e) => setPasswords({ ...passwords, confirm: e.target.value })}
               />
             </div>
             <button
-              className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+              className="bg-green-500 text-white px-4 py-2   hover:bg-green-600"
               onClick={handlePasswordChange}
             >
               Change Password
@@ -190,7 +190,7 @@ export default function MyProfilePage() {
         <div className="space-y-4">
           {orders.length > 0 ? (
             orders.map((order) => (
-              <div key={order.id} className="border p-4 rounded-lg shadow">
+              <div key={order.id} className="border p-4   shadow">
                 <p>
                   <span className="font-medium">Order Number:</span> {order.number}
                 </p>

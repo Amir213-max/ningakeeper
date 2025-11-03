@@ -151,7 +151,7 @@ useEffect(() => {
             <select
               onChange={(e) => setLang(e.target.value)}
               value={lang}
-              className="bg-black text-white border border-gray-500 px-2 py-1 rounded text-sm"
+              className="bg-black text-white border border-gray-500 px-2 py-1  text-sm"
             >
               <option value="en">en</option>
               <option value="ar">ar</option>

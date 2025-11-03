@@ -121,7 +121,7 @@ export default function CheckoutClientPage() {
                 <button
                   onClick={() => handleRemoveItem(item.id)}
                   disabled={removing === item.id}
-                  className="ml-2 px-3 py-1 text-sm bg-red-500 hover:bg-red-600 text-white rounded-md shadow-sm transition disabled:opacity-50"
+                  className="ml-2 px-3 py-1 text-sm bg-red-500 hover:bg-red-600 text-white  shadow-sm transition disabled:opacity-50"
                 >
                   {removing === item.id ? "..." : "✕"}
                 </button>
@@ -183,19 +183,19 @@ export default function CheckoutClientPage() {
             placeholder="Phone"
             value={customerInfo.phone}
             onChange={handleInputChange}
-            className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-300 outline-none bg-gray-50 text-gray-900 placeholder-gray-400"
+            className="w-full p-3 border border-gray-300  focus:ring-2 focus:ring-amber-300 outline-none bg-gray-50 text-gray-900 placeholder-gray-400"
           />
           <textarea
             name="address"
             placeholder="Address"
             value={customerInfo.address}
             onChange={handleInputChange}
-            className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-300 outline-none bg-gray-50 text-gray-900 placeholder-gray-400"
+            className="w-full p-3 border border-gray-300  focus:ring-2 focus:ring-amber-300 outline-none bg-gray-50 text-gray-900 placeholder-gray-400"
           />
           <button
             onClick={handlePlaceOrder}
             disabled={placingOrder}
-            className="w-full bg-amber-300 hover:bg-amber-400 cursor-pointer text-white font-bold py-3 rounded-xl transition duration-300 shadow-md hover:shadow-indigo-400/50"
+            className="w-full bg-amber-300 hover:bg-amber-400 cursor-pointer text-white font-bold py-3  transition duration-300 shadow-md hover:shadow-indigo-400/50"
           >
             {placingOrder ? "Placing Order..." : "Place Order"}
           </button>

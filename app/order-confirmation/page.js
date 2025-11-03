@@ -30,7 +30,7 @@ export default function OrderConfirmationPage() {
         Thank you for your purchase. Your order has been successfully placed.
       </p>
 
-      <div className="bg-white shadow-md rounded-lg p-6 w-full max-w-md text-left text-sm text-gray-800 mb-6">
+      <div className="bg-white shadow-md   p-6 w-full max-w-md text-left text-sm text-gray-800 mb-6">
         <p><strong>🆔 Order Number:</strong> {orderDetails.number}</p>
         <p><strong>🧾 Order ID:</strong> {orderDetails.id}</p>
         {/* Add more fields if available from the GraphQL API */}
@@ -39,7 +39,7 @@ export default function OrderConfirmationPage() {
 
       <Link
         href="/"
-        className="bg-yellow-400 hover:bg-yellow-300 text-black px-6 py-3 rounded font-semibold transition duration-300"
+        className="bg-yellow-400 hover:bg-yellow-300 text-black px-6 py-3   font-semibold transition duration-300"
       >
         Back to Home
       </Link>

@@ -116,7 +116,7 @@ export default function RecommendedSlider({ productId }) {
                   href={`/product/${displayedProducts[0].sku}`}
                   className="block w-72"
                 >
-                  <div className="bg-gray-100 hover:bg-gray-200 transition duration-500 text-neutral-700 rounded-lg shadow-md overflow-hidden flex flex-col">
+                  <div className="bg-gray-100 hover:bg-gray-200 transition duration-500 text-neutral-700   shadow-md overflow-hidden flex flex-col">
                     <div className="relative w-full h-60 flex items-center justify-center">
                       {displayedProducts[0].images?.[0] ? (
                         <Image
@@ -212,7 +212,7 @@ export default function RecommendedSlider({ productId }) {
                         }}
                       >
                         <Link href={`/product/${item.sku}`} className="block">
-                          <div className="hover:bg-gray-200 transition duration-500 text-neutral-700 rounded-lg shadow-md overflow-hidden flex flex-col h-96">
+                          <div className="hover:bg-gray-200 transition duration-500 text-neutral-700   shadow-md overflow-hidden flex flex-col h-96">
                             <div className="relative w-full h-48 flex items-center justify-center">
                               {item.images?.[0] ? (
                                 <Image

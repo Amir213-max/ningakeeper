@@ -57,7 +57,7 @@ export default function BootsSlider() {
         {products.map((item) => (
           <SplideSlide key={item.id}>
             <Link href={`/product/${item.sku}`}>
-              <div className="bg-neutral-900 hover:bg-neutral-800 rounded-lg shadow-md overflow-hidden flex flex-col h-96 cursor-pointer">
+              <div className="bg-neutral-900 hover:bg-neutral-800   shadow-md overflow-hidden flex flex-col h-96 cursor-pointer">
                 <div className="relative w-full h-48 flex items-center justify-center">
                   {item.images?.[0] ? (
                     <Image

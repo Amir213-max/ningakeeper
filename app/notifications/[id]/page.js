@@ -16,7 +16,7 @@ export default function NotificationDetailPage() {
         ← Back to Notifications
       </Link>
 
-      <div className="mt-6 p-6 bg-white shadow rounded-lg border border-gray-200">
+      <div className="mt-6 p-6 bg-white shadow   border border-gray-200">
         <h1 className="text-2xl font-semibold mb-2 text-black">{message}</h1>
         <p className="text-gray-600 mb-4">
           {new Date(created_at).toLocaleString()}

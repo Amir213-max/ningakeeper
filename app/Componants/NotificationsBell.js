@@ -39,11 +39,11 @@ export default function NavbarNotifications() {
     <div className="relative">
       <button
         onClick={() => setOpen(true)}
-        className="relative p-2 rounded-full hover:bg-amber-400 transition-colors"
+        className="relative p-2   hover:bg-amber-400 transition-colors"
       >
         <Bell className="w-6 h-6 text-gray cursor-pointer" />
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs w-6 h-5 flex items-center justify-center rounded-full animate-pulse">
+          <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs w-6 h-5 flex items-center justify-center   animate-pulse">
             {unreadCount}
           </span>
         )}
@@ -56,7 +56,7 @@ export default function NavbarNotifications() {
             onClick={() => setOpen(false)}
           ></div>
 
-          <div className="relative mt-20 w-[90vw] max-w-xs sm:max-w-sm bg-white shadow-2xl rounded-xl overflow-hidden border border-gray-200 animate-fadeIn">
+          <div className="relative mt-20 w-[90vw] max-w-xs sm:max-w-sm bg-white shadow-2xl   overflow-hidden border border-gray-200 animate-fadeIn">
             <div className="p-3 border-b flex justify-between items-center bg-gradient-to-r from-amber-100 to-amber-50">
               <span className="font-semibold text-gray-800 text-sm">
                 Notifications
@@ -81,7 +81,7 @@ export default function NavbarNotifications() {
                     key={notif.id}
                     href={`/notifications/${notif.id}`}
                     onClick={() => setOpen(false)}
-                    className={`block p-3 rounded-lg transition-all duration-200 ${
+                    className={`block p-3   transition-all duration-200 ${
                       !notif.read_at
                         ? "border-l-4 border-red-500 bg-red-50 hover:bg-red-100"
                         : "border border-gray-100 hover:bg-gray-50"

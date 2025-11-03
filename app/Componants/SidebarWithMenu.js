@@ -38,18 +38,18 @@ export default function SidebarWithDropdown({ categoriesByPage, t, onSelectCateg
       {/* زر فتح الـ Drawer للشاشات الصغيرة */}
       <button
         onClick={() => setSidebarOpen(true)}
-        className="fixed top-4 left-4 z-[110] p-2 bg-yellow-500 rounded-md shadow-md lg:hidden"
+        className="fixed top-4 left-4 z-[110] p-2 bg-yellow-500   shadow-md lg:hidden"
       >
         {t("Menu")}
       </button>
 
       {/* Sidebar للشاشات الكبيرة */}
-      <ul className="hidden lg:flex flex-col px-3 py-4 space-y-3 bg-black rounded-xl shadow-sm w-64">
+      <ul className="hidden lg:flex flex-col px-3 py-4 space-y-3 bg-black   shadow-sm w-64">
         {mainPages.map((page, idx) => (
           <li key={idx} className="relative">
             <Link
               href={page.href}
-              className="flex items-center justify-between gap-3 p-4 rounded-lg cursor-pointer transition-all duration-300 text-white hover:bg-yellow-500"
+              className="flex items-center justify-between gap-3 p-4   cursor-pointer transition-all duration-300 text-white hover:bg-yellow-500"
               onClick={() => setOpenDropdown(openDropdown === idx ? null : idx)}
             >
               {page.name}
@@ -58,13 +58,13 @@ export default function SidebarWithDropdown({ categoriesByPage, t, onSelectCateg
 
             {/* Dropdown للكاتيجوريات الخاصة بالصفحة */}
             {openDropdown === idx && categoriesByPage[page.href]?.length > 0 && (
-              <ul className="ml-4 mt-1 bg-neutral-800 rounded-md">
+              <ul className="ml-4 mt-1 bg-neutral-800  ">
                 {categoriesByPage[page.href].map((cat) => (
                   <li key={cat.id}>
                     <div
                       onClick={() => handleSelect(cat.id)}
                       className={clsx(
-                        "px-4 py-2 cursor-pointer hover:bg-yellow-500 rounded-md transition-all",
+                        "px-4 py-2 cursor-pointer hover:bg-yellow-500   transition-all",
                         activeCategory === cat.id ? "bg-yellow-500 text-black font-bold" : "text-white"
                       )}
                     >
@@ -97,7 +97,7 @@ export default function SidebarWithDropdown({ categoriesByPage, t, onSelectCateg
             <li key={idx} className="relative">
               <Link
                 href={page.href}
-                className="flex items-center justify-between gap-3 px-4 py-2 rounded-md cursor-pointer hover:bg-yellow-500 transition-all"
+                className="flex items-center justify-between gap-3 px-4 py-2   cursor-pointer hover:bg-yellow-500 transition-all"
                 onClick={() => setOpenDropdown(openDropdown === idx ? null : idx)}
               >
                 {page.name}
@@ -105,13 +105,13 @@ export default function SidebarWithDropdown({ categoriesByPage, t, onSelectCateg
               </Link>
 
               {openDropdown === idx && categoriesByPage[page.href]?.length > 0 && (
-                <ul className="ml-4 mt-1 bg-neutral-800 rounded-md">
+                <ul className="ml-4 mt-1 bg-neutral-800  ">
                   {categoriesByPage[page.href].map((cat) => (
                     <li key={cat.id}>
                       <div
                         onClick={() => handleSelect(cat.id)}
                         className={clsx(
-                          "px-4 py-2 cursor-pointer hover:bg-yellow-500 rounded-md transition-all",
+                          "px-4 py-2 cursor-pointer hover:bg-yellow-500   transition-all",
                           activeCategory === cat.id ? "bg-yellow-500 text-black font-bold" : "text-white"
                         )}
                       >

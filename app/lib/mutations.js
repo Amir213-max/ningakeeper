@@ -106,7 +106,7 @@ const CREATE_CART = gql`
   }
 `;
 
-const ADD_ITEM_TO_CART = gql`
+ export const ADD_ITEM_TO_CART = gql`
   mutation AddItemToCart($input: AddCartItemInput!) {
     addItemToCart(input: $input) {
       id

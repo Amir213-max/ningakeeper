@@ -78,7 +78,7 @@ export default function MultiSlider_6() {
           brands.map((brand, index) => (
             <SplideSlide key={index}>
               <Link href={`/brands/${brand.id}`}>
-                <div className="rounded-lg shadow-md overflow-hidden w-full flex flex-col h-32 cursor-pointer hover:scale-105 transition-transform duration-300 bg-black">
+                <div className="  shadow-md overflow-hidden w-full flex flex-col h-32 cursor-pointer hover:scale-105 transition-transform duration-300 bg-black">
                   <div className="relative w-full h-full flex items-center justify-center p-6">
                     <Image
                       loader={customLoader} // ✅ استخدم الـ Loader هنا

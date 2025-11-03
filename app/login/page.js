@@ -69,7 +69,7 @@ export default function LoginPage() {
           </h2>
 
           <form onSubmit={handleLogin} className="flex flex-col gap-4">
-            <div className="flex items-center border border-gray-300 rounded-lg px-3">
+            <div className="flex items-center border border-gray-300   px-3">
               <Mail className="text-gray-400" size={20} />
               <input
                 type="email"
@@ -80,7 +80,7 @@ export default function LoginPage() {
                 className="w-full p-3 text-black outline-none"
               />
             </div>
-            <div className="flex items-center border border-gray-300 rounded-lg px-3">
+            <div className="flex items-center border border-gray-300   px-3">
               <Lock className="text-gray-400" size={20} />
               <input
                 type="password"
@@ -94,7 +94,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-black cursor-pointer text-white py-3 rounded-lg hover:bg-amber-600 transition"
+              className="w-full bg-black cursor-pointer text-white py-3   hover:bg-amber-600 transition"
             >
               {loading ? "Logging in..." : "Login"}
             </button>
@@ -117,7 +117,7 @@ export default function LoginPage() {
           <h2 className="text-2xl font-bold mb-6">New here?</h2>
           <Link
             href="/register"
-            className="block w-full bg-yellow-500 text-white py-3 rounded-lg font-semibold hover:bg-amber-600 transition"
+            className="block w-full bg-yellow-500 text-white py-3   font-semibold hover:bg-amber-600 transition"
           >
             Register with KEEPERsport
           </Link>

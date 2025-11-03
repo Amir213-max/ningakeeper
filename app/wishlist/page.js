@@ -68,7 +68,7 @@ export default function WishlistPage() {
           {wishlist.products.map((product) => (
             <div
               key={product.id}
-              className="bg-white shadow-md rounded-lg overflow-hidden hover:shadow-lg transition"
+              className="bg-white shadow-md   overflow-hidden hover:shadow-lg transition"
             >
               {/* صورة المنتج */}
               {product.images?.[0] && (
@@ -101,7 +101,7 @@ export default function WishlistPage() {
 
                 <Link
                   href={`/product/${encodeURIComponent(product.sku)}`}
-                  className="block mt-3 text-center text-sm bg-[#1f2323] text-white py-2 rounded-lg hover:bg-black"
+                  className="block mt-3 text-center text-sm bg-[#1f2323] text-white py-2   hover:bg-black"
                 >
                   View Product
                 </Link>

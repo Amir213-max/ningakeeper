@@ -20,13 +20,13 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="min-h-screen flex justify-center items-center bg-gray-100 p-8">
-      <div className="w-full max-w-md bg-white shadow-lg rounded-lg p-6">
+      <div className="w-full max-w-md bg-white shadow-lg   p-6">
         <h2 className="text-2xl font-bold mb-6 text-gray-800 text-center">
           Forgot Password?
         </h2>
 
         <form onSubmit={handleForgotPassword} className="flex flex-col gap-4">
-          <div className="flex items-center border border-gray-300 rounded-lg px-3">
+          <div className="flex items-center border border-gray-300   px-3">
             <Mail className="text-gray-400" size={20} />
             <input
               type="email"
@@ -40,7 +40,7 @@ export default function ForgotPasswordPage() {
 
           <button
             type="submit"
-            className="w-full bg-black text-white py-3 cursor-pointer rounded-lg hover:bg-neutral-700 transition"
+            className="w-full bg-black text-white py-3 cursor-pointer   hover:bg-neutral-700 transition"
           >
             Send Reset Link
           </button>

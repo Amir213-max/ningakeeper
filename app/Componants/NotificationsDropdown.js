@@ -51,7 +51,7 @@
 //       <button onClick={() => setOpen(!open)} className="relative">
 //         <Bell className="w-6 h-6 text-gray-800" />
 //         {unreadCount > 0 && (
-//           <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
+//           <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5   flex items-center justify-center">
 //             {unreadCount}
 //           </span>
 //         )}
@@ -59,7 +59,7 @@
 
 //       {/* Dropdown */}
 //       {open && (
-//         <div className="absolute right-0 mt-2 w-80 bg-white shadow-lg rounded-md z-50">
+//         <div className="absolute right-0 mt-2 w-80 bg-white shadow-lg   z-50">
 //           <h3 className="p-2 font-bold border-b">Notifications</h3>
 //           <ul>
 //             {notifications.length === 0 && (

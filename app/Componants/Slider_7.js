@@ -91,7 +91,7 @@ export default function MultiSlider_7() {
       <Splide key={lang} className='h-fit' options={sliderOptions} aria-label="عروض مميزة">
         {cards1.map((item, index) => (
           <SplideSlide key={index}>
-            <div className="bg-neutral-900 hover:bg-neutral-800  rounded-lg shadow-md overflow-hidden flex flex-col h-96">
+            <div className="bg-neutral-900 hover:bg-neutral-800    shadow-md overflow-hidden flex flex-col h-96">
               <div className="relative w-full h-60   flex items-center justify-center">
               <Image
                   src={item.image}

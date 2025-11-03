@@ -50,7 +50,7 @@ export default function MultiSlider() {
           <SplideSlide key={item.id}>
          <Link href={`/product/${item.sku}`} className="block">
 
-              <div className="bg-neutral-900 hover:bg-neutral-800 rounded-lg shadow-md overflow-hidden flex flex-col h-96">
+              <div className="bg-neutral-900 hover:bg-neutral-800   shadow-md overflow-hidden flex flex-col h-96">
                 <div className="relative w-full h-48 flex items-center justify-center">
                   {item.images?.[0] ? (
                     <Image

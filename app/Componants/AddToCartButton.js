@@ -27,7 +27,7 @@ export default function AddToCartButton({ product }) {
   return (
     <button
       onClick={handleAddToCart}
-      className="bg-blue-600 text-white px-4 py-2 rounded"
+      className="bg-blue-600 text-white px-4 py-2 "
     >
       Add to Cart
     </button>

@@ -160,7 +160,7 @@ const cartSubtotal = cart
     return (
       <div className="min-h-screen bg-white md:bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FFD300] mx-auto mb-4"></div>
+          <div className="animate-spin  h-12 w-12 border-b-2 border-[#FFD300] mx-auto mb-4"></div>
           <p className="text-[#111] text-lg">Loading your cart...</p>
         </div>
       </div>
@@ -174,7 +174,7 @@ const cartSubtotal = cart
           <h1 className="text-3xl md:text-4xl font-bold text-[#111] text-center">
             Checkout
           </h1>
-          <div className="w-24 h-1 bg-[#FFD300] mx-auto mt-4 rounded-full"></div>
+          <div className="w-24 h-1 bg-[#FFD300] mx-auto mt-4 "></div>
         </div>
       </div>
 
@@ -184,7 +184,7 @@ const cartSubtotal = cart
           <div className="space-y-6">
             <div className="bg-white  shadow-lg p-6 md:p-8 border border-gray-100 hover:shadow-xl transition-all duration-300">
               <div className="flex items-center mb-6">
-                <div className="w-8 h-8 bg-[#FFD300] rounded-full flex items-center justify-center mr-3">
+                <div className="w-8 h-8 bg-[#FFD300]  flex items-center justify-center mr-3">
                   <span className="text-[#111] font-bold text-sm">1</span>
                 </div>
                 <h2 className="text-2xl font-bold text-[#111]">Your Cart</h2>
@@ -197,12 +197,12 @@ const cartSubtotal = cart
     key={item.id}
     initial={{ opacity: 1, y: 0 }}
     exit={{ opacity: 0, y: -20, transition: { duration: 0.3 } }}
-    className="relative flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors duration-200"
+    className="relative flex items-center justify-between p-4 bg-gray-50  hover:bg-gray-100 transition-colors duration-200"
   >
     {/* زر الإزالة */}
     <button
       onClick={() => handleRemoveItem(item.id)}
-      className="absolute top-2 right-2 w-7 h-7 flex items-center justify-center rounded-full bg-gray-200 text-gray-500 hover:bg-red-500 hover:text-white transition-all duration-200 shadow-sm"
+      className="absolute top-2 right-2 w-7 h-7 flex items-center justify-center  bg-gray-200 text-gray-500 hover:bg-red-500 hover:text-white transition-all duration-200 shadow-sm"
       title="Remove item"
     >
       ✕
@@ -210,7 +210,7 @@ const cartSubtotal = cart
 
     <div className="flex gap-3 items-center w-full flex-col sm:flex-row sm:items-start">
       {/* صورة المنتج */}
-      <div className="flex-shrink-0 w-24 h-24 sm:w-20 sm:h-20 bg-gray-200 rounded-lg overflow-hidden">
+      <div className="flex-shrink-0 w-24 h-24 sm:w-20 sm:h-20 bg-gray-200   overflow-hidden">
         {item.product.images?.[0] ? (
           <img
             src={item.product.images[0]}
@@ -235,7 +235,7 @@ const cartSubtotal = cart
           <button
             onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
             disabled={loadingItem === item.id}
-            className="w-7 h-7 flex items-center justify-center bg-gray-200 rounded-md hover:bg-gray-300 disabled:opacity-50"
+            className="w-7 h-7 flex items-center justify-center bg-gray-200   hover:bg-gray-300 disabled:opacity-50"
           >
             -
           </button>
@@ -245,7 +245,7 @@ const cartSubtotal = cart
           <button
             onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
             disabled={loadingItem === item.id}
-            className="w-7 h-7 flex items-center justify-center bg-gray-200 rounded-md hover:bg-gray-300 disabled:opacity-50"
+            className="w-7 h-7 flex items-center justify-center bg-gray-200   hover:bg-gray-300 disabled:opacity-50"
           >
             +
           </button>
@@ -288,11 +288,11 @@ const cartSubtotal = cart
                     placeholder="Enter discount code"
                     value={couponCode}
                     onChange={(e) => setCouponCode(e.target.value)}
-                    className="flex-1 px-4 py-3 rounded-xl border border-gray-300 focus:border-[#FFD300] focus:ring-2 focus:ring-[#FFD300] focus:ring-opacity-20 outline-none transition-all duration-200 text-[#111] placeholder-[#555]"
+                    className="flex-1 px-4 py-3   border border-gray-300 focus:border-[#FFD300] focus:ring-2 focus:ring-[#FFD300] focus:ring-opacity-20 outline-none transition-all duration-200 text-[#111] placeholder-[#555]"
                   />
                   <button
                     onClick={applyCoupon}
-                    className="bg-[#FFD300] text-[#111] px-6 py-3 rounded-xl font-semibold hover:bg-[#E6BE00] transition-colors duration-200 whitespace-nowrap"
+                    className="bg-[#FFD300] text-[#111] px-6 py-3   font-semibold hover:bg-[#E6BE00] transition-colors duration-200 whitespace-nowrap"
                   >
                     Apply
                   </button>
@@ -305,7 +305,7 @@ const cartSubtotal = cart
           <div className="space-y-6">
             <div className="bg-white shadow-lg p-6 md:p-8 border border-gray-100 hover:shadow-xl transition-all duration-300">
               <div className="flex items-center mb-6">
-                <div className="w-8 h-8 bg-[#FFD300] rounded-full flex items-center justify-center mr-3">
+                <div className="w-8 h-8 bg-[#FFD300]   flex items-center justify-center mr-3">
                   <span className="text-[#111] font-bold text-sm">2</span>
                 </div>
                 <h2 className="text-2xl font-bold text-[#111]">
@@ -325,7 +325,7 @@ const cartSubtotal = cart
                       setSelectedCountry(e.target.value);
                       setSelectedShipping("");
                     }}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-[#FFD300] focus:ring-2 focus:ring-[#FFD300] outline-none"
+                    className="w-full px-4 py-3   border border-gray-300 focus:border-[#FFD300] focus:ring-2 focus:ring-[#FFD300] outline-none"
                   >
                     <option value="">-- Select Country --</option>
                     {countries.map((c) => (
@@ -345,7 +345,7 @@ const cartSubtotal = cart
                     <div className="flex gap-3">
                       <button
                         onClick={() => setSelectedShipping("normal")}
-                        className={`flex-1 px-4 py-3 rounded-xl border text-sm font-semibold transition-all duration-200 ${
+                        className={`flex-1 px-4 py-3   border text-sm font-semibold transition-all duration-200 ${
                           selectedShipping === "normal"
                             ? "border-[#FFD300] bg-[#FFF7CC] text-[#111]"
                             : "border-gray-300 text-gray-600 hover:bg-gray-50"
@@ -360,7 +360,7 @@ const cartSubtotal = cart
 
                       <button
                         onClick={() => setSelectedShipping("fast")}
-                        className={`flex-1 px-4 py-3 rounded-xl border text-sm font-semibold transition-all duration-200 ${
+                        className={`flex-1 px-4 py-3   border text-sm font-semibold transition-all duration-200 ${
                           selectedShipping === "fast"
                             ? "border-[#FFD300] bg-[#FFF7CC] text-[#111]"
                             : "border-gray-300 text-gray-600 hover:bg-gray-50"
@@ -432,7 +432,7 @@ const cartSubtotal = cart
             <button
               onClick={handleContinue}
               disabled={!selectedCountry || !selectedShipping}
-              className={`w-full py-4 px-6 rounded-xl font-bold text-lg shadow-lg transition-all duration-200 transform ${
+              className={`w-full py-4 px-6   font-bold text-lg shadow-lg transition-all duration-200 transform ${
                 !selectedCountry || !selectedShipping
                   ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                   : "bg-[#FFD300] text-[#111] hover:bg-[#E6BE00] hover:scale-[1.02] active:scale-[0.98]"

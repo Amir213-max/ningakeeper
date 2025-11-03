@@ -19,7 +19,7 @@ export default function RegisterPage() {
   function Toast({ type = "error", message }) {
     return (
       <div
-        className={`fixed top-4 right-4 px-4 py-2 rounded-lg shadow-lg z-50 animate-slide-in ${
+        className={`fixed top-4 right-4 px-4 py-2   shadow-lg z-50 animate-slide-in ${
           type === "success" ? "bg-green-600" : "bg-red-600"
         } text-white`}
       >
@@ -83,13 +83,13 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen flex justify-center items-center bg-gray-100 p-8">
-      <div className="w-full max-w-md bg-white shadow-lg rounded-lg p-6">
+      <div className="w-full max-w-md bg-white shadow-lg   p-6">
         <h2 className="text-2xl font-bold mb-6 text-gray-800 text-center">
           Create a new account
         </h2>
 
         <form onSubmit={handleRegister} className="flex flex-col gap-4">
-          <div className="flex items-center border border-gray-300 rounded-lg px-3">
+          <div className="flex items-center border border-gray-300   px-3">
             <User className="text-gray-400" size={20} />
             <input
               type="text"
@@ -101,7 +101,7 @@ export default function RegisterPage() {
             />
           </div>
 
-          <div className="flex items-center border border-gray-300 rounded-lg px-3">
+          <div className="flex items-center border border-gray-300   px-3">
             <Mail className="text-gray-400" size={20} />
             <input
               type="email"
@@ -113,7 +113,7 @@ export default function RegisterPage() {
             />
           </div>
 
-          <div className="flex items-center border border-gray-300 rounded-lg px-3">
+          <div className="flex items-center border border-gray-300   px-3">
             <Lock className="text-gray-400" size={20} />
             <input
               type="password"
@@ -128,7 +128,7 @@ export default function RegisterPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-yellow-600 text-white py-3 rounded-lg font-semibold hover:bg-amber-700 transition disabled:opacity-50"
+            className="w-full bg-yellow-600 text-white py-3   font-semibold hover:bg-amber-700 transition disabled:opacity-50"
           >
             {loading ? "Registering..." : "Register"}
           </button>

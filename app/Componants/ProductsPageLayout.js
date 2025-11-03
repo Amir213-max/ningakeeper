@@ -156,7 +156,7 @@ export default function ProductsPageLayout({
       <div className="block lg:hidden bg-[#1f2323] px-4 py-3 sticky top-0 z-30 flex justify-between items-center">
         <button
           onClick={() => setSidebarOpen(true)}
-          className="text-white bg-yellow-500 px-3 py-1 rounded-lg font-semibold"
+          className="text-white bg-yellow-500 px-3 py-1   font-semibold"
         >
           ☰ {t("Filters")}
         </button>
@@ -175,7 +175,7 @@ export default function ProductsPageLayout({
         </div>
 
         {/* Main content */}
-        <div className="lg:col-span-4 bg-white p-4 sm:p-6 rounded-t-2xl lg:rounded-none">
+        <div className="lg:col-span-4 bg-white p-4 sm:p-6  ">
           <h1 className="text-3xl sm:text-4xl font-bold text-[#1f2323] mb-4">
             {selectedCategoryName || pageTitle}
           </h1>
@@ -201,7 +201,7 @@ export default function ProductsPageLayout({
             {currentProducts.map((product) => (
               <div
                 key={product.sku}
-                className="bg-gradient-to-br from-white to-neutral-200 rounded-xl shadow-md overflow-hidden flex flex-col relative transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
+                className="bg-gradient-to-br from-white to-neutral-200   shadow-md overflow-hidden flex flex-col relative transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
               >
                 {/* Product Badge */}
               {product.productBadges?.length > 0 &&
@@ -223,7 +223,7 @@ export default function ProductsPageLayout({
                   href={`/product/${encodeURIComponent(product.sku)}`}
                   className="p-4 flex flex-col flex-grow justify-between"
                 >
-                  <div className="bg-neutral-400 text-amber-100 text-xs font-semibold w-fit px-3 py-1 rounded-full mb-3">
+                  <div className="bg-neutral-400 text-amber-100 text-xs font-semibold w-fit px-3 py-1   mb-3">
                     {(product.rootCategories || []).map((cat) => cat.name).join(", ")}
                   </div>
 
@@ -253,7 +253,7 @@ export default function ProductsPageLayout({
               <button
                 onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
                 disabled={currentPage === 1}
-                className="px-3 sm:px-4 py-2 cursor-pointer rounded-lg bg-gray-200 text-gray-700 disabled:opacity-50 text-sm sm:text-base"
+                className="px-3 sm:px-4 py-2 cursor-pointer   bg-gray-200 text-gray-700 disabled:opacity-50 text-sm sm:text-base"
               >
                 Prev
               </button>
@@ -262,7 +262,7 @@ export default function ProductsPageLayout({
                 <button
                   key={idx}
                   onClick={() => setCurrentPage(idx + 1)}
-                  className={`px-3 sm:px-4 py-2 cursor-pointer rounded-lg text-sm sm:text-base ${
+                  className={`px-3 sm:px-4 py-2 cursor-pointer   text-sm sm:text-base ${
                     currentPage === idx + 1
                       ? "bg-[#1f2323] text-white"
                       : "bg-gray-100 text-gray-700"
@@ -275,7 +275,7 @@ export default function ProductsPageLayout({
               <button
                 onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
                 disabled={currentPage === totalPages}
-                className="px-3 sm:px-4 py-2 cursor-pointer rounded-lg bg-gray-200 text-gray-700 disabled:opacity-50 text-sm sm:text-base"
+                className="px-3 sm:px-4 py-2 cursor-pointer   bg-gray-200 text-gray-700 disabled:opacity-50 text-sm sm:text-base"
               >
                 Next
               </button>

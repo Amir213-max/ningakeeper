@@ -81,7 +81,7 @@ export default function CustomerPage() {
           <h1 className="text-3xl md:text-4xl font-bold text-[#111] text-center">
             Complete Your Order
           </h1>
-          <div className="w-24 h-1 bg-[#FFD300] mx-auto mt-4 rounded-full"></div>
+          <div className="w-24 h-1 bg-[#FFD300] mx-auto mt-4  "></div>
         </div>
       </div>
 
@@ -89,7 +89,7 @@ export default function CustomerPage() {
         {/* Customer Info */}
         <div className="bg-white  shadow-lg p-6 md:p-8 border border-gray-100 hover:shadow-xl transition-all duration-300">
           <div className="flex items-center mb-6">
-            <div className="w-8 h-8 bg-[#FFD300] rounded-full flex items-center justify-center mr-3">
+            <div className="w-8 h-8 bg-[#FFD300]   flex items-center justify-center mr-3">
               <span className="text-[#111] font-bold text-sm">1</span>
             </div>
             <h2 className="text-2xl font-bold text-[#111]">Customer Information</h2>
@@ -99,10 +99,18 @@ export default function CustomerPage() {
             <input
               type="text"
               name="name"
-              placeholder="Full Name *"
+              placeholder="First Name *"
               value={customer.name}
               onChange={handleChange}
-              className="border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-[#FFD300]"
+              className="border border-gray-300   px-4 py-3 focus:outline-none focus:border-[#FFD300] col-span-1 md:col-span-2"
+            />
+              <input
+              type="text"
+              name="name"
+              placeholder="Last Name *"
+             
+              onChange={handleChange}
+              className="border border-gray-300   px-4 py-3 focus:outline-none focus:border-[#FFD300] col-span-1 md:col-span-2"
             />
             <input
               type="email"
@@ -110,7 +118,7 @@ export default function CustomerPage() {
               placeholder="Email Address *"
               value={customer.email}
               onChange={handleChange}
-              className="border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-[#FFD300]"
+              className="border border-gray-300   px-4 py-3 focus:outline-none focus:border-[#FFD300] col-span-1 md:col-span-2"
             />
             <input
               type="tel"
@@ -118,7 +126,7 @@ export default function CustomerPage() {
               placeholder="Phone Number *"
               value={customer.phone}
               onChange={handleChange}
-              className="border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-[#FFD300]"
+              className="border border-gray-300   px-4 py-3 focus:outline-none focus:border-[#FFD300]"
             />
             <input
               type="text"
@@ -126,7 +134,7 @@ export default function CustomerPage() {
               placeholder="City *"
               value={customer.city}
               onChange={handleChange}
-              className="border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-[#FFD300]"
+              className="border border-gray-300   px-4 py-3 focus:outline-none focus:border-[#FFD300]"
             />
             <input
               type="text"
@@ -134,7 +142,7 @@ export default function CustomerPage() {
               placeholder="Address *"
               value={customer.address}
               onChange={handleChange}
-              className="border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-[#FFD300] col-span-1 md:col-span-2"
+              className="border border-gray-300   px-4 py-3 focus:outline-none focus:border-[#FFD300] col-span-1 md:col-span-2"
             />
             <input
               type="text"
@@ -142,7 +150,7 @@ export default function CustomerPage() {
               placeholder="ZIP / Postal Code *"
               value={customer.zip}
               onChange={handleChange}
-              className="border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-[#FFD300]"
+              className="border border-gray-300   px-4 py-3 focus:outline-none focus:border-[#FFD300]"
             />
             <textarea
               name="notes"
@@ -150,7 +158,7 @@ export default function CustomerPage() {
               value={customer.notes}
               onChange={handleChange}
               rows={3}
-              className="border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-[#FFD300] col-span-1 md:col-span-2"
+              className="border border-gray-300   px-4 py-3 focus:outline-none focus:border-[#FFD300] col-span-1 md:col-span-2"
             ></textarea>
           </div>
         </div>
@@ -158,7 +166,7 @@ export default function CustomerPage() {
         {/* Payment Options */}
         <div className="bg-white  shadow-lg p-6 md:p-8 border border-gray-100 hover:shadow-xl transition-all duration-300">
           <div className="flex items-center mb-6">
-            <div className="w-8 h-8 bg-[#FFD300] rounded-full flex items-center justify-center mr-3">
+            <div className="w-8 h-8 bg-[#FFD300]   flex items-center justify-center mr-3">
               <span className="text-[#111] font-bold text-sm">2</span>
             </div>
             <h2 className="text-2xl font-bold text-[#111]">Payment Method</h2>
@@ -167,7 +175,7 @@ export default function CustomerPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <button
               onClick={() => setPaymentType("COD")}
-              className={`p-6 rounded-xl border-2 transition-all duration-200 hover:scale-[1.02] text-left ${
+              className={`p-6   border-2 transition-all duration-200 hover:scale-[1.02] text-left ${
                 paymentType === "COD"
                   ? "border-[#FFD300] bg-[#FFD300] bg-opacity-10"
                   : "border-gray-200 hover:border-[#FFD300] hover:border-opacity-50"
@@ -176,7 +184,7 @@ export default function CustomerPage() {
               <div className="flex items-center justify-between mb-3">
                 <h3 className="font-bold text-[#111] text-lg">Cash on Delivery</h3>
                 {paymentType === "COD" && (
-                  <div className="w-6 h-6 bg-[#FFD300] rounded-full flex items-center justify-center">
+                  <div className="w-6 h-6 bg-[#FFD300]   flex items-center justify-center">
                     <svg
                       className="w-4 h-4 text-[#111]"
                       fill="currentColor"
@@ -196,7 +204,7 @@ export default function CustomerPage() {
 
             <button
               onClick={() => setPaymentType("TAP")}
-              className={`p-6 rounded-xl border-2 transition-all duration-200 hover:scale-[1.02] text-left ${
+              className={`p-6   border-2 transition-all duration-200 hover:scale-[1.02] text-left ${
                 paymentType === "TAP"
                   ? "border-[#FFD300] bg-[#FFD300] bg-opacity-10"
                   : "border-gray-200 hover:border-[#FFD300] hover:border-opacity-50"
@@ -205,7 +213,7 @@ export default function CustomerPage() {
               <div className="flex items-center justify-between mb-3">
                 <h3 className="font-bold text-[#111] text-lg">Tap Payment</h3>
                 {paymentType === "TAP" && (
-                  <div className="w-6 h-6 bg-[#FFD300] rounded-full flex items-center justify-center">
+                  <div className="w-6 h-6 bg-[#FFD300]   flex items-center justify-center">
                     <svg
                       className="w-4 h-4 text-[#111]"
                       fill="currentColor"
@@ -232,7 +240,7 @@ export default function CustomerPage() {
           <button
             onClick={handlePlaceOrder}
             disabled={loading}
-            className="w-full bg-[#FFD300] text-[#111] py-4 px-6 rounded-xl font-bold text-lg hover:bg-[#E6BE00] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+            className="w-full bg-[#FFD300] text-[#111] py-4 px-6   font-bold text-lg hover:bg-[#E6BE00] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
           >
             Place Order
           </button>
@@ -244,7 +252,7 @@ export default function CustomerPage() {
           <button
             onClick={handlePlaceOrder}
             disabled={loading}
-            className="w-full bg-[#FFD300] text-[#111] py-4 px-6 rounded-xl font-bold text-lg hover:bg-[#E6BE00] transition-all duration-200 transform hover:scale-[1.02] shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-[#FFD300] text-[#111] py-4 px-6   font-bold text-lg hover:bg-[#E6BE00] transition-all duration-200 transform hover:scale-[1.02] shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Place Order
           </button>

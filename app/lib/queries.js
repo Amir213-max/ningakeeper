@@ -450,7 +450,12 @@ export const RECOMMENDED_PRODUCTS_QUERY = `
         name
         sku
         images
-        price_range_from
+        productBadges{
+label
+}
+relative_list_price_difference
+price_range_exact_amount
+      list_price_amount
         brand {
           id
           name

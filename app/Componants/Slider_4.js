@@ -55,7 +55,7 @@ export default function MultiSlider_4() {
 <Splide key={lang} className='h-fit' options={sliderOptions} aria-label="عروض مميزة">
         {cards1.map((item, index) => (
           <SplideSlide key={index}>
-            <div className=" rounded-lg shadow-md overflow-hidden w-full flex flex-col h-96">
+            <div className="   shadow-md overflow-hidden w-full flex flex-col h-96">
               <div className="relative w-full h-full    flex items-center justify-center">
                 <Image
                   src={item.image}

@@ -211,7 +211,7 @@ export default function GoalKeeperClientPage({ products, brands, attributeValues
     <button
       onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
       disabled={currentPage === 1}
-      className="px-3 py-2 rounded-full bg-gray-200 text-gray-700 disabled:opacity-50 hover:bg-gray-300 transition"
+      className="px-3 py-2   bg-gray-200 text-gray-700 disabled:opacity-50 hover:bg-gray-300 transition"
     >
       &#10094;
     </button>
@@ -230,7 +230,7 @@ export default function GoalKeeperClientPage({ products, brands, attributeValues
             <button
               key={idx}
               onClick={() => setCurrentPage(pageNumber)}
-              className={`px-3 py-2 rounded-full text-sm sm:text-base transition ${
+              className={`px-3 py-2   text-sm sm:text-base transition ${
                 currentPage === pageNumber
                   ? "bg-[#1f2323] text-white shadow-md"
                   : "bg-gray-100 text-gray-700 hover:bg-gray-200"
@@ -254,7 +254,7 @@ export default function GoalKeeperClientPage({ products, brands, attributeValues
     <button
       onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
       disabled={currentPage === totalPages}
-      className="px-3 py-2 rounded-full bg-gray-200 text-gray-700 disabled:opacity-50 hover:bg-gray-300 transition"
+      className="px-3 py-2   bg-gray-200 text-gray-700 disabled:opacity-50 hover:bg-gray-300 transition"
     >
       &#10095;
     </button>

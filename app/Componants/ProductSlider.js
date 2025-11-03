@@ -39,7 +39,7 @@ export default function ProductSlider({ images, productName }) {
             <img
               src={img}
               alt={`${productName} image ${index + 1}`}
-              className="w-full h-48 object-contain rounded"
+              className="w-full h-48 object-contain "
             />
           </SplideSlide>
         ))}

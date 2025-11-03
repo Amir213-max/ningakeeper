@@ -18,7 +18,7 @@ export default function ZoomableImage({ src, alt }) {
   return (
     <div
       ref={imageRef}
-      className="relative w-full h-[500px] overflow-hidden rounded-lg border border-gray-200 bg-gray-50"
+      className="relative w-full h-[500px] overflow-hidden   border border-gray-200 bg-gray-50"
       onMouseEnter={() => setZoom(true)}
       onMouseLeave={() => setZoom(false)}
       onMouseMove={handleMouseMove}
