@@ -16,7 +16,6 @@ import Link from "next/link";
 import PriceDisplay from "../components/PriceDisplay";
 import { useCurrency } from "../contexts/CurrencyContext";
 
-
 export default function CartSidebar({ isOpen, onClose }) {
   const [cart, setCart] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -24,6 +23,7 @@ export default function CartSidebar({ isOpen, onClose }) {
   const [updating, setUpdating] = useState(null);
   const [recommended, setRecommended] = useState([]);
   const [adding, setAdding] = useState(null);
+  const { loading: currencyLoading } = useCurrency();
 
   const loadCart = async () => {
     try {
@@ -140,7 +140,6 @@ export default function CartSidebar({ isOpen, onClose }) {
       setAdding(null);
     }
   };
-   const { loading: currencyLoading } = useCurrency();
 
   return (
     <div
@@ -180,13 +179,13 @@ export default function CartSidebar({ isOpen, onClose }) {
                     key={item.id}
                     layout
                     transition={{ duration: 0.25, ease: "easeInOut" }}
-                    className="flex items-center justify-between bg-white   shadow-sm p-3 hover:shadow-md transition"
+                    className="flex items-center justify-between bg-white shadow-sm p-3 hover:shadow-md transition"
                   >
                     <div className="flex items-center space-x-3">
                       <img
                         src={product.images?.[0] || "/no-img.png"}
                         alt={product.name}
-                        className="w-16 h-16 object-cover   border"
+                        className="w-16 h-16 object-cover border"
                       />
                       <div>
                         <p className="font-semibold text-gray-800">
@@ -204,7 +203,7 @@ export default function CartSidebar({ isOpen, onClose }) {
                               )
                             }
                             disabled={updating === item.id || item.quantity === 1}
-                            className="w-7 h-7 flex items-center justify-center   border border-gray-300 bg-gray-100 hover:bg-red-100 text-red-600 font-bold transition"
+                            className="w-7 h-7 flex items-center justify-center border border-gray-300 bg-gray-100 hover:bg-red-100 text-red-600 font-bold transition"
                           >
                             {updating === item.id ? (
                               <Loader2 size={14} className="animate-spin" />
@@ -226,7 +225,7 @@ export default function CartSidebar({ isOpen, onClose }) {
                               )
                             }
                             disabled={updating === item.id}
-                            className="w-7 h-7 flex items-center justify-center   border border-gray-300 bg-gray-100 hover:bg-green-100 text-green-600 font-bold transition"
+                            className="w-7 h-7 flex items-center justify-center border border-gray-300 bg-gray-100 hover:bg-green-100 text-green-600 font-bold transition"
                           >
                             {updating === item.id ? (
                               <Loader2 size={14} className="animate-spin" />
@@ -237,17 +236,17 @@ export default function CartSidebar({ isOpen, onClose }) {
                         </div>
 
                         <p className="text-sm font-bold text-green-600 mt-1">
-                          
-                          <PriceDisplay 
-                          price={(finalPrice * item.quantity).toFixed(2)}
-                          loading={currencyLoading} />
+                          <PriceDisplay
+                            price={finalPrice * item.quantity}
+                            loading={currencyLoading}
+                          />
                         </p>
                       </div>
                     </div>
                     <button
                       onClick={() => handleRemoveItem(item.id)}
                       disabled={removing === item.id}
-                      className="text-sm px-3 py-1   bg-red-100 text-red-600 hover:bg-red-200 transition disabled:opacity-50"
+                      className="text-sm px-3 py-1 bg-red-100 text-red-600 hover:bg-red-200 transition disabled:opacity-50"
                     >
                       {removing === item.id ? "..." : "Remove"}
                     </button>
@@ -274,16 +273,16 @@ export default function CartSidebar({ isOpen, onClose }) {
                       <motion.div
                         key={prod.id}
                         whileHover={{ scale: 1.03 }}
-                        className="bg-white   shadow-sm hover:shadow-md transition flex flex-col justify-between"
+                        className="bg-white shadow-sm hover:shadow-md transition flex flex-col justify-between"
                       >
                         <Link
                           href={`/product/${prod.sku}`}
-                          className="block p-2  "
+                          className="block p-2"
                         >
                           <img
                             src={prod.images?.[0] || "/no-img.png"}
                             alt={prod.name}
-                            className="w-full h-24 object-cover   mb-1"
+                            className="w-full h-24 object-cover mb-1"
                           />
                           <p className="text-sm font-semibold text-gray-800 line-clamp-1">
                             {prod.name}
@@ -296,14 +295,12 @@ export default function CartSidebar({ isOpen, onClose }) {
                                   <PriceDisplay
                                     price={prod.list_price_amount}
                                     loading={currencyLoading}
-                                  
                                   />
                                 </span>
                                 <span className="text-sm text-green-600 font-bold">
                                   <PriceDisplay
                                     price={prod.price_range_exact_amount}
                                     loading={currencyLoading}
-                                    
                                   />
                                 </span>
                                 <span className="text-xs text-red-500 font-bold">
@@ -315,7 +312,6 @@ export default function CartSidebar({ isOpen, onClose }) {
                                 <PriceDisplay
                                   price={prod.list_price_amount}
                                   loading={currencyLoading}
-                                 
                                 />
                               </span>
                             )}
@@ -326,7 +322,7 @@ export default function CartSidebar({ isOpen, onClose }) {
                           whileTap={{ scale: 0.95 }}
                           onClick={() => handleAddToCart(prod.id)}
                           disabled={adding === prod.id}
-                          className={`flex items-center justify-center gap-1 w-full py-1.5   font-medium text-sm transition ${
+                          className={`flex items-center justify-center gap-1 w-full py-1.5 font-medium text-sm transition ${
                             adding === prod.id
                               ? "bg-green-500 text-white"
                               : "bg-gray-100 text-gray-700 hover:bg-gray-200"
@@ -356,7 +352,7 @@ export default function CartSidebar({ isOpen, onClose }) {
         {cart?.lineItems?.length > 0 && (
           <button
             onClick={() => (window.location.href = "/checkout_1")}
-            className="w-full bg-black cursor-pointer text-white py-3  font-semibold hover:bg-gray-800 transition"
+            className="w-full bg-black cursor-pointer text-white py-3 font-semibold hover:bg-gray-800 transition"
           >
             Checkout →
           </button>
