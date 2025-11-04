@@ -93,6 +93,7 @@ query ProductsByCategory($categoryId: ID!) {
       updated_at
       productBadges{
         label
+        color
       }
       list_price_amount
       list_price_currency
@@ -264,6 +265,7 @@ query PRODUCTS_SALES_QUERY {
   products {
     productBadges{
       label
+      color
     }
       created_at
       updated_at
@@ -346,6 +348,7 @@ query getproduct ($id: String!) {
     sku
     productBadges{
       label
+      color
     }
     description_ar
     description_en
@@ -415,6 +418,7 @@ export const GET_PRODUCT_BY_SKU = gql`
 
 productBadges{
 label
+color
 }
 
 
@@ -451,6 +455,7 @@ export const RECOMMENDED_PRODUCTS_QUERY = `
         sku
         images
         productBadges{
+        color
 label
 }
 relative_list_price_difference

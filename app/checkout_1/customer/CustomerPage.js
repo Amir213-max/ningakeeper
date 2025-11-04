@@ -139,7 +139,7 @@ export default function CustomerPage() {
             <input
               type="text"
               name="address"
-              placeholder="Address *"
+              placeholder="Street and house number *"
               value={customer.address}
               onChange={handleChange}
               className="border border-gray-300   px-4 py-3 focus:outline-none focus:border-[#FFD300] col-span-1 md:col-span-2"
@@ -167,7 +167,7 @@ export default function CustomerPage() {
         <div className="bg-white  shadow-lg p-6 md:p-8 border border-gray-100 hover:shadow-xl transition-all duration-300">
           <div className="flex items-center mb-6">
             <div className="w-8 h-8 bg-[#FFD300]   flex items-center justify-center mr-3">
-              <span className="text-[#111] font-bold text-sm">2</span>
+              <span className="text-[#111] font-bold text-sm">1</span>
             </div>
             <h2 className="text-2xl font-bold text-[#111]">Payment Method</h2>
           </div>
@@ -181,7 +181,7 @@ export default function CustomerPage() {
                   : "border-gray-200 hover:border-[#FFD300] hover:border-opacity-50"
               }`}
             >
-              <div className="flex items-center justify-between mb-3">
+              {/* <div className="flex items-center justify-between mb-3">
                 <h3 className="font-bold text-[#111] text-lg">Cash on Delivery</h3>
                 {paymentType === "COD" && (
                   <div className="w-6 h-6 bg-[#FFD300]   flex items-center justify-center">
@@ -209,7 +209,7 @@ export default function CustomerPage() {
                   ? "border-[#FFD300] bg-[#FFD300] bg-opacity-10"
                   : "border-gray-200 hover:border-[#FFD300] hover:border-opacity-50"
               }`}
-            >
+            > */}
               <div className="flex items-center justify-between mb-3">
                 <h3 className="font-bold text-[#111] text-lg">Tap Payment</h3>
                 {paymentType === "TAP" && (

@@ -43,6 +43,7 @@ const GET_PRODUCTS_BY_BRAND = gql`
       }
       productBadges {
         label
+        color
       }
     }
   }

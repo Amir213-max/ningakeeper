@@ -185,7 +185,7 @@ export default function CartSidebar({ isOpen, onClose }) {
                       <img
                         src={product.images?.[0] || "/no-img.png"}
                         alt={product.name}
-                        className="w-16 h-16 object-cover border"
+                        className="w-16 h-16 object-fill-fit border"
                       />
                       <div>
                         <p className="font-semibold text-gray-800">
@@ -259,7 +259,7 @@ export default function CartSidebar({ isOpen, onClose }) {
             {recommended.length > 0 && (
               <div className="mt-8">
                 <h3 className="text-lg font-bold mb-3 text-gray-800">
-                  Recommended for you 💡
+                  Recommended for you
                 </h3>
                 <div className="grid grid-cols-2 gap-3">
                   {recommended.map((prod) => {
@@ -282,7 +282,7 @@ export default function CartSidebar({ isOpen, onClose }) {
                           <img
                             src={prod.images?.[0] || "/no-img.png"}
                             alt={prod.name}
-                            className="w-full h-24 object-cover mb-1"
+                            className="w-full h-24 object-fill-fit mb-1"
                           />
                           <p className="text-sm font-semibold text-gray-800 line-clamp-1">
                             {prod.name}

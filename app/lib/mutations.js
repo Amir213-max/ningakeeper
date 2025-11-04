@@ -57,6 +57,7 @@ const GET_USER_CART = gql`
           name
            productBadges{
         label
+        color
       }
           list_price_amount
       list_price_currency
@@ -115,6 +116,7 @@ const CREATE_CART = gql`
         id
          productBadges{
         label
+        color
       }
         name
         list_price_amount
@@ -173,6 +175,7 @@ export const UPDATE_CART_ITEM_QUANTITY = gql`
       product {
        productBadges{
         label
+       color
       }
         id
         name
