@@ -240,6 +240,30 @@ export const SIGNIN_MUTATION = gql`
   }
 `;
 
+
+
+
+export const CREATE_ORDER_WITH_TAP_PAYMENT = gql`
+  mutation CreateOrderWithTapPayment($input: TapPaymentInput!) {
+    createOrderWithTapPayment(input: $input) {
+      success
+      payment_url
+      transaction_id
+      order_id
+      message
+      error
+      order {
+        id
+        number
+        total_amount
+        
+      }
+    }
+  }
+`;
+
+
+
 export const CREATE_TAP_PAYMENT = gql`
 mutation CreateOrderWithTapPayment($input: TapPaymentInput!) {
   createOrderWithTapPayment(input: $input) {

@@ -81,7 +81,7 @@ type HomePageBlockContent {
     show_descriptions: Boolean
     
     # Brands content
-    brand_ids: [String!]!
+    brand_ids: [Int!]
     show_names: Boolean
     
     # Text content
@@ -111,6 +111,7 @@ type SliderSlide {
 
 type Banner {
     image: String!
+    mobile_image: String
     title: String
     link: String
     description: String
@@ -1339,6 +1340,7 @@ type Query {
      users: [User!]! @all(model: "App\\Models\\User")
      user(id: ID! @eq): User @find(model: "App\\Models\\User")
      me: User @field(resolver: "App\\GraphQL\\Queries\\MeQuery")
+     profile: User @field(resolver: "App\\GraphQL\\Queries\\MeQuery")
  
      products(limit: Int, offset: Int): [Product!]! @field(resolver: "App\\GraphQL\\Queries\\ProductsQuery")
      productsWithCategories(limit: Int, offset: Int): [Product!]! @field(resolver: "App\\GraphQL\\Queries\\ProductsWithCategoriesQuery")

@@ -5,13 +5,13 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Mail, Lock } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
-import { graphqlClient } from "../lib/graphqlClient"; // 🟢 عميل GraphQL
-import { SIGNIN_MUTATION } from "../lib/mutations";   // 🟢 الميوتشن
-import { useAuth } from "../contexts/AuthContext";   // 🟢 استدعاء الكونتكست
+import { graphqlClient, setAuthToken } from "../lib/graphqlClient"; // ✅ ضيف setAuthToken
+import { SIGNIN_MUTATION } from "../lib/mutations";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login } = useAuth(); // 🟢 جاي من الكونتكست
+  const { login } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -28,12 +28,9 @@ export default function LoginPage() {
     try {
       setLoading(true);
 
-      // 🟢 استدعاء الميوتشن من الـ GraphQL
+      // 🟢 استدعاء الميوتشن
       const res = await graphqlClient.request(SIGNIN_MUTATION, {
-        input: { 
-          email,
-          password,
-        },
+        input: { email, password },
       });
 
       const { token, user, message } = res.signin;
@@ -43,12 +40,18 @@ export default function LoginPage() {
         return;
       }
 
-      // 🟢 خزن اليوزر والتوكن في الـ context
+      // ✅ خزّن التوكن في localStorage
+      localStorage.setItem("token", token);
+
+      // ✅ حدّث الهيدر بتاع GraphQLClient علشان يستخدم التوكن
+      setAuthToken(token);
+
+      // 🟢 خزّن بيانات المستخدم في الكونتكست
       login(user, token);
 
       toast.success("تم تسجيل الدخول بنجاح ✅", { position: "top-right" });
 
-      router.push("/"); // رجع للهوم
+      router.push("/"); // رجوع للهوم
     } catch (err) {
       console.error("Login error:", err);
       toast.error("حدث خطأ أثناء تسجيل الدخول ❌");
@@ -69,7 +72,7 @@ export default function LoginPage() {
           </h2>
 
           <form onSubmit={handleLogin} className="flex flex-col gap-4">
-            <div className="flex items-center border border-gray-300   px-3">
+            <div className="flex items-center border border-gray-300 px-3">
               <Mail className="text-gray-400" size={20} />
               <input
                 type="email"
@@ -80,7 +83,7 @@ export default function LoginPage() {
                 className="w-full p-3 text-black outline-none"
               />
             </div>
-            <div className="flex items-center border border-gray-300   px-3">
+            <div className="flex items-center border border-gray-300 px-3">
               <Lock className="text-gray-400" size={20} />
               <input
                 type="password"
@@ -94,7 +97,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-black cursor-pointer text-white py-3   hover:bg-amber-600 transition"
+              className="w-full bg-black cursor-pointer text-white py-3 hover:bg-amber-600 transition"
             >
               {loading ? "Logging in..." : "Login"}
             </button>
@@ -117,7 +120,7 @@ export default function LoginPage() {
           <h2 className="text-2xl font-bold mb-6">New here?</h2>
           <Link
             href="/register"
-            className="block w-full bg-yellow-500 text-white py-3   font-semibold hover:bg-amber-600 transition"
+            className="block w-full bg-yellow-500 text-white py-3 font-semibold hover:bg-amber-600 transition"
           >
             Register with KEEPERsport
           </Link>

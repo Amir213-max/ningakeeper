@@ -14,6 +14,7 @@ export async function POST(req) {
         format: "text"
       }),
     });
+console.log("TAP SECRET KEY:", process.env.TAP_SECRET_KEY);
 
     const data = await res.json();
     return NextResponse.json(data);

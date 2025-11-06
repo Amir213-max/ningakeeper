@@ -3,7 +3,7 @@
 import { useTranslation } from '@/app/contexts/TranslationContext';
 import { useCurrency } from '@/app/contexts/CurrencyContext';
 import { graphqlClient } from '@/app/lib/graphqlClient';
-import { RECOMMENDED_PRODUCTS_QUERY } from '@/app/lib/queries';
+import { RECOMMENoDED_PRODUCTS_QUERY } from '@/app/lib/queries';
 import { Splide, SplideSlide } from '@splidejs/react-splide';
 import '@splidejs/react-splide/css';
 import Image from 'next/image';

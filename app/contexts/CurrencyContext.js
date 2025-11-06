@@ -23,7 +23,7 @@ export const CurrencyProvider = ({ children }) => {
   useEffect(() => {
     const savedCurrency = localStorage.getItem('selectedCurrency');
     if (savedCurrency && (savedCurrency === 'EUR' || savedCurrency === 'SAR')) {
-      console.log('🔄 Loading saved currency from localStorage:', savedCurrency);
+      
       setCurrency(savedCurrency);
     }
   }, []);
@@ -32,18 +32,18 @@ export const CurrencyProvider = ({ children }) => {
   useEffect(() => {
     const fetchRate = async () => {
       try {
-        console.log('🔄 Fetching currency conversion rate...');
+     
         setLoading(true);
         setError(null);
         const rate = await getCurrencyRate();
-        console.log('✅ Currency rate fetched successfully:', rate);
+     
         setConversionRate(rate);
       } catch (err) {
         console.error('❌ Error loading currency rate:', err);
         setError('Failed to load currency rate');
         // Fallback to default rate
         const fallbackRate = 4.6;
-        console.log('⚠️ Using fallback rate:', fallbackRate);
+       
         setConversionRate(fallbackRate);
       } finally {
         setLoading(false);
@@ -56,15 +56,14 @@ export const CurrencyProvider = ({ children }) => {
   // Save currency to localStorage when it changes
   useEffect(() => {
     if (currency) {
-      console.log('💾 Saving currency to localStorage:', currency);
+   
       localStorage.setItem('selectedCurrency', currency);
     }
   }, [currency]);
 
   const switchCurrency = (newCurrency) => {
     if (newCurrency === 'EUR' || newCurrency === 'SAR') {
-      console.log('🔄 Switching currency from', currency, 'to', newCurrency);
-      console.log('📊 Current conversion rate:', conversionRate);
+ 
       setCurrency(newCurrency);
     } else {
       console.warn('⚠️ Invalid currency code:', newCurrency);
@@ -78,12 +77,12 @@ export const CurrencyProvider = ({ children }) => {
     }
 
     if (currency === 'EUR') {
-      console.log(`💰 Converting ${eurPrice} EUR → ${eurPrice} EUR (no conversion needed)`);
+  
       return eurPrice;
     }
     
     const convertedPrice = eurPrice * conversionRate;
-    console.log(`💰 Converting ${eurPrice} EUR → ${convertedPrice} SAR (rate: ${conversionRate})`);
+ 
     return convertedPrice;
   };
 

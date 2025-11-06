@@ -1,4 +1,5 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
@@ -11,14 +12,32 @@ import {
 } from "../lib/mutations";
 import PriceDisplay from "../components/PriceDisplay";
 
+// جلب الدول
 const GET_COUNTRIES = gql`
   query {
     countries {
       id
       name
       code
-      normal_shipping_cost
-      fast_shipping_cost
+    }
+  }
+`;
+
+// حساب الشحن من السيرفر
+const CALCULATE_SHIPPING = gql`
+  query calculateShipping($country_id: ID!) {
+    calculateShipping(country_id: $country_id) {
+      country {
+        id
+        name
+        code
+      }
+      normal_shipping {
+        cost
+      }
+      fast_shipping {
+        cost
+      }
     }
   }
 `;
@@ -26,24 +45,28 @@ const GET_COUNTRIES = gql`
 export default function CheckoutPage() {
   const router = useRouter();
   const [cart, setCart] = useState(null);
-  const [cartId, setCartId] = useState("1");
+  const [cartId, setCartId] = useState(""); // cartId ديناميكي
   const [countries, setCountries] = useState([]);
   const [selectedCountry, setSelectedCountry] = useState("");
-  const [selectedShipping, setSelectedShipping] = useState(""); // ✅ نوع الشحن
+  const [selectedShipping, setSelectedShipping] = useState("");
+  const [shippingCosts, setShippingCosts] = useState({ normal: 0, fast: 0 });
   const [couponCode, setCouponCode] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [discountAmount, setDiscountAmount] = useState(0);
   const [loadingItem, setLoadingItem] = useState(null);
   const [removingItem, setRemovingItem] = useState(null);
 
+  // جلب الكارت وتعيين cartId تلقائي
   useEffect(() => {
     const loadCart = async () => {
       const userCart = await fetchUserCart();
       setCart(userCart);
+      setCartId(userCart?.id || "");
     };
     loadCart();
   }, []);
 
+  // جلب الدول
   useEffect(() => {
     const loadCountries = async () => {
       const res = await graphqlClient.request(GET_COUNTRIES);
@@ -52,10 +75,30 @@ export default function CheckoutPage() {
     loadCountries();
   }, []);
 
+  // جلب تكاليف الشحن عند اختيار الدولة
+  useEffect(() => {
+    const fetchShipping = async () => {
+      if (!selectedCountry) return;
+      try {
+        const res = await graphqlClient.request(CALCULATE_SHIPPING, {
+          country_id: selectedCountry,
+        });
+        const shippingData = res.calculateShipping;
+        setShippingCosts({
+          normal: shippingData.normal_shipping?.cost || 0,
+          fast: shippingData.fast_shipping?.cost || 0,
+        });
+      } catch (err) {
+        console.error("Error fetching shipping:", err);
+        setShippingCosts({ normal: 0, fast: 0 });
+      }
+    };
+    fetchShipping();
+  }, [selectedCountry]);
+
   const handleRemoveItem = async (itemId) => {
     try {
       setRemovingItem(itemId);
-      await new Promise((resolve) => setTimeout(resolve, 300));
       await graphqlClient.request(REMOVE_ITEM_FROM_CART, { id: itemId });
       setCart((prev) => ({
         ...prev,
@@ -77,7 +120,6 @@ export default function CheckoutPage() {
         id: itemId,
         quantity: newQuantity,
       });
-
       setCart((prev) => ({
         ...prev,
         lineItems: prev.lineItems.map((i) =>
@@ -98,29 +140,26 @@ export default function CheckoutPage() {
       return;
     }
     setAppliedCoupon(couponCode);
-    setDiscountAmount(50);
+    setDiscountAmount(50); // مثال للخصم
     alert(`تم تطبيق الكوبون: ${couponCode}`);
   };
 
-// ✅ جمع الأسعار بعد الخصم لو فيه badge
-const cartSubtotal = cart
-  ? cart.lineItems.reduce((sum, i) => {
-      const price =
-        i.product.productBadges?.length > 0
-          ? i.product.list_price_amount -
-            (i.product.list_price_amount *
-              Math.abs(
-                parseFloat(i.product.productBadges[0].label.replace("%", ""))
-              )) /
-              100
-          : i.product.list_price_amount || 0;
-
-      return sum + price * i.quantity;
-    }, 0)
-  : 0;
-
+  // حساب Subtotal بعد الخصم
+  const cartSubtotal = cart
+    ? cart.lineItems.reduce((sum, i) => {
+        const price =
+          i.product.productBadges?.length > 0
+            ? i.product.list_price_amount -
+              (i.product.list_price_amount *
+                Math.abs(parseFloat(i.product.productBadges[0].label.replace("%", "")))
+              ) / 100
+            : i.product.list_price_amount || 0;
+        return sum + price * i.quantity;
+      }, 0)
+    : 0;
 
   const totalAfterDiscount = cartSubtotal - discountAmount;
+
   const selectedCountryData = countries.find((c) => c.id === selectedCountry);
 
   const isSaudi =
@@ -131,30 +170,39 @@ const cartSubtotal = cart
   const taxRate = isSaudi ? 0.15 : 0;
   const taxAmount = totalAfterDiscount * taxRate;
 
-  // ✅ حساب تكلفة الشحن بناءً على الاختيار
   const shippingCost =
     selectedShipping === "fast"
-      ? selectedCountryData?.fast_shipping_cost || 0
+      ? shippingCosts.fast
       : selectedShipping === "normal"
-      ? selectedCountryData?.normal_shipping_cost || 0
+      ? shippingCosts.normal
       : 0;
 
   const totalWithTaxAndShipping =
     totalAfterDiscount + taxAmount + shippingCost;
 
-  const handleContinue = () => {
-    if (!selectedCountry || !selectedShipping) {
-      alert("من فضلك اختر الدولة ونوع الشحن");
-      return;
-    }
-    const params = new URLSearchParams({
-      cartId,
-      countryId: selectedCountry,
-      shippingType: selectedShipping,
-      appliedCoupon: appliedCoupon || "",
-    });
-    router.push(`/checkout_1/customer?${params.toString()}`);
-  };
+const handleContinue = () => {
+  if (!selectedCountry || !selectedShipping) {
+    alert("من فضلك اختر الدولة ونوع الشحن");
+    return;
+  }
+
+  // ✅ تحويل fast → express قبل الإرسال
+  const shippingTypeValue =
+    selectedShipping === "fast" ? "express" : "normal";
+
+  const params = new URLSearchParams({
+    cartId,
+    countryId: selectedCountry,
+    shippingType: shippingTypeValue, // ✅ هنا التغيير
+    appliedCoupon: appliedCoupon || "",
+    subtotal: totalAfterDiscount?.toFixed(2) || "0",
+    shipping: shippingCost?.toFixed(2) || "0",
+    isSaudi: isSaudi ? "true" : "false",
+  });
+
+  router.push(`/checkout_1/customer?${params.toString()}`);
+};
+
 
   if (!cart)
     return (
@@ -168,7 +216,6 @@ const cartSubtotal = cart
 
   return (
     <div className="min-h-screen bg-white md:bg-gray-50 text-[#111]">
-      {/* Header */}
       <div className="bg-white md:bg-gray-50 border-b border-gray-200 md:border-none">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <h1 className="text-3xl md:text-4xl font-bold text-[#111] text-center">
@@ -180,11 +227,11 @@ const cartSubtotal = cart
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Left Column - Cart Summary */}
+          {/* Cart Summary */}
           <div className="space-y-6">
-            <div className="bg-white  shadow-lg p-6 md:p-8 border border-gray-100 hover:shadow-xl transition-all duration-300">
+            <div className="bg-white shadow-lg p-6 md:p-8 border border-gray-100 hover:shadow-xl transition-all duration-300">
               <div className="flex items-center mb-6">
-                <div className="w-8 h-8 bg-[#FFD300]  flex items-center justify-center mr-3">
+                <div className="w-8 h-8 bg-[#FFD300] flex items-center justify-center mr-3">
                   <span className="text-[#111] font-bold text-sm">1</span>
                 </div>
                 <h2 className="text-2xl font-bold text-[#111]">Your Cart</h2>
@@ -192,88 +239,80 @@ const cartSubtotal = cart
 
               <div className="space-y-4">
                 <AnimatePresence>
-                 {cart.lineItems.map((item) => (
-  <motion.div
-    key={item.id}
-    initial={{ opacity: 1, y: 0 }}
-    exit={{ opacity: 0, y: -20, transition: { duration: 0.3 } }}
-    className="relative flex items-center justify-between p-4 bg-gray-50  hover:bg-gray-100 transition-colors duration-200"
-  >
-    {/* زر الإزالة */}
-    <button
-      onClick={() => handleRemoveItem(item.id)}
-      className="absolute top-2 right-2 w-7 h-7 flex items-center justify-center  bg-gray-200 text-gray-500 hover:bg-red-500 hover:text-white transition-all duration-200 shadow-sm"
-      title="Remove item"
-    >
-      ✕
-    </button>
+                  {cart.lineItems.map((item) => (
+                    <motion.div
+                      key={item.id}
+                      initial={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20, transition: { duration: 0.3 } }}
+                      className="relative flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition-colors duration-200"
+                    >
+                      <button
+                        onClick={() => handleRemoveItem(item.id)}
+                        className="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-gray-200 text-gray-500 hover:bg-red-500 hover:text-white transition-all duration-200 shadow-sm"
+                        title="Remove item"
+                      >
+                        ✕
+                      </button>
 
-    <div className="flex gap-3 items-center w-full flex-col sm:flex-row sm:items-start">
-      {/* صورة المنتج */}
-      <div className="flex-shrink-0 w-24 h-24 sm:w-20 sm:h-20 bg-gray-200   overflow-hidden">
-        {item.product.images?.[0] ? (
-          <img
-            src={item.product.images[0]}
-            alt={item.product.name}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-gray-500 font-bold text-xs">
-            No Image
-          </div>
-        )}
-      </div>
+                      <div className="flex gap-3 items-center w-full flex-col sm:flex-row sm:items-start">
+                        <div className="flex-shrink-0 w-24 h-24 sm:w-20 sm:h-20 bg-gray-200 overflow-hidden">
+                          {item.product.images?.[0] ? (
+                            <img
+                              src={item.product.images[0]}
+                              alt={item.product.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-gray-500 font-bold text-xs">
+                              No Image
+                            </div>
+                          )}
+                        </div>
 
-      {/* معلومات المنتج */}
-      <div className="flex flex-col sm:flex-1 sm:justify-between w-full sm:w-auto text-center sm:text-left">
-        <h3 className="font-semibold text-[#111] text-sm md:text-base line-clamp-2 mb-2 sm:mb-1">
-          {item.product.name}
-        </h3>
+                        <div className="flex flex-col sm:flex-1 sm:justify-between w-full sm:w-auto text-center sm:text-left">
+                          <h3 className="font-semibold text-[#111] text-sm md:text-base line-clamp-2 mb-2 sm:mb-1">
+                            {item.product.name}
+                          </h3>
 
-        {/* التحكم في الكمية */}
-        <div className="flex justify-center sm:justify-start items-center gap-3 mt-1 mb-3">
-          <button
-            onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
-            disabled={loadingItem === item.id}
-            className="w-7 h-7 flex items-center justify-center bg-gray-200   hover:bg-gray-300 disabled:opacity-50"
-          >
-            -
-          </button>
-          <span className="w-6 text-center font-medium text-[#111]">
-            {loadingItem === item.id ? "..." : item.quantity}
-          </span>
-          <button
-            onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
-            disabled={loadingItem === item.id}
-            className="w-7 h-7 flex items-center justify-center bg-gray-200   hover:bg-gray-300 disabled:opacity-50"
-          >
-            +
-          </button>
-        </div>
+                          <div className="flex justify-center sm:justify-start items-center gap-3 mt-1 mb-3">
+                            <button
+                              onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
+                              disabled={loadingItem === item.id}
+                              className="w-7 h-7 flex items-center justify-center bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
+                            >
+                              -
+                            </button>
+                            <span className="w-6 text-center font-medium text-[#111]">
+                              {loadingItem === item.id ? "..." : item.quantity}
+                            </span>
+                            <button
+                              onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
+                              disabled={loadingItem === item.id}
+                              className="w-7 h-7 flex items-center justify-center bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
+                            >
+                              +
+                            </button>
+                          </div>
 
-        {/* السعر */}
-        <div className="flex justify-center sm:justify-end">
-        {/* ✅ السعر الصحيح مع الخصم إن وجد */}
-<PriceDisplay
-  price={
-    (
-      item.product.productBadges?.length > 0
-        ? item.product.list_price_amount - (
-            item.product.list_price_amount *
-            Math.abs(parseFloat(item.product.productBadges[0].label.replace("%", "")))
-          ) / 100
-        : item.product.list_price_amount
-    ) * item.quantity
-  }
-  size="base"
-/>
-
-        </div>
-      </div>
-    </div>
-  </motion.div>
-))}
-
+                          <div className="flex justify-center sm:justify-end">
+                            <PriceDisplay
+                              price={
+                                (
+                                  item.product.productBadges?.length > 0
+                                    ? item.product.list_price_amount -
+                                      (item.product.list_price_amount *
+                                        Math.abs(parseFloat(item.product.productBadges[0].label.replace("%", "")))
+                                      ) / 100
+                                    : item.product.list_price_amount
+                                ) * item.quantity
+                              }
+                              size="base"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
                 </AnimatePresence>
               </div>
 
@@ -288,11 +327,11 @@ const cartSubtotal = cart
                     placeholder="Enter discount code"
                     value={couponCode}
                     onChange={(e) => setCouponCode(e.target.value)}
-                    className="flex-1 px-4 py-3   border border-gray-300 focus:border-[#FFD300] focus:ring-2 focus:ring-[#FFD300] focus:ring-opacity-20 outline-none transition-all duration-200 text-[#111] placeholder-[#555]"
+                    className="flex-1 px-4 py-3 border border-gray-300 focus:border-[#FFD300] focus:ring-2 focus:ring-[#FFD300] focus:ring-opacity-20 outline-none transition-all duration-200 text-[#111] placeholder-[#555]"
                   />
                   <button
                     onClick={applyCoupon}
-                    className="bg-[#FFD300] text-[#111] px-6 py-3   font-semibold hover:bg-[#E6BE00] transition-colors duration-200 whitespace-nowrap"
+                    className="bg-[#FFD300] text-[#111] px-6 py-3 font-semibold hover:bg-[#E6BE00] transition-colors duration-200 whitespace-nowrap"
                   >
                     Apply
                   </button>
@@ -300,12 +339,12 @@ const cartSubtotal = cart
               </div>
             </div>
           </div>
-          {/* ... */}
-          {/* ✅ Country & Shipping */}
+
+          {/* Shipping & Summary */}
           <div className="space-y-6">
             <div className="bg-white shadow-lg p-6 md:p-8 border border-gray-100 hover:shadow-xl transition-all duration-300">
               <div className="flex items-center mb-6">
-                <div className="w-8 h-8 bg-[#FFD300]   flex items-center justify-center mr-3">
+                <div className="w-8 h-8 bg-[#FFD300] flex items-center justify-center mr-3">
                   <span className="text-[#111] font-bold text-sm">2</span>
                 </div>
                 <h2 className="text-2xl font-bold text-[#111]">
@@ -314,7 +353,6 @@ const cartSubtotal = cart
               </div>
 
               <div className="space-y-4">
-                {/* Country */}
                 <label className="block">
                   <span className="text-[#111] font-medium mb-2 block">
                     Select Country
@@ -325,7 +363,7 @@ const cartSubtotal = cart
                       setSelectedCountry(e.target.value);
                       setSelectedShipping("");
                     }}
-                    className="w-full px-4 py-3   border border-gray-300 focus:border-[#FFD300] focus:ring-2 focus:ring-[#FFD300] outline-none"
+                    className="w-full px-4 py-3 border border-gray-300 focus:border-[#FFD300] focus:ring-2 focus:ring-[#FFD300] outline-none"
                   >
                     <option value="">-- Select Country --</option>
                     {countries.map((c) => (
@@ -336,7 +374,6 @@ const cartSubtotal = cart
                   </select>
                 </label>
 
-                {/* ✅ Shipping Type */}
                 {selectedCountry && (
                   <div className="mt-4">
                     <span className="text-[#111] font-medium mb-2 block">
@@ -345,31 +382,27 @@ const cartSubtotal = cart
                     <div className="flex gap-3">
                       <button
                         onClick={() => setSelectedShipping("normal")}
-                        className={`flex-1 px-4 py-3   border text-sm font-semibold transition-all duration-200 ${
+                        className={`flex-1 px-4 py-3 border text-sm font-semibold transition-all duration-200 ${
                           selectedShipping === "normal"
                             ? "border-[#FFD300] bg-[#FFF7CC] text-[#111]"
                             : "border-gray-300 text-gray-600 hover:bg-gray-50"
                         }`}
                       >
                         Normal Shipping (
-                        <PriceDisplay
-                          price={selectedCountryData?.normal_shipping_cost || 0}
-                        />
+                        <PriceDisplay price={shippingCosts.normal} />
                         )
                       </button>
 
                       <button
                         onClick={() => setSelectedShipping("fast")}
-                        className={`flex-1 px-4 py-3   border text-sm font-semibold transition-all duration-200 ${
+                        className={`flex-1 px-4 py-3 border text-sm font-semibold transition-all duration-200 ${
                           selectedShipping === "fast"
                             ? "border-[#FFD300] bg-[#FFF7CC] text-[#111]"
                             : "border-gray-300 text-gray-600 hover:bg-gray-50"
                         }`}
                       >
                         Fast Shipping (
-                        <PriceDisplay
-                          price={selectedCountryData?.fast_shipping_cost || 0}
-                        />
+                        <PriceDisplay price={shippingCosts.fast} />
                         )
                       </button>
                     </div>
@@ -378,11 +411,9 @@ const cartSubtotal = cart
               </div>
             </div>
 
-            {/* ✅ Order Summary */}
+            {/* Order Summary */}
             <div className="bg-white shadow-lg p-6 md:p-8 border border-gray-100">
-              <h3 className="text-xl font-bold text-[#111] mb-6">
-                Order Summary
-              </h3>
+              <h3 className="text-xl font-bold text-[#111] mb-6">Order Summary</h3>
 
               <div className="space-y-3">
                 <div className="flex justify-between text-[#555]">
@@ -393,9 +424,7 @@ const cartSubtotal = cart
                 {discountAmount > 0 && (
                   <div className="flex justify-between text-green-600">
                     <span>Discount:</span>
-                    <span>
-                      - <PriceDisplay price={discountAmount} />
-                    </span>
+                    <span>- <PriceDisplay price={discountAmount} /></span>
                   </div>
                 )}
 
@@ -407,14 +436,10 @@ const cartSubtotal = cart
                 )}
 
                 {isSaudi && (
-                  <>
-                    <div className="flex justify-between text-[#555]">
-                      <span>VAT (15%):</span>
-                      <span>
-                        + <PriceDisplay price={taxAmount} />
-                      </span>
-                    </div>
-                  </>
+                  <div className="flex justify-between text-[#555]">
+                    <span>VAT (15%):</span>
+                    <span>+ <PriceDisplay price={taxAmount} /></span>
+                  </div>
                 )}
 
                 <div className="border-t border-gray-200 pt-3">
@@ -428,11 +453,10 @@ const cartSubtotal = cart
               </div>
             </div>
 
-            {/* ✅ Continue Button Disabled Logic */}
             <button
               onClick={handleContinue}
               disabled={!selectedCountry || !selectedShipping}
-              className={`w-full py-4 px-6   font-bold text-lg shadow-lg transition-all duration-200 transform ${
+              className={`w-full py-4 px-6 font-bold text-lg shadow-lg transition-all duration-200 transform ${
                 !selectedCountry || !selectedShipping
                   ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                   : "bg-[#FFD300] text-[#111] hover:bg-[#E6BE00] hover:scale-[1.02] active:scale-[0.98]"
