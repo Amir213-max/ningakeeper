@@ -1,9 +1,10 @@
+import { Suspense } from "react";
 import PaymentSuccessClient from "./PaymentSuccessClient";
 
 export default function PaymentSuccessPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center">
+    <Suspense fallback={<div>Loading...</div>}>
       <PaymentSuccessClient />
-    </div>
+    </Suspense>
   );
 }
