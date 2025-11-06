@@ -10,7 +10,7 @@ export default function CustomerPage() {
   const searchParams = useSearchParams();
   const cartId = searchParams.get("cartId") ?? "";
   const shippingType = searchParams.get("shippingType") ?? "standard";
-  const shippingCountryId = searchParams.get("countryId") || "SA";
+  const shippingCountryId = searchParams.get("countryCode") || "SA";
 
   const subtotalParam = parseFloat(searchParams.get("subtotal")) || 0;
   const shippingParam = parseFloat(searchParams.get("shipping")) || 0;
@@ -42,7 +42,21 @@ export default function CustomerPage() {
   const total = subtotalParam + shippingParam + taxAmount;
 
   const handlePlaceOrder = async () => {
-    if (!cartId) return alert("Cart ID not found!");
+   let finalCartId = cartId;
+let guestCart = null;
+
+if (!cartId || cartId === "guest") {
+  // 🧍‍♂️ الزائر: جِب الداتا من localStorage
+  const savedCart = JSON.parse(localStorage.getItem("guest_cart"));
+  if (!savedCart || !savedCart.lineItems?.length) {
+    alert("Your cart is empty!");
+    setLoading(false);
+    return;
+  }
+  guestCart = savedCart;
+  finalCartId = null; // عشان السيرفر يعرف إن ده guest order
+}
+
     if (paymentType !== "TAP") return alert("Please select Tap Payment first!");
 
     if (
@@ -60,36 +74,46 @@ export default function CustomerPage() {
     try {
       console.log("Preparing order:", customer);
 
-      const res = await graphqlClient.request(CREATE_ORDER_WITH_TAP_PAYMENT, {
-        input: {
-          cart_id: parseInt(cartId),
-          shipping_type: shippingType,
-          shipping_country_id: shippingCountryId,
-          customer_email: customer.email,
-          customer_phone: customer.phone,
-          redirect_url: `${window.location.origin}/payment-success`,
-          webhook_url: `${window.location.origin}/api/tap-webhook`,
-          published: true,
-          shipping_address: {
-            first_name: customer.first_name,
-            last_name: customer.last_name,
-            address_line_1: customer.address,
-            locality: customer.city || "Main",
-            address_line_2: "",
-            postal_code: customer.zip || "0000",
-            country_code: String(shippingCountryId),
-          },
-          billing_address: {
-            first_name: customer.first_name,
-            last_name: customer.last_name,
-            address_line_1: customer.address,
-            locality: customer.city || "Main",
-            address_line_2: "",
-            postal_code: customer.zip || "0000",
-            country_code: String(shippingCountryId),
-          },
-        },
-      });
+     const res = await graphqlClient.request(CREATE_ORDER_WITH_TAP_PAYMENT, {
+  input: {
+    ...(finalCartId ? { cart_id: parseInt(finalCartId) } : {}), // ✅ استخدمه فقط لو موجود
+    shipping_type: shippingType,
+    shipping_country_id: parseInt(shippingCountryId),
+    customer_email: customer.email,
+    customer_phone: customer.phone,
+    redirect_url: `${window.location.origin}/payment-success`,
+    webhook_url: `${window.location.origin}/api/tap-webhook`,
+    published: true,
+    shipping_address: {
+      first_name: customer.first_name,
+      last_name: customer.last_name,
+      address_line_1: customer.address,
+      locality: customer.city || "Main",
+      address_line_2: "",
+      postal_code: customer.zip || "0000",
+      country_code: String(shippingCountryId),
+    },
+    billing_address: {
+      first_name: customer.first_name,
+      last_name: customer.last_name,
+      address_line_1: customer.address,
+      locality: customer.city || "Main",
+      address_line_2: "",
+      postal_code: customer.zip || "0000",
+      country_code: String(shippingCountryId),
+    },
+    ...(guestCart
+      ? {
+          items: guestCart.lineItems.map((item) => ({
+            product_id: item.id,
+            quantity: item.quantity,
+            price: item.price,
+          })),
+        }
+      : {}),
+  },
+});
+
 
       console.log("Full TAP response:", res);
       const tapResponse = res.createOrderWithTapPayment;

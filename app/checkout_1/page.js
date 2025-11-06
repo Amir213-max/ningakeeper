@@ -56,22 +56,59 @@ export default function CheckoutPage() {
   const [loadingItem, setLoadingItem] = useState(null);
   const [removingItem, setRemovingItem] = useState(null);
 
-  // جلب الكارت وتعيين cartId تلقائي
-  useEffect(() => {
-    const loadCart = async () => {
+useEffect(() => {
+  const loadCart = async () => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (user) {
+      // 🔹 المستخدم المسجل → من السيرفر
       const userCart = await fetchUserCart();
       setCart(userCart);
       setCartId(userCart?.id || "");
-    };
-    loadCart();
-  }, []);
+    } else {
+      // 🧍 الزائر → من localStorage
+      const guestCart = JSON.parse(localStorage.getItem("guest_cart"));
+      if (guestCart && guestCart.lineItems.length > 0) {
+        setCart({
+          id: "guest",
+          lineItems: guestCart.lineItems.map((item, index) => ({
+            id: index,
+            quantity: item.quantity,
+            product: {
+              name: item.name,
+              list_price_amount: item.price,
+              images: item.image ? [item.image] : [],
+              productBadges: [],
+            },
+          })),
+        });
+        setCartId("guest");
+      } else {
+        setCart({ id: "guest", lineItems: [] });
+        setCartId("guest");
+      }
+    }
+  };
+  loadCart();
+}, []);
+
 
   // جلب الدول
   useEffect(() => {
-    const loadCountries = async () => {
-      const res = await graphqlClient.request(GET_COUNTRIES);
-      setCountries(res.countries);
-    };
+  const loadCountries = async () => {
+  try {
+    const res = await graphqlClient.request(GET_COUNTRIES);
+    setCountries(res.countries);
+
+    // ✅ عرض كل الدول في الكونسول
+    console.log("🌍 Available Countries:");
+    res.countries.forEach((country) => {
+      console.log(`ID: ${country.id} | Name: ${country.name} | Code: ${country.code}`);
+    });
+  } catch (err) {
+    console.error("Error fetching countries:", err);
+  }
+};
+
     loadCountries();
   }, []);
 
@@ -192,7 +229,7 @@ const handleContinue = () => {
 
   const params = new URLSearchParams({
     cartId,
-    countryId: selectedCountry,
+      countryCode: selectedCountryData?.code || "",
     shippingType: shippingTypeValue, // ✅ هنا التغيير
     appliedCoupon: appliedCoupon || "",
     subtotal: totalAfterDiscount?.toFixed(2) || "0",

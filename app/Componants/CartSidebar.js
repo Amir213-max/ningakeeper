@@ -25,39 +25,63 @@ export default function CartSidebar({ isOpen, onClose }) {
   const [adding, setAdding] = useState(null);
   const { loading: currencyLoading } = useCurrency();
 
-  const loadCart = async () => {
-    try {
-      setLoading(true);
-      const userCart = await fetchUserCart();
-      setCart(userCart);
+const loadCart = async () => {
+  try {
+    setLoading(true);
+    const userCart = await fetchUserCart();
+    setCart(userCart);
 
-      console.log("🧺 Loaded Cart:", userCart);
+    console.log("🧺 Loaded Cart:", userCart);
 
-      if (userCart?.lineItems?.length > 0) {
-        const firstProductId = userCart.lineItems[0].product.id;
-        console.log("🆔 First Product ID:", firstProductId);
+    if (userCart?.lineItems?.length > 0) {
+      // نجيب كل الـ product IDs في السلة
+      const productIds = userCart.lineItems.map((item) => item.product.id);
 
-        const data = await graphqlClient.request(RECOMMENDED_PRODUCTS_QUERY, {
-          productId: firstProductId,
-        });
-        console.log("🧩 Raw Recommended Data:", data);
+      console.log("🆔 Product IDs in cart:", productIds);
 
-        const recommendedProducts =
-          data?.productsWithCategoryRecommendations?.recommended_products || [];
+      // نجيب التوصيات لكل منتج في نفس الوقت
+      const results = await Promise.all(
+        productIds.map(async (productId) => {
+          try {
+            const data = await graphqlClient.request(RECOMMENDED_PRODUCTS_QUERY, {
+              productId,
+            });
+            return (
+              data?.productsWithCategoryRecommendations?.recommended_products ||
+              []
+            );
+          } catch (err) {
+            console.error("⚠️ Error fetching recommendations for:", productId, err);
+            return [];
+          }
+        })
+      );
 
-        console.log("✅ Extracted Recommended Products:", recommendedProducts);
+      // ندمج كل النتائج في array واحد
+      const allRecommendations = results.flat();
 
-        setRecommended(recommendedProducts);
-      } else {
-        setRecommended([]);
-      }
-    } catch (err) {
-      console.error("❌ Error loading cart:", err);
-      toast.error("Failed to load cart");
-    } finally {
-      setLoading(false);
+      // نزيل التكرارات حسب ID
+      const uniqueRecommendations = Array.from(
+        new Map(allRecommendations.map((p) => [p.id, p])).values()
+      );
+
+      // ناخد آخر 10 فقط
+      const lastTen = uniqueRecommendations.slice(-10);
+
+      console.log("✅ Final 10 Recommended Products:", lastTen);
+
+      setRecommended(lastTen);
+    } else {
+      setRecommended([]);
     }
-  };
+  } catch (err) {
+    console.error("❌ Error loading cart:", err);
+    toast.error("Failed to load cart");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   useEffect(() => {
     if (isOpen) loadCart();

@@ -35,37 +35,66 @@ export default function ProductDetailsSidebar({ product }) {
   });
 
   // 🛒 إضافة المنتج للسلة
-  const addToCart = async () => {
-    const requiredAttributes = Object.keys(attributesMap).filter(
-      (label) =>
-        label.toLowerCase().includes("size") ||
-        label.toLowerCase().includes("color")
-    );
+// 🛒 إضافة المنتج للسلة
+const addToCart = async () => {
+  const requiredAttributes = Object.keys(attributesMap).filter(
+    (label) =>
+      label.toLowerCase().includes("size") ||
+      label.toLowerCase().includes("color")
+  );
 
-    const missing = requiredAttributes.filter(
-      (attr) => !selectedAttributes[attr]
-    );
+  const missing = requiredAttributes.filter(
+    (attr) => !selectedAttributes[attr]
+  );
 
-    if (missing.length > 0) {
-      alert(`Please select: ${missing.join(", ")}`);
-      return;
-    }
+  if (missing.length > 0) {
+    alert(`Please select: ${missing.join(", ")}`);
+    return;
+  }
 
-    setAdding(true);
-    try {
-      await addToCartTempUser(
-        product.id,
-        quantity,
-        product.list_price_amount || 0
-      );
+  setAdding(true);
+  try {
+    const user = JSON.parse(localStorage.getItem("user"));
+
+    if (user) {
+      // ✅ المستخدم المسجّل → استدعاء الـ API
+      await addToCartTempUser(product.id, quantity, product.list_price_amount || 0);
       alert(`${product.name} added to cart!`);
-    } catch (err) {
-      console.error("❌ Error adding to cart:", err);
-      alert("Failed to add to cart. Check console for details.");
-    } finally {
-      setAdding(false);
+    } else {
+      // 🧍 الزائر → تخزين محلي في localStorage
+      const cartKey = "guest_cart";
+      const existingCart = JSON.parse(localStorage.getItem(cartKey)) || { lineItems: [] };
+
+      const existingItemIndex = existingCart.lineItems.findIndex(
+        (item) => item.productId === product.id
+      );
+
+      if (existingItemIndex >= 0) {
+        // 🔁 لو المنتج موجود بالفعل → زوّد الكمية فقط
+        existingCart.lineItems[existingItemIndex].quantity += quantity;
+      } else {
+        // ➕ إضافة منتج جديد
+        existingCart.lineItems.push({
+          productId: product.id,
+          name: product.name,
+          price: product.list_price_amount || 0,
+          quantity,
+          attributes: selectedAttributes,
+          image: product.cover_image?.url || "",
+        });
+      }
+
+      localStorage.setItem(cartKey, JSON.stringify(existingCart));
+      alert(`${product.name} added to cart (guest mode)!`);
     }
-  };
+  } catch (err) {
+    console.error("❌ Error adding to cart:", err);
+    alert("Failed to add to cart. Check console for details.");
+  } finally {
+    setAdding(false);
+  }
+};
+
 
   // 💰 الأسعار مع خصم إن وجد
   const basePrice = product.list_price_amount || product.price_range_exact_amount || 0;
