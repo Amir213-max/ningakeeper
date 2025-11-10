@@ -56,37 +56,42 @@ const addToCart = async () => {
   try {
     const user = JSON.parse(localStorage.getItem("user"));
 
-    if (user) {
-      // ✅ المستخدم المسجّل → استدعاء الـ API
-      await addToCartTempUser(product.id, quantity, product.list_price_amount || 0);
-      alert(`${product.name} added to cart!`);
-    } else {
-      // 🧍 الزائر → تخزين محلي في localStorage
-      const cartKey = "guest_cart";
-      const existingCart = JSON.parse(localStorage.getItem(cartKey)) || { lineItems: [] };
+   if (user) {
+  // ✅ لو المستخدم داخل (هيتحفظ في السيرفر)
+  await addToCartTempUser(product.id, quantity, product.list_price_amount || 0);
+  alert(`${product.name} added to your account cart!`);
+} else {
+  // 🧍‍♂️ الجيست (يتخزن محلي)
+  const cartKey = "guest_cart";
+  const existingCart = JSON.parse(localStorage.getItem(cartKey)) || { lineItems: [] };
 
-      const existingItemIndex = existingCart.lineItems.findIndex(
-        (item) => item.productId === product.id
-      );
+  const existingItemIndex = existingCart.lineItems.findIndex(
+    (item) => item.productId === product.id
+  );
 
-      if (existingItemIndex >= 0) {
-        // 🔁 لو المنتج موجود بالفعل → زوّد الكمية فقط
-        existingCart.lineItems[existingItemIndex].quantity += quantity;
-      } else {
-        // ➕ إضافة منتج جديد
-        existingCart.lineItems.push({
-          productId: product.id,
-          name: product.name,
-          price: product.list_price_amount || 0,
-          quantity,
-          attributes: selectedAttributes,
-          image: product.cover_image?.url || "",
-        });
-      }
+ if (existingItemIndex >= 0) {
+  existingCart.lineItems[existingItemIndex].quantity += quantity;
+} else {
+  existingCart.lineItems.push({
+    productId: product.id,
+    quantity,
+    product: {
+      id: product.id,
+      name: product.name,
+      sku: product.sku,
+      list_price_amount: product.list_price_amount,
+      price_range_exact_amount: product.price_range_exact_amount,
+      images: product.images || [{ url: product.cover_image?.url || "" }],
+      productBadges: product.productBadges || [],
+    },
+    attributes: selectedAttributes,
+  });
+}
 
-      localStorage.setItem(cartKey, JSON.stringify(existingCart));
-      alert(`${product.name} added to cart (guest mode)!`);
-    }
+  localStorage.setItem(cartKey, JSON.stringify(existingCart));
+  alert(`${product.name} added to guest cart!`);
+}
+
   } catch (err) {
     console.error("❌ Error adding to cart:", err);
     alert("Failed to add to cart. Check console for details.");
@@ -110,6 +115,36 @@ const addToCart = async () => {
   const listPriceFormatted = currencyLoading ? "..." : formatPrice(basePrice);
   const finalPriceFormatted = currencyLoading ? "..." : formatPrice(finalPrice);
   const hasDiscount = !!discountMatch;
+
+
+  // ✅ عند تسجيل الدخول بنقل الكارت الجيست إلى السيرفر
+useEffect(() => {
+  const mergeGuestCart = async () => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    const guestCart = JSON.parse(localStorage.getItem("guest_cart"));
+
+    if (user && guestCart && guestCart.lineItems.length > 0) {
+      try {
+        console.log("🧩 Merging guest cart with user cart...");
+
+        // لكل منتج في كارت الجيست، نضيفه في كارت اليوزر
+        for (const item of guestCart.lineItems) {
+          await addToCartTempUser(item.productId, item.quantity, item.price);
+        }
+
+        // بعد الدمج نحذف كارت الجيست
+        localStorage.removeItem("guest_cart");
+        console.log("✅ Guest cart merged successfully!");
+      } catch (err) {
+        console.error("❌ Error merging guest cart:", err);
+      }
+    }
+  };
+
+  mergeGuestCart();
+}, []);
+
+
 
   return (
     <div

@@ -40,7 +40,7 @@ useEffect(() => {
 
         
   // ✅ جلب بيانات المستخدم والتوكن من الـ AuthContext
-  const { user, token } = useAuth();
+  const { user, token, logout } = useAuth();
 
     const { setSelectedCategoryId } = useCategory();
   const handleCategorySelect = (catId) => {
@@ -108,25 +108,34 @@ useEffect(() => {
           <div className="navbar-right order-2 flex items-center gap-4">
             {/* 🔑 لو المستخدم مسجل دخول */}
              
-            {user ? (
-                <Link
-                href="/myprofile">
-                  <div className="hidden lg:flex  text-white flex items-center gap-3">
-                <span className="text-sm hidden sm:inline">{user.name}</span>
-                <button className="text-white hover:text-amber-600 cursor-pointer transition-colors duration-200">
-                  <FaUser className='  lg-flex' size={20} />
-                </button>
-              </div>
-                </Link>
-              
-            ) : (
-              <Link
-                href="/login"
-                className="text-white hover:text-amber-600 cursor-pointer transition-colors duration-200"
-              >
-                <FaUser className='hidden md:flex'  size={20} />
-              </Link>
-            )}
+    
+{user ? (
+  <div className="hidden lg:flex items-center gap-3">
+    <Link href="/myprofile" className="flex items-center gap-3 text-white">
+      <span className="text-sm hidden sm:inline">{user.name}</span>
+      <FaUser className="lg-flex" size={20} />
+    </Link>
+
+    {/* ✅ زر Logout */}
+    <button
+      onClick={() => {
+        // استدعاء دالة logout من AuthContext
+        logout();
+        setCartOpen(false); // اختياري: اغلاق الكارت لو مفتوح
+      }}
+      className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm transition-colors duration-200"
+    >
+      Logout
+    </button>
+  </div>
+) : (
+  <Link
+    href="/login"
+    className="text-white hover:text-amber-600 cursor-pointer transition-colors duration-200"
+  >
+    <FaUser className="hidden md:flex" size={20} />
+  </Link>
+)}
 
             {/* 🔍 Search */}
             <button

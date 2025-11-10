@@ -31,10 +31,37 @@ export async function POST(request) {
       }),
     });
 
+    // Check if response is OK before parsing
+    if (!tapResponse.ok) {
+      const errorData = await tapResponse.json().catch(() => ({ message: "Failed to parse error response" }));
+      console.error("Tap API Error Response:", errorData);
+      return NextResponse.json({ 
+        success: false, 
+        error: errorData.errors || errorData.message || "Invalid response from Tap payment service",
+        details: errorData 
+      }, { status: tapResponse.status });
+    }
+
     const data = await tapResponse.json();
 
-    if (data.errors) {
-      return NextResponse.json({ success: false, error: data.errors }, { status: 400 });
+    // Check for errors in response
+    if (data.errors || !data.transaction) {
+      console.error("Tap API Error:", data);
+      return NextResponse.json({ 
+        success: false, 
+        error: data.errors || "Invalid response from Tap payment service",
+        details: data 
+      }, { status: 400 });
+    }
+
+    // Verify transaction URL exists
+    if (!data.transaction?.url) {
+      console.error("Missing transaction URL in Tap response:", data);
+      return NextResponse.json({ 
+        success: false, 
+        error: "Invalid response from Tap payment service - missing payment URL",
+        details: data 
+      }, { status: 400 });
     }
 
     return NextResponse.json({ success: true, paymentUrl: data.transaction.url });

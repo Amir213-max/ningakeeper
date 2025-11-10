@@ -40,97 +40,125 @@ export default function CustomerPage() {
   const taxRate = isSaudi ? 0.15 : 0;
   const taxAmount = subtotalParam * taxRate;
   const total = subtotalParam + shippingParam + taxAmount;
-
-  const handlePlaceOrder = async () => {
-   let finalCartId = cartId;
-let guestCart = null;
-
-if (!cartId || cartId === "guest") {
-  // 🧍‍♂️ الزائر: جِب الداتا من localStorage
-  const savedCart = JSON.parse(localStorage.getItem("guest_cart"));
-  if (!savedCart || !savedCart.lineItems?.length) {
-    alert("Your cart is empty!");
-    setLoading(false);
+const handlePlaceOrder = async () => {
+  if (!cartId || cartId === "guest") {
+    alert("You must log in to place an order!");
+    window.location.href = "/login";
     return;
   }
-  guestCart = savedCart;
-  finalCartId = null; // عشان السيرفر يعرف إن ده guest order
-}
 
-    if (paymentType !== "TAP") return alert("Please select Tap Payment first!");
+  if (paymentType !== "TAP") return alert("Please select Tap Payment first!");
 
-    if (
-      !customer.first_name ||
-      !customer.last_name ||
-      !customer.email ||
-      !customer.phone ||
-      !customer.address
-    ) {
-      alert("Please fill all required fields!");
-      return;
-    }
+  if (!customer.first_name || !customer.last_name || !customer.email || !customer.phone || !customer.address) {
+    alert("Please fill all required fields!");
+    return;
+  }
 
-    setLoading(true);
-    try {
-      console.log("Preparing order:", customer);
+  setLoading(true);
 
-     const res = await graphqlClient.request(CREATE_ORDER_WITH_TAP_PAYMENT, {
-  input: {
-    ...(finalCartId ? { cart_id: parseInt(finalCartId) } : {}), // ✅ استخدمه فقط لو موجود
-    shipping_type: shippingType,
-    shipping_country_id: parseInt(shippingCountryId),
-    customer_email: customer.email,
-    customer_phone: customer.phone,
-    redirect_url: `${window.location.origin}/payment-success`,
-    webhook_url: `${window.location.origin}/api/tap-webhook`,
-    published: true,
-    shipping_address: {
-      first_name: customer.first_name,
-      last_name: customer.last_name,
-      address_line_1: customer.address,
-      locality: customer.city || "Main",
-      address_line_2: "",
-      postal_code: customer.zip || "0000",
-      country_code: String(shippingCountryId),
-    },
-    billing_address: {
-      first_name: customer.first_name,
-      last_name: customer.last_name,
-      address_line_1: customer.address,
-      locality: customer.city || "Main",
-      address_line_2: "",
-      postal_code: customer.zip || "0000",
-      country_code: String(shippingCountryId),
-    },
-    ...(guestCart
-      ? {
-          items: guestCart.lineItems.map((item) => ({
-            product_id: item.id,
-            quantity: item.quantity,
-            price: item.price,
-          })),
-        }
-      : {}),
-  },
-});
+  try {
+    const amountInSmallestUnit = Math.round(total * 100); // ✅ تحويل المبلغ للوحدة الصغيرة
 
+    console.log("Preparing order, amount in smallest unit:", amountInSmallestUnit);
+    console.log("Selected currency:", currency); // ✅ Log selected currency for debugging
+    console.log("Order details:", {
+      cartId,
+      shippingType,
+      shippingCountryId,
+      total,
+      currency, // ✅ Include currency in log
+      customer: { email: customer.email, phone: customer.phone }
+    });
 
-      console.log("Full TAP response:", res);
-      const tapResponse = res.createOrderWithTapPayment;
+    // ⚠️ NOTE: Currency is NOT sent to backend because TapPaymentInput doesn't support it
+    // Backend must determine currency from shipping_country_id (SA = SAR) or user preference
+    // See CURRENCY_ISSUE_BACKEND_FIX.md for backend fix instructions
+    
+    const res = await graphqlClient.request(CREATE_ORDER_WITH_TAP_PAYMENT, {
+      input: {
+        cart_id: parseInt(cartId),
+        shipping_type: shippingType,
+        shipping_country_id: parseInt(shippingCountryId),
+        customer_email: customer.email,
+        customer_phone: customer.phone,
+        redirect_url: `${window.location.origin}/payment-success`,
+        webhook_url: `${window.location.origin}/api/tap-webhook`,
+        published: true,
+        shipping_address: {
+          first_name: customer.first_name,
+          last_name: customer.last_name,
+          address_line_1: customer.address,
+          locality: customer.city || "Main",
+          address_line_2: "",
+          postal_code: customer.zip || "0000",
+          country_code: String(shippingCountryId),
+        },
+        billing_address: {
+          first_name: customer.first_name,
+          last_name: customer.last_name,
+          address_line_1: customer.address,
+          locality: customer.city || "Main",
+          address_line_2: "",
+          postal_code: customer.zip || "0000",
+          country_code: String(shippingCountryId),
+        },
+      },
+    });
 
-      if (tapResponse.success && tapResponse.payment_url) {
-        window.location.href = tapResponse.payment_url;
+    console.log("GraphQL Response:", res);
+
+    const tapResponse = res.createOrderWithTapPayment;
+
+    console.log("Full Tap Response:", JSON.stringify(tapResponse, null, 2));
+
+    if (tapResponse.success && tapResponse.payment_url) {
+      window.location.href = tapResponse.payment_url;
+    } else {
+      console.error("TAP payment failed - Full Response:", tapResponse);
+      console.error("TAP payment failed - Error:", tapResponse.error);
+      console.error("TAP payment failed - Message:", tapResponse.message);
+      console.error("TAP payment failed - Order ID:", tapResponse.order_id);
+      
+      // Show more detailed error message
+      let errorMessage = "Payment processing failed";
+      if (tapResponse.error) {
+        errorMessage += ": " + tapResponse.error;
+      } else if (tapResponse.message) {
+        errorMessage += ": " + tapResponse.message;
       } else {
-        console.error("TAP payment failed:", tapResponse);
-        alert("Payment failed: " + (tapResponse.message || tapResponse.error || "Unknown error"));
+        errorMessage += ": Invalid response from Tap payment service";
       }
-    } catch (error) {
-      console.error("TAP ERROR:", error);
-      alert("حدث خطأ أثناء إنشاء الأوردر");
-    } finally {
-      setLoading(false);
+      
+      if (tapResponse.order_id) {
+        errorMessage += `\n\nOrder #${tapResponse.order_id} was created but payment failed.`;
+        errorMessage += "\n\nPlease check backend logs for Tap API error details.";
+      }
+      
+      alert(errorMessage);
     }
-  };
+  } catch (error) {
+    console.error("TAP ERROR - Full error object:", error);
+    console.error("TAP ERROR - Response:", error.response);
+    console.error("TAP ERROR - Message:", error.message);
+    
+    // Handle GraphQL errors
+    let errorMessage = "Payment processing failed: Invalid response from Tap payment service";
+    
+    if (error.response?.errors && Array.isArray(error.response.errors)) {
+      const graphqlError = error.response.errors[0];
+      errorMessage = graphqlError.message || errorMessage;
+      if (graphqlError.extensions) {
+        console.error("GraphQL Error Extensions:", graphqlError.extensions);
+      }
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
+    
+    alert(errorMessage);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen bg-white md:bg-gray-50 text-[#111]">

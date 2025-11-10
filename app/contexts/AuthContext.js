@@ -1,5 +1,7 @@
 "use client";
 import { createContext, useContext, useState, useEffect } from "react";
+import { setAuthToken } from "../lib/graphqlClient";
+import { getDynamicUserId } from "../lib/mutations";
 
 const AuthContext = createContext();
 
@@ -18,19 +20,38 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-  const login = (userData, token) => {
-    setUser(userData);
-    setToken(token);
-    localStorage.setItem("user", JSON.stringify(userData));
-    localStorage.setItem("token", token);
-  };
+const login = (userData, token) => {
+  setUser(userData);
+  setToken(token);
+  localStorage.setItem("user", JSON.stringify(userData));
+  localStorage.setItem("token", token);
 
-  const logout = () => {
-    setUser(null);
-    setToken(null);
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-  };
+  // إزالة guest_id لأنه خلاص بقى عنده كارت باسم حسابه
+  localStorage.removeItem("guest_id");
+};
+
+
+
+
+const logout = () => {
+  // مسح بيانات المستخدم
+  setUser(null);
+  setToken(null);
+  localStorage.removeItem("user");
+  localStorage.removeItem("token");
+
+  // إزالة التوكن من GraphQLClient
+  setAuthToken(null);
+
+  // توليد guest_id جديد للكارت
+  getDynamicUserId();
+
+  // optional: redirect للهوم
+  if (typeof window !== "undefined") {
+    window.location.href = "/";
+  }
+};
+
 
   return (
     <AuthContext.Provider value={{ user, token, login, logout }}>

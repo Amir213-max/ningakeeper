@@ -26,7 +26,27 @@ export async function POST(req) {
       }),
     });
 
+    // Check if response is OK before parsing
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ message: "Failed to parse error response" }));
+      console.error("Tap API Error Response:", errorData);
+      return NextResponse.json({ 
+        error: "Invalid response from Tap payment service",
+        details: errorData.errors || errorData.message || errorData
+      }, { status: response.status });
+    }
+
     const data = await response.json();
+    
+    // Check for errors in response
+    if (data.errors) {
+      console.error("Tap API Error:", data);
+      return NextResponse.json({ 
+        error: "Invalid response from Tap payment service",
+        details: data.errors 
+      }, { status: 400 });
+    }
+
     return NextResponse.json(data);
   } catch (error) {
     console.error("TAP ERROR:", error);

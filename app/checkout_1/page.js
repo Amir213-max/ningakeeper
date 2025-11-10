@@ -4,7 +4,9 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { gql } from "graphql-request";
-import { graphqlClient } from "../lib/graphqlClient";
+  import { GET_PRODUCT_BY_SKU } from "@/app/lib/queries";
+import { graphqlClient } from "@/app/lib/graphqlClient";
+
 import {
   fetchUserCart,
   REMOVE_ITEM_FROM_CART,
@@ -56,31 +58,87 @@ export default function CheckoutPage() {
   const [loadingItem, setLoadingItem] = useState(null);
   const [removingItem, setRemovingItem] = useState(null);
 
+  // ✅ تحديث الكارت للـ guest في localStorage
+  const updateGuestCart = (newLineItems) => {
+    localStorage.setItem("guest_cart", JSON.stringify({ lineItems: newLineItems }));
+    setCart({ id: "guest", lineItems: newLineItems });
+  };
+
+  // تحميل الكارت
+
+
 useEffect(() => {
   const loadCart = async () => {
     const user = JSON.parse(localStorage.getItem("user"));
     if (user) {
-      // 🔹 المستخدم المسجل → من السيرفر
-      const userCart = await fetchUserCart();
+      // 🧠 أولاً: نجلب كارت المستخدم من السيرفر
+      let userCart = await fetchUserCart();
+
+      // 🧩 ثانياً: نجلب كارت الزائر إن وُجدت
+      const guestCart = JSON.parse(localStorage.getItem("guest_cart"))?.lineItems || [];
+
+      // 🔁 لو فيه كارت زائر، ندمجها مع كارت المستخدم
+      if (guestCart.length > 0 && userCart?.id) {
+        for (const guestItem of guestCart) {
+          try {
+            await graphqlClient.request(
+              gql`
+                mutation AddToCart($input: AddItemToCartInput!) {
+                  addItemToCart(input: $input) {
+                    id
+                  }
+                }
+              `,
+              {
+                input: {
+                  cart_id: userCart.id,
+                  product_id: guestItem.productId, // تأكد إنك بتخزنها كده في guest_cart
+                  quantity: guestItem.quantity,
+                },
+              }
+            );
+          } catch (err) {
+            console.warn("⚠️ Failed to merge guest cart item:", guestItem.productId, err);
+          }
+        }
+
+        // 🧹 بعد الدمج نحذف كارت الزائر
+        localStorage.removeItem("guest_cart");
+
+        // 🔄 نعيد تحميل الكارت النهائية بعد الدمج
+        userCart = await fetchUserCart();
+      }
+
       setCart(userCart);
       setCartId(userCart?.id || "");
     } else {
-      // 🧍 الزائر → من localStorage
+      // 🧍‍♂️ لو المستخدم مش عامل لوجين، نعرض كارت الزائر
       const guestCart = JSON.parse(localStorage.getItem("guest_cart"));
       if (guestCart && guestCart.lineItems.length > 0) {
-        setCart({
-          id: "guest",
-          lineItems: guestCart.lineItems.map((item, index) => ({
-            id: index,
-            quantity: item.quantity,
-            product: {
-              name: item.name,
-              list_price_amount: item.price,
-              images: item.image ? [item.image] : [],
-              productBadges: [],
-            },
-          })),
-        });
+   const detailedItems = guestCart.lineItems.map((item, index) => {
+  const productData = item.product || {}; // ✅ المنتج موجود جوه item.product
+
+  return {
+    id: index,
+    quantity: item.quantity,
+    product: {
+      id: productData.id || null,
+      name: productData.name || "Unnamed Product",
+      sku: productData.sku || "",
+      list_price_amount:
+        productData.price_range_exact_amount ||
+        productData.list_price_amount ||
+        item.price ||
+        0,
+      images: productData.images?.length ? [productData.images[0]] : ["/no-img.png"],
+      productBadges: productData.productBadges || [],
+    },
+  };
+});
+
+
+
+        setCart({ id: "guest", lineItems: detailedItems });
         setCartId("guest");
       } else {
         setCart({ id: "guest", lineItems: [] });
@@ -88,26 +146,27 @@ useEffect(() => {
       }
     }
   };
+
   loadCart();
 }, []);
 
 
   // جلب الدول
   useEffect(() => {
-  const loadCountries = async () => {
-  try {
-    const res = await graphqlClient.request(GET_COUNTRIES);
-    setCountries(res.countries);
+    const loadCountries = async () => {
+      try {
+        const res = await graphqlClient.request(GET_COUNTRIES);
+        setCountries(res.countries);
 
-    // ✅ عرض كل الدول في الكونسول
-    console.log("🌍 Available Countries:");
-    res.countries.forEach((country) => {
-      console.log(`ID: ${country.id} | Name: ${country.name} | Code: ${country.code}`);
-    });
-  } catch (err) {
-    console.error("Error fetching countries:", err);
-  }
-};
+        // ✅ عرض كل الدول في الكونسول
+        console.log("🌍 Available Countries:");
+        res.countries.forEach((country) => {
+          console.log(`ID: ${country.id} | Name: ${country.name} | Code: ${country.code}`);
+        });
+      } catch (err) {
+        console.error("Error fetching countries:", err);
+      }
+    };
 
     loadCountries();
   }, []);
@@ -133,14 +192,21 @@ useEffect(() => {
     fetchShipping();
   }, [selectedCountry]);
 
+  // إزالة عنصر من الكارت
   const handleRemoveItem = async (itemId) => {
     try {
       setRemovingItem(itemId);
-      await graphqlClient.request(REMOVE_ITEM_FROM_CART, { id: itemId });
-      setCart((prev) => ({
-        ...prev,
-        lineItems: prev.lineItems.filter((i) => i.id !== itemId),
-      }));
+
+      if (cartId === "guest") {
+        const updatedLineItems = cart.lineItems.filter((i) => i.id !== itemId);
+        updateGuestCart(updatedLineItems);
+      } else {
+        await graphqlClient.request(REMOVE_ITEM_FROM_CART, { id: itemId });
+        setCart((prev) => ({
+          ...prev,
+          lineItems: prev.lineItems.filter((i) => i.id !== itemId),
+        }));
+      }
     } catch (err) {
       console.error("Error removing item:", err);
       alert("حدث خطأ أثناء حذف المنتج، حاول مرة أخرى.");
@@ -149,20 +215,30 @@ useEffect(() => {
     }
   };
 
+  // تعديل الكمية
   const handleQuantityChange = async (itemId, newQuantity) => {
     if (newQuantity < 1) return;
+
     try {
       setLoadingItem(itemId);
-      await graphqlClient.request(UPDATE_CART_ITEM_QUANTITY, {
-        id: itemId,
-        quantity: newQuantity,
-      });
-      setCart((prev) => ({
-        ...prev,
-        lineItems: prev.lineItems.map((i) =>
+
+      if (cartId === "guest") {
+        const updatedLineItems = cart.lineItems.map((i) =>
           i.id === itemId ? { ...i, quantity: newQuantity } : i
-        ),
-      }));
+        );
+        updateGuestCart(updatedLineItems);
+      } else {
+        await graphqlClient.request(UPDATE_CART_ITEM_QUANTITY, {
+          id: itemId,
+          quantity: newQuantity,
+        });
+        setCart((prev) => ({
+          ...prev,
+          lineItems: prev.lineItems.map((i) =>
+            i.id === itemId ? { ...i, quantity: newQuantity } : i
+          ),
+        }));
+      }
     } catch (err) {
       console.error("Error updating quantity:", err);
       alert("حدث خطأ أثناء تحديث الكمية");
@@ -171,6 +247,7 @@ useEffect(() => {
     }
   };
 
+  // تطبيق كوبون
   const applyCoupon = () => {
     if (!couponCode) {
       alert("من فضلك أدخل كود الخصم");
@@ -217,29 +294,28 @@ useEffect(() => {
   const totalWithTaxAndShipping =
     totalAfterDiscount + taxAmount + shippingCost;
 
-const handleContinue = () => {
-  if (!selectedCountry || !selectedShipping) {
-    alert("من فضلك اختر الدولة ونوع الشحن");
-    return;
-  }
+  // متابعة الشحن
+  const handleContinue = () => {
+    if (!selectedCountry || !selectedShipping) {
+      alert("من فضلك اختر الدولة ونوع الشحن");
+      return;
+    }
 
-  // ✅ تحويل fast → express قبل الإرسال
-  const shippingTypeValue =
-    selectedShipping === "fast" ? "express" : "normal";
+    const shippingTypeValue =
+      selectedShipping === "fast" ? "express" : "normal";
 
-  const params = new URLSearchParams({
-    cartId,
+    const params = new URLSearchParams({
+      cartId,
       countryCode: selectedCountryData?.code || "",
-    shippingType: shippingTypeValue, // ✅ هنا التغيير
-    appliedCoupon: appliedCoupon || "",
-    subtotal: totalAfterDiscount?.toFixed(2) || "0",
-    shipping: shippingCost?.toFixed(2) || "0",
-    isSaudi: isSaudi ? "true" : "false",
-  });
+      shippingType: shippingTypeValue,
+      appliedCoupon: appliedCoupon || "",
+      subtotal: totalAfterDiscount?.toFixed(2) || "0",
+      shipping: shippingCost?.toFixed(2) || "0",
+      isSaudi: isSaudi ? "true" : "false",
+    });
 
-  router.push(`/checkout_1/customer?${params.toString()}`);
-};
-
+    router.push(`/checkout_1/customer?${params.toString()}`);
+  };
 
   if (!cart)
     return (
@@ -250,6 +326,8 @@ const handleContinue = () => {
         </div>
       </div>
     );
+
+ 
 
   return (
     <div className="min-h-screen bg-white md:bg-gray-50 text-[#111]">

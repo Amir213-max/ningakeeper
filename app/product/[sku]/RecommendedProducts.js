@@ -3,13 +3,14 @@
 import { useTranslation } from '@/app/contexts/TranslationContext';
 import { useCurrency } from '@/app/contexts/CurrencyContext';
 import { graphqlClient } from '@/app/lib/graphqlClient';
-import { RECOMMENoDED_PRODUCTS_QUERY } from '@/app/lib/queries';
+
 import { Splide, SplideSlide } from '@splidejs/react-splide';
 import '@splidejs/react-splide/css';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { RECOMMENDED_PRODUCTS_QUERY } from '@/app/lib/queries';
 
 export default function RecommendedSlider({ productId }) {
   const { t, lang } = useTranslation();

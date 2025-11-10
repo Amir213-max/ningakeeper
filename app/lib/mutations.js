@@ -39,11 +39,11 @@ export async function createOrderFromCurrentCart() {
   
 
 
-export const TEMP_USER_ID = 1;
+
 
 // --- Queries & Mutations ---
 
-const GET_USER_CART = gql`
+export const GET_USER_CART = gql`
   query UserCart($user_id: ID!) {
     userCart(user_id: $user_id) {
       id
@@ -94,7 +94,7 @@ export const ADD_TO_WISHLIST = gql`
 `;
 
 
-const CREATE_CART = gql`
+export const CREATE_CART = gql`
   mutation CreateCart($input: CartInput!) {
     createCart(input: $input) {
       id
@@ -311,6 +311,23 @@ export const CREATE_ORDER_MUTATION = gql`
 `;
 
 
+// ✅ دالة للحصول على user_id ديناميكي
+export function getDynamicUserId() {
+  // لو المستخدم عامل تسجيل دخول (مخزن بياناته في localStorage)
+  const user = typeof window !== "undefined" ? JSON.parse(localStorage.getItem("user")) : null;
+  if (user?.id) return user.id;
+
+  // لو المستخدم ضيف (guest)
+  let guestId = typeof window !== "undefined" ? localStorage.getItem("guest_id") : null;
+
+  if (!guestId) {
+    guestId = uuidv4(); // توليد ID جديد
+    localStorage.setItem("guest_id", guestId);
+  }
+
+  return guestId;
+}
+
 // Function to execute mutation
 export async function removeItemFromCart(id) {
   try {
@@ -339,11 +356,11 @@ function normalizeCart(cart) {
 export async function addToCartTempUser(productId, quantity = 1, unitPrice = 0) {
   try {
     // ✅ log endpoint
-    console.log("🚀 [GraphQL Endpoint]:", graphqlClient?.url);
 
+    const userId = getDynamicUserId(); 
     // 1️⃣ جلب الكارت الحالي لليوزر المؤقت
     const cartData = await graphqlClient.request(GET_USER_CART, {
-      user_id: TEMP_USER_ID,
+      user_id:userId,
     });
     console.log("📦 [Current Cart]:", cartData);
 
@@ -353,7 +370,7 @@ export async function addToCartTempUser(productId, quantity = 1, unitPrice = 0) 
     if (!cartId) {
       console.log("🆕 [No Cart Found] → Creating new cart...");
       const newCartInput = {
-        user_id: TEMP_USER_ID,
+        user_id: userId,
         item_total: 0,
         grand_total: 0,
         shipping_costs: 0,
@@ -397,17 +414,19 @@ export async function addToCartTempUser(productId, quantity = 1, unitPrice = 0) 
 
 // --- جلب الكارت الحالي للـ user ---
 export async function fetchUserCart() {
-  console.log("📡 [Fetching Cart for user_id]:", TEMP_USER_ID);
+  const userId = getDynamicUserId(); // ✅ جديد
+
+  console.log("📡 [Fetching Cart for user_id]:", userId);
 
   const { userCart } = await graphqlClient.request(GET_USER_CART, {
-    user_id: TEMP_USER_ID,
+    user_id: userId,
   });
 
   if (!userCart) {
     console.log("🆕 [No Cart Found] → Creating one...");
     const newCart = await graphqlClient.request(CREATE_CART, {
       input: {
-        user_id: TEMP_USER_ID,
+        user_id: userId,
         item_total: 0,
         grand_total: 0,
         shipping_costs: 0,
@@ -420,3 +439,4 @@ export async function fetchUserCart() {
   console.log("📦 [Cart Found]:", userCart);
   return normalizeCart(userCart);
 }
+

@@ -56,6 +56,24 @@ export const GET_ME = gql`
   }
 `;
 
+export const GET_PROFILE = gql`
+  query GetProfile($token: String!) {
+    profile(token: $token) {
+      id
+      name
+      email
+      phone
+      date_of_birth
+      gender
+      avatar
+      is_active
+      email_verified_at
+      created_at
+      updated_at
+    }
+  }
+`;
+
 // ✅ جلب المنتجات (مع إمكانية تحديد limit/offset)
 export const PRODUCTS_QUERY = gql`
   query Products($limit: Int, $offset: Int) {
@@ -446,7 +464,7 @@ export const GET_DEFAULT_WISHLIST = gql`
   }
 `;
 
-export const RECOMMENDED_PRODUCTS_QUERY = `
+export const RECOMMENDED_PRODUCTS_QUERY =gql `
   query GetRecommendedProducts($productId: ID!) {
     productsWithCategoryRecommendations(product_id: $productId) {
       recommended_products {
@@ -469,7 +487,7 @@ price_range_exact_amount
     }
   }
 `;
-export const GET_ORDERS = `
+export const GET_ORDERS = gql`
 query GetOrders {
   orders {
     id
