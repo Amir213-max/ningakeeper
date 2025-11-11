@@ -57,28 +57,23 @@ const handlePlaceOrder = async () => {
   setLoading(true);
 
   try {
-    const amountInSmallestUnit = Math.round(total * 100); // ✅ تحويل المبلغ للوحدة الصغيرة
+    // ✅ المبلغ بالعملة المختارة
+    const totalInSelectedCurrency = convertPrice(total); // يحول المبلغ حسب العملة الحالية
+    const amountInSmallestUnit = Math.round(totalInSelectedCurrency * 100); // Halala أو سنت
 
     console.log("Preparing order, amount in smallest unit:", amountInSmallestUnit);
-    console.log("Selected currency:", currency); // ✅ Log selected currency for debugging
-    console.log("Order details:", {
-      cartId,
-      shippingType,
-      shippingCountryId,
-      total,
-      currency, // ✅ Include currency in log
-      customer: { email: customer.email, phone: customer.phone }
-    });
+    console.log("Selected currency:", currency);
 
-    // ⚠️ NOTE: Currency is NOT sent to backend because TapPaymentInput doesn't support it
-    // Backend must determine currency from shipping_country_id (SA = SAR) or user preference
-    // See CURRENCY_ISSUE_BACKEND_FIX.md for backend fix instructions
-    
     const res = await graphqlClient.request(CREATE_ORDER_WITH_TAP_PAYMENT, {
       input: {
         cart_id: parseInt(cartId),
         shipping_type: shippingType,
         shipping_country_id: parseInt(shippingCountryId),
+        shipping_cost: convertPrice(shippingParam),
+        subtotal: parseFloat(convertPrice(subtotalParam).toFixed(2)),
+        vat_amount: parseFloat(convertPrice(taxAmount).toFixed(2)),
+        total_amount: parseFloat(totalInSelectedCurrency.toFixed(2)),
+        currency: currency, // نفس العملة اللي اختارها المستخدم
         customer_email: customer.email,
         customer_phone: customer.phone,
         redirect_url: `${window.location.origin}/payment-success`,
@@ -105,60 +100,25 @@ const handlePlaceOrder = async () => {
       },
     });
 
-    console.log("GraphQL Response:", res);
-
     const tapResponse = res.createOrderWithTapPayment;
-
     console.log("Full Tap Response:", JSON.stringify(tapResponse, null, 2));
 
     if (tapResponse.success && tapResponse.payment_url) {
       window.location.href = tapResponse.payment_url;
     } else {
-      console.error("TAP payment failed - Full Response:", tapResponse);
-      console.error("TAP payment failed - Error:", tapResponse.error);
-      console.error("TAP payment failed - Message:", tapResponse.message);
-      console.error("TAP payment failed - Order ID:", tapResponse.order_id);
-      
-      // Show more detailed error message
       let errorMessage = "Payment processing failed";
-      if (tapResponse.error) {
-        errorMessage += ": " + tapResponse.error;
-      } else if (tapResponse.message) {
-        errorMessage += ": " + tapResponse.message;
-      } else {
-        errorMessage += ": Invalid response from Tap payment service";
-      }
-      
-      if (tapResponse.order_id) {
-        errorMessage += `\n\nOrder #${tapResponse.order_id} was created but payment failed.`;
-        errorMessage += "\n\nPlease check backend logs for Tap API error details.";
-      }
-      
+      if (tapResponse.error) errorMessage += ": " + tapResponse.error;
+      else if (tapResponse.message) errorMessage += ": " + tapResponse.message;
       alert(errorMessage);
     }
   } catch (error) {
-    console.error("TAP ERROR - Full error object:", error);
-    console.error("TAP ERROR - Response:", error.response);
-    console.error("TAP ERROR - Message:", error.message);
-    
-    // Handle GraphQL errors
-    let errorMessage = "Payment processing failed: Invalid response from Tap payment service";
-    
-    if (error.response?.errors && Array.isArray(error.response.errors)) {
-      const graphqlError = error.response.errors[0];
-      errorMessage = graphqlError.message || errorMessage;
-      if (graphqlError.extensions) {
-        console.error("GraphQL Error Extensions:", graphqlError.extensions);
-      }
-    } else if (error.message) {
-      errorMessage = error.message;
-    }
-    
-    alert(errorMessage);
+    console.error("TAP ERROR:", error);
+    alert("Payment processing failed: Invalid response from Tap payment service");
   } finally {
     setLoading(false);
   }
 };
+
 
   return (
     <div className="min-h-screen bg-white md:bg-gray-50 text-[#111]">

@@ -423,7 +423,7 @@ const handleAddToCart = async (productId) => {
                     return (
                       <motion.div key={prod.id} whileHover={{ scale: 1.03 }} className="bg-white shadow-sm hover:shadow-md transition flex flex-col justify-between">
                         <Link href={`/product/${prod.sku}`} className="block p-2">
-                          <img src={prod.images?.[0] || "/no-img.png"} alt={prod.name} className="w-full h-24 object-fill-fit mb-1" />
+                          <img src={prod.images?.[0] || "/no-img.png"} alt={prod.name} className="w-full h-24 object-contain mb-1" />
                           <p className="text-sm font-semibold text-gray-800 line-clamp-1">{prod.name}</p>
                           <div className="flex items-center gap-1 mb-2">
                             {hasDiscount ? (

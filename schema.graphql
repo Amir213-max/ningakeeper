@@ -645,6 +645,8 @@ type NotificationTypeCount {
      cart_id: ID!
      shipping_cost: Float
      shipping_type: String
+     total_amount: Float
+     currency:String
      shipping_country_id: ID
      shipping_address: AddressInput
      billing_address: AddressInput
